@@ -1,0 +1,28 @@
+Package: ncbi
+Type: Package
+Title: Full-text search in NCBI's databases.
+Version: 0.0-1
+Date: 2012-11-13
+Authors@R: person("Gerhard", "Schöfl", role=c("aut","cre"),
+    email="gschofl@yahoo.de")
+Description: Search and retrieve data from the NCBI databases.
+License: MIT
+Encoding: latin1
+Depends:
+    R (>= 2.15)
+Imports:
+    methods,
+    rentrez,
+    biofiles,
+    rmisc,
+    IRanges,
+    Biostrings,
+    stats,
+    XML
+Collate:
+    'utils.R'
+    'sequences.R'
+    'taxonomy.R'
+    'taxonomy-generics.R'
+    'taxonomy-methods.R'
+    'ncbi.R'
