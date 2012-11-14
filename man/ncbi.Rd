@@ -3,9 +3,9 @@
 \name{ncbi}
 \alias{ncbi}
 \alias{ncbi-package}
-\title{Full-text search of NCBI's databases}
+\title{Retrieve data from NCBI.}
 \description{
-Full-text search of NCBI's databases
+Retrieve data from NCBI.
 }
 \section{description}{
 
@@ -13,13 +13,18 @@ Full-text search of NCBI's databases
   Important functions:
   \itemize{
    
-    \item \code{pubmed}: Search the \emph{PubMed} database.
-    
-    \item \code{protein}: Search the \emph{Protein} database.
-
-    \item \code{nucleotide}: Search the \emph{Nucleotide} database.
-    
-    \item \code{\link{taxon}}: Search the \emph{Taxonomy} database.
+    \item \code{\link{pubmed}}: Retrieve records from the \emph{PubMed}
+    database.
+    \item \code{\link{protein}}: Retrieve records from the \emph{protein}
+    database.
+    \item \code{\link{nucleotide}}: Retrieve records from the
+    \emph{nuccore} database.
+    \item \code{\link{GSS}}: Retrieve records from the
+    \emph{nucgss} database.   
+    \item \code{\link{EST}}: Retrieve records from the
+    \emph{nucest} database.        
+    \item \code{\link{taxon}}: Retrieve records from the
+    \emph{Taxonomy} database.  
     
   }
 }

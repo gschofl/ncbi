@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title></title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+
+</head>
+
+<body>
+<p>#ncbi</p>
+
+<p>ncbi allows to search, download and parse data records from various NCBI databases. </p>
+
+<p>Currently implemented are functions for the sequence databases <em>protein</em>,
+<em>nuccore</em>, <em>nucgss</em>, and <em>nucest</em>, as well as for <em>pubmed</em> and <em>taxonomy</em>.</p>
+
+<p>##Install</p>
+
+<p><code>ncbi</code> depends on functionality provided by packages
+currently not available from CRAN: <code>rentrez</code>, <code>biofiles</code>, and <code>rmisc</code></p>
+
+<p>Use Hadley Wickham&#39;s <a href="https://github.com/hadley/devtools">devtools</a> to 
+install</p>
+
+<pre><code class="r">requre(devtools)
+install_github(&quot;rmisc&quot;, &quot;gschofl&quot;)
+install_github(&quot;rentrez&quot;, &quot;gschofl&quot;, &quot;no_parsing&quot;)
+install_github(&quot;biofiles&quot;, &quot;gschofl&quot;)
+install_github(&quot;ncbi&quot;, &quot;gschofl&quot;)
+</code></pre>
+
+<p>##Examples</p>
+
+<p>###Retrieving protein sequences for <em>Chlamydia psittaci</em> 6BC </p>
+
+<p>Let&#39;s first retrieve the accession numbers for all proteins for <em>C. psittaci</em>
+6BC. As a default <code>retmax</code> is set to 100. To get all accession numbers we set
+<code>retmax = NULL</code></p>
+
+<pre><code class="r">psit_acc &lt;- protein(&quot;Chlamydia psittaci 6BC[ORGN]&quot;, rettype=&quot;acc&quot;, retmax=NULL)
+length(psit_acc)
+        # [1] 3500
+psit_acc[1:10]
+        # [1] &quot;Q46203.1&quot;       &quot;P59691.2&quot;       &quot;F0T376.1&quot;      
+        # [4] &quot;Q46225.1&quot;       &quot;YP_005663704.1&quot; &quot;YP_005663702.1&quot;
+        # [7] &quot;YP_005663700.1&quot; &quot;YP_005663698.1&quot; &quot;YP_005663703.1&quot;
+        # [10] &quot;YP_005663701.1&quot;
+</code></pre>
+
+<p>Download the first 10 proteins</p>
+
+<pre><code class="r">psit_seq &lt;- protein(psit_acc[1:10])
+psit_seq
+        #   A AAStringSet instance of length 10
+        #     width seq                                                 names               
+        # [1]   402 MKKLLKSALLFAATGSALSLQALP...KWSITGEARLINERAAHMNAQFRF Q46203.1 RecName:...
+        # [2]   505 MAWENVRVRVAPSPTGDPHVGTAY...PKKIQTTIDKVLKEEDFENKIFEF P59691.2 RecName:...
+        # [3]    87 MKKAVLLATVFCGVVGLTSCCRIV...SECNPGVQGPQAKGCTSLDGRCKQ F0T376.1 RecName:...
+        # [4]   269 MFSDKMILIAGPCVIEEEETTLEI...TFEALLPIWNQLYQCVRSFEMAAV Q46225.1 RecName:...
+        # [5]   335 MRKGNSLHRNLDTIFGNEVYSNNL...SSKMIYAYDKSTIADNASKKVSLI YP_005663704.1 si...
+        # [6]   347 MVKSENQIIKSSLHLENQKFGRKP...FYLNKSKFQQISTNKTIQSTTNKN YP_005663702.1 hy...
+        # [7]   259 MKTLAFCSFKGGTGKTTLSLNIGS...DILNLTKEIENKLFSDEKLVQETL YP_005663700.1 sp...
+        # [8]   307 MSGLSHHHKSRLFLTVLEAANVWL...STQMLSAYDTGMTDNLTSQLPLIF YP_005663698.1 si...
+        # [9]   458 MIKQSEEEKDLLDVEFFVLGQAVN...GSVFSTTLRFNSCTGKFTIQKEAW YP_005663703.1 re...
+        #[10]   264 MGNSGFYLNDTQNCVFADNIKLGQ...GDSILGTTATSNISFLEVKQQTNG YP_005663701.1 hy...
+</code></pre>
+
+<p>Look at the metadata that comes with the sequences</p>
+
+<pre><code class="r">require(Biostrings)
+names(elementMetadata(psit_seq))
+        # [1] &quot;gi&quot;      &quot;accver&quot;  &quot;sid&quot;     &quot;local&quot;   &quot;taxid&quot;   &quot;orgname&quot; &quot;defline&quot; &quot;length&quot;
+&gt; elementMetadata(psit_seq)[[&quot;defline&quot;]]
+        #  [1] &quot;RecName: Full=Major outer membrane porin; Short=MOMP; Flags: Precursor&quot;                                                                                                                                                                                  
+        #  [2] &quot;RecName: Full=Glutamate--tRNA ligase; AltName: Full=Glutamyl-tRNA synthetase; Short=GluRS&quot;                                                                                                                                                               
+        #  [3] &quot;RecName: Full=Small cysteine-rich outer membrane protein omcA; Short=Small-CRP; AltName: Full=9 kDa cysteine-rich lipoprotein; Short=9KD-CRP; Flags: Precursor&quot;                                                                                          
+        #  [4] &quot;RecName: Full=2-dehydro-3-deoxyphosphooctonate aldolase; AltName: Full=3-deoxy-D-manno-octulosonic acid 8-phosphate synthase; AltName: Full=KDO-8-phosphate synthase; Short=KDO 8-P synthase; Short=KDOPS; AltName: Full=Phospho-2-dehydro-3-deoxyocton&gt;&quot;
+        #  [5] &quot;site-specific recombinase, phage integrase family [Chlamydophila psittaci 6BC]&quot;                                                                                                                                                                          
+        #  [6] &quot;hypothetical protein G5O_p0005 [Chlamydophila psittaci 6BC]&quot;                                                                                                                                                                                             
+        #  [7] &quot;sporulation initiation inhibitor protein soj [Chlamydophila psittaci 6BC]&quot;                                                                                                                                                                               
+        #  [8] &quot;site-specific recombinase, phage integrase family [Chlamydophila psittaci 6BC]&quot;                                                                                                                                                                          
+        #  [9] &quot;replicative DNA helicase [Chlamydophila psittaci 6BC]&quot;                                                                                                                                                                                                   
+        # [10] &quot;hypothetical protein G5O_p0004 [Chlamydophila psittaci 6BC]&quot;        
+</code></pre>
+
+<p>Download the full Genbank entry for a protein</p>
+
+<pre><code class="r">p &lt;- protein(elementMetadata(psit_seq)[[&quot;gi&quot;]][5], &quot;gp&quot;)
+        # Parsing features into “file63845f2468ac.db”
+p
+        # ‘gbRecord’ database ‘file63845f2468ac.db’ with 8 features
+        # LOCUS       YP_005663704 335 aa AA linear BCT 27-SEP-2012
+        # DEFINITION  site-specific recombinase, phage integrase family
+        #              [Chlamydophila psittaci 6BC].
+        # ACCESSION   YP_005663704
+        # VERSION     YP_005663704.1 GI:384451105
+        # DBLINK      Project: 159845
+        # DBSOURCE    REFSEQ: accession NC_017288.1
+        # KEYWORDS    .
+        # SOURCE      Chlamydophila psittaci 6BC (Chlamydia psittaci 6BC)
+        #   ORGANISM  Chlamydophila psittaci 6BC
+        #             Bacteria; Chlamydiae; Chlamydiales; Chlamydiaceae;
+        #              Chlamydia/Chlamydophila group; Chlamydia.
+        # REFERENCE   Not implemented yet
+        # COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject
+        #              to final NCBI review. The reference sequence is identical
+        #              to AEB56031. Method: conceptual translation.
+        # ORIGIN      mrkgnslhrnldtifgnevysnnlthqeflsvrnqhlweklrdiplyeavhtwlssltnh
+        #              ...
+        #              hipfkvtphvlratavteykkmgcsdsdimkitghssskmiyaydkstiadnaskkvsli
+
+require(biofiles)
+features(p)
+        # &#39;gbFeatureList&#39; with 8 features:
+        # 
+        # Feature:         Location/Qualifiers:
+        #  source          1..335
+        #                  /organism=&quot;Chlamydophila psittaci 6BC&quot;
+        #                  /strain=&quot;6BC&quot;
+        #                  /culture_collection=&quot;ATCC:VR-125&quot;
+        #                  /db_xref=&quot;taxon:331636&quot;
+        #                  /plasmid=&quot;pCps6BC&quot;
+        # 
+        # ...
+        # Feature:         Location/Qualifiers:
+        #  CDS             1..335
+        #                  /locus_tag=&quot;G5O_p0007&quot;
+        #                  /coded_by=&quot;NC_017288.1:6479..7486&quot;
+        #                  /transl_table=&quot;11&quot;
+        #                  /db_xref=&quot;GeneID:12242274&quot;
+</code></pre>
+
+<p>###Retrieving taxon information for Chlamydiaceae</p>
+
+<p>Which taxa within the family <em>Chlamydiaceae</em> are on NCBI</p>
+
+<pre><code class="r">tx &lt;- taxon(&quot;Chlamydiaceae[subtree]&quot;, &quot;uilist&quot;, retmax=NULL)
+length(tx)
+        # [1] 233
+head(tx, 10)
+        # [1] 1238237 1238236 1238235 1238234 1238233 1234369 1234368 1234367
+        # [9] 1221877 1218358
+</code></pre>
+
+<p>Download all taxon records</p>
+
+<pre><code class="r">txlist &lt;- taxon(&quot;Chlamydiaceae[subtree]&quot;, retmax=NULL)
+txlist
+        # A ‘taxonList’ instance of length 233
+        # Chlamydia psittaci 10_1398_11 (1238237; no rank) 
+        # Chlamydia psittaci 10_743_SC13 (1238236; no rank) 
+        # Chlamydia psittaci 10_881_SC42 (1238235; no rank) 
+        # Chlamydia psittaci 10_1957 (1238234; no rank) 
+        # Chlamydia psittaci 10_2393 (1238233; no rank) 
+        # Chlamydia pecorum P787 (1234369; no rank) 
+        # Chlamydia pecorum W73 (1234368; no rank) 
+        # Chlamydia pecorum PV3056/3 (1234367; no rank) 
+        # Chlamydia psittaci 01DC12 (1221877; no rank) 
+        # Chlamydia psittaci WC (1218358; no rank)
+          .
+          .
+          .
+</code></pre>
+
+<p>The scientific names of all those recognized as species</p>
+
+<pre><code class="r">sciName(txlist)[taxRank(txlist) == &#39;species&#39;]
+        #  [1] &quot;Chlamydia sp. 09G3706&quot;                 &quot;Chlamydia sp. 09G3705&quot;                
+        #  [3] &quot;Chlamydia sp. 08-1274/23&quot;              &quot;Chlamydia sp. 08-1274/21&quot;             
+        #  [5] &quot;Chlamydia sp. 08-1274/19&quot;              &quot;Chlamydia sp. 08-1274/13&quot;             
+        #  [7] &quot;Chlamydia sp. 08-1274/3&quot;               &quot;Chlamydia sp. 10-1957/2&quot;              
+        #  [9] &quot;Chlamydia sp. 10-2393/6&quot;               &quot;Chlamydia sp. 09-424/4&quot;               
+        # [11] &quot;Chlamydia sp. 09-130/5&quot;                &quot;Chlamydia sp. 09-130/4&quot;               
+        # [13] &quot;Chlamydophila sp. 09-589/S46&quot;          &quot;Chlamydophila sp. 09-489/LP23&quot;        
+        # [15] &quot;Chlamydiaceae bacterium 10-1398/6&quot;     &quot;Chlamydiaceae bacterium 10-1398/11&quot;   
+        # [17] &quot;Chlamydophila sp. S384&quot;                &quot;Chlamydophila sp. C312-513&quot;           
+        # [19] &quot;Chlamydophila sp. 08-1274_Flock9&quot;      &quot;Chlamydophila sp. 08-1274_Flock3&quot;     
+        # [21] &quot;Chlamydophila sp. 08-1274_Flock23&quot;     &quot;Chlamydophila sp. 08-1274_Flock22&quot;    
+        # [23] &quot;Chlamydophila sp. 08-1274_Flock21&quot;     &quot;Chlamydophila sp. 08-1274_Flock19&quot;    
+        # [25] &quot;Chlamydophila sp. 08-1274_Flock13&quot;     &quot;Candidatus Clavochlamydia salmonicola&quot;
+        # [27] &quot;uncultured Chlamydophila sp.&quot;          &quot;Chlamydophila sp. 6617-T5&quot;            
+        # [29] &quot;Chlamydophila sp. 6620-T4&quot;             &quot;Chlamydophila sp. 6688-T2&quot;            
+        # [31] &quot;uncultured Chlamydiaceae bacterium&quot;    &quot;Chlamydophila sp. Rostinovo-70&quot;       
+        # [33] &quot;Chlamydia sp. CH301104&quot;                &quot;cf. Chlamydia sp. RLUH-1&quot;             
+        # [35] &quot;uncultured Chlamydia sp.&quot;              &quot;uncultured Chlamydia suis CTRAUS5&quot;    
+        # [37] &quot;Chlamydophila sp. CPSCROC&quot;             &quot;Chlamydophila sp. CPSSNAKE&quot;           
+        # [39] &quot;Chlamydophila sp. PEENT&quot;               &quot;Chlamydiaceae gen. sp. EQVAG&quot;         
+        # [41] &quot;Chlamydia cf. pneumoniae CPXT1&quot;        &quot;Chlamydia pecorum&quot;                    
+        # [43] &quot;Chlamydia muridarum&quot;                   &quot;Chlamydia suis&quot;                       
+        # [45] &quot;Chlamydia pneumoniae&quot;                  &quot;Chlamydophila caviae&quot;                 
+        # [47] &quot;Chlamydophila felis&quot;                   &quot;Chlamydophila abortus&quot;                
+        # [49] &quot;Chlamydia psittaci&quot;                    &quot;Chlamydia sp.&quot;                        
+        # [51] &quot;Chlamydia trachomatis&quot;          
+
+</code></pre>
+
+<p>###Retrieving data from Pubmed</p>
+
+<p>Search PubMed for all publications with <em>Chlamydia psittaci</em> in the title
+in 2012</p>
+
+<pre><code class="r">require(rentrez)
+pmid &lt;- esearch(&quot;Chlamydia psittaci[TITL]&quot;, &quot;pubmed&quot;, mindate=2012, maxdate=2012)
+pmid
+        # ESearch query using the ‘pubmed’ database.
+        # Query term: ‘Chlamydia psittaci[TITL] AND 2012[EDAT] : 2012[EDAT]’
+        # Total number of hits: 9
+        # Number of hits retrieved: 9
+        # [1] &quot;23098816&quot; &quot;22957128&quot; &quot;22689815&quot; &quot;22506068&quot; &quot;22472082&quot; &quot;22382892&quot; &quot;22302240&quot;
+        # [8] &quot;22299031&quot; &quot;22296995&quot;
+</code></pre>
+
+<p>Now fetch the first 5 of these records from pubmed</p>
+
+<pre><code class="r">p &lt;- pubmed(idist(pmid)[1:5])
+p
+        # Yin L, Kalmar I, Lagae S, Vandendriessche S, Vanderhaeghen W,
+        # Butaye P, Cox E and Vanrompay D (2012). “Emerging Chlamydia
+        # psittaci infections in the chicken industry and pathology of
+        # Chlamydia psittaci genotype B and D strains in specific pathogen
+        # free chickens.” _Veterinary microbiology_. ISSN 1873-2542, &lt;URL:
+        # http://dx.doi.org/10.1016/j.vetmic.2012.09.026&gt;.
+        # 
+        # Blomqvist M, Christerson L, Waldenström J, Lindberg P, Helander B,
+        # Gunnarsson G, Herrmann B and Olsen B (2012). “Chlamydia psittaci in
+        # birds of prey, Sweden.” _Infection ecology &amp; epidemiology_, *2*.
+        # ISSN 2000-8686, &lt;URL: http://dx.doi.org/10.3402/iee.v2i0.8435&gt;.
+        # 
+        # Braukmann M, Sachse K, Jacobsen I, Westermann M, Menge C, Saluz H
+        # and Berndt A (2012). “Distinct intensity of host-pathogen
+        # interactions in Chlamydia psittaci- and Chlamydia abortus-infected
+        # chicken embryos.” _Infection and immunity_, *80*(9), pp. 2976-88.
+        # ISSN 1098-5522, &lt;URL: http://dx.doi.org/10.1128/IAI.00437-12&gt;.
+        # 
+        # Voigt A, Schöfl G and Saluz H (2012). “The Chlamydia psittaci
+        # genome: a comparative analysis of intracellular pathogens.” _PloS
+        # one_, *7*(4), pp. e35097. ISSN 1932-6203, &lt;URL:
+        # http://dx.doi.org/10.1371/journal.pone.0035097&gt;.
+        # 
+        # Collina F, De Chiara A, De Renzo A, De Rosa G, Botti G and Franco R
+        # (2012). “Chlamydia psittaci in ocular adnexa MALT lymphoma: a
+        # possible role in lymphomagenesis and a different geographical
+        # distribution.” _Infectious agents and cancer_, *7*, pp. 8. ISSN
+        # 1750-9378, &lt;URL: http://dx.doi.org/10.1186/1750-9378-7-8&gt;.
+</code></pre>
+
+<p>Which journals where they published in</p>
+
+<pre><code class="r">journal(p)
+        # [[1]]
+        # [1] &quot;Veterinary microbiology&quot;
+        # attr(,&quot;abbrev&quot;)
+        # [1] &quot;Vet. Microbiol.&quot;
+        # attr(,&quot;issn&quot;)
+        # [1] &quot;1873-2542&quot;
+        # 
+        # [[2]]
+        # [1] &quot;Infection ecology &amp; epidemiology&quot;
+        # attr(,&quot;abbrev&quot;)
+        # [1] &quot;Infect Ecol Epidemiol&quot;
+        # attr(,&quot;issn&quot;)
+        # [1] &quot;2000-8686&quot;
+        # 
+        # [[3]]
+        # [1] &quot;Infection and immunity&quot;
+        # attr(,&quot;abbrev&quot;)
+        # [1] &quot;Infect. Immun.&quot;
+        # attr(,&quot;issn&quot;)
+        # [1] &quot;1098-5522&quot;
+        # 
+        # [[4]]
+        # [1] &quot;PloS one&quot;
+        # attr(,&quot;abbrev&quot;)
+        # [1] &quot;PLoS ONE&quot;
+        # attr(,&quot;issn&quot;)
+        # [1] &quot;1932-6203&quot;
+        # 
+        # [[5]]
+        # [1] &quot;Infectious agents and cancer&quot;
+        # attr(,&quot;abbrev&quot;)
+        # [1] &quot;Infect. Agents Cancer&quot;
+        # attr(,&quot;issn&quot;)
+        # [1] &quot;1750-9378&quot;
+</code></pre>
+
+</body>
+
+</html>
+

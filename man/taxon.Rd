@@ -3,19 +3,28 @@
 \name{taxon-class}
 \alias{taxon}
 \alias{taxon-class}
-\title{taxon}
+\title{Retrieve records from the Taxonomy database.}
 \usage{
-  taxon(id, ...)
+  taxon(taxid, rettype = NULL, retmax = 25, parse = TRUE,
+    ...)
 }
 \arguments{
-  \item{id}{A valid NCBI search term or a vector of \sQuote{taxids}.}
+  \item{taxid}{\sQuote{taxids} or a valid NCBI search term.}
 
-  \item{...}{Parameters passed on to the underlying \code{\link{esearch}}
+  \item{rettype}{Which type of data should be retrieved? Full records
+(default: \code{NULL}) or an \sQuote{uilist}.}
+
+  \item{retmax}{Maximal number of records to be retrieved (default: 25).}
+
+  \item{parse}{Should the retrieved data be parsed?}
+
+  \item{...}{Parameters passed on to the underlying \code{\link{efetch}}
 query.}
 }
 
 \value{
-A \linkS4class{taxon} or \linkS4class{taxonList} instance.
+An \linkS4class{XMLInternalDocument} or if #' parsed a
+ \linkS4class{taxon} or \linkS4class{taxonList} instance.
 }
 \description{
 \dQuote{taxon} is an S4 class that provides a container for

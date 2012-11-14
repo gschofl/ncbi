@@ -1,6 +1,6 @@
 Package: ncbi
 Type: Package
-Title: Full-text search in NCBI's databases.
+Title: Retrieve data from NCBI.
 Version: 0.0-1
 Date: 2012-11-13
 Authors@R: person("Gerhard", "Schöfl", role=c("aut","cre"),
@@ -21,6 +21,10 @@ Imports:
     XML
 Collate:
     'utils.R'
+    'uilist.R'
+    'pubmed.R'
+    'pubmed-generics.R'
+    'pubmed-methods.R'
     'sequences.R'
     'taxonomy.R'
     'taxonomy-generics.R'

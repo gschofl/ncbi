@@ -3,19 +3,21 @@
 \alias{EST}
 \title{Retrieve sequences and annotations from the EST database}
 \usage{
-  GSS(term, rettype = "fasta", retmax = 25, parse = TRUE,
+  EST(gi, rettype = "fasta", retmax = 25, parse = TRUE,
     ...)
 }
 \arguments{
-  \item{term}{A valid NCBI search term or \sQuote{GI} numbers.}
+  \item{gi}{\sQuote{GI}s or a valid NCBI search term.}
 
-  \item{rettype}{}
+  \item{rettype}{Which type of data should be retrieved? \sQuote{fasta}
+(default), \sQuote{gp}, \sQuote{acc}, \sQuote{seqid}, \sQuote{est},
+\sQuote{native}, or \code{NULL} (text ASN.1).}
 
-  \item{retmax}{}
+  \item{retmax}{Maximal number of records to be retrieved (default: 25).}
 
-  \item{parse}{}
+  \item{parse}{Should the retrieved data be parsed?}
 
-  \item{...}{Parameters passed on to the underlying \code{\link{esearch}}
+  \item{...}{Parameters passed on to the underlying \code{\link{efetch}}
 query.}
 }
 

@@ -3,19 +3,22 @@
 \alias{nucleotide}
 \title{Retrieve sequences and annotations from the Nucleotide database}
 \usage{
-  nucleotide(term, rettype = "fasta", retmax = 25, parse =
+  nucleotide(gi, rettype = "fasta", retmax = 25, parse =
     TRUE, ...)
 }
 \arguments{
-  \item{term}{A valid NCBI search term or \sQuote{GI} numbers.}
+  \item{gi}{\sQuote{GI}s or a valid NCBI search term.}
 
-  \item{rettype}{}
+  \item{rettype}{Which type of data should be retrieved? \sQuote{fasta}
+(default), \sQuote{gb}, \sQuote{gbwithparts}, \sQuote{acc}, \sQuote{seqid},
+\sQuote{ft}, \sQuote{fasta_cds_na}, \sQuote{fasta_cds_aa}, \sQuote{native},
+or \code{NULL} (text ASN.1).}
 
-  \item{retmax}{}
+  \item{retmax}{Maximal number of records to be retrieved (default: 25).}
 
-  \item{parse}{}
+  \item{parse}{Should the retrieved data be parsed?}
 
-  \item{...}{Parameters passed on to the underlying \code{\link{esearch}}
+  \item{...}{Parameters passed on to the underlying \code{\link{efetch}}
 query.}
 }
 

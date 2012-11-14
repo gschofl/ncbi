@@ -19,7 +19,7 @@ setClass("taxonList", contains="list")
 setClass("Lineage", contains="taxonList")
 
 
-#' taxon
+#' Retrieve records from the Taxonomy database.
 #'
 #' \dQuote{taxon} is an S4 class that provides a container for
 #' records retrieved from the NCBI Taxonomy database.
@@ -65,51 +65,62 @@ setClass("taxon",
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK21100/}{NCBI}
 #' for more information.
 #' 
-#' @param id A valid NCBI search term or a vector of \sQuote{taxids}.
-#' @param ... Parameters passed on to the underlying \code{\link{esearch}}
+#' @param taxid \sQuote{taxids} or a valid NCBI search term.
+#' @param rettype Which type of data should be retrieved? Full records
+#' (default: \code{NULL}) or an \sQuote{uilist}. 
+#' @param retmax Maximal number of records to be retrieved (default: 25).
+#' @param parse Should the retrieved data be parsed?
+#' @param ... Parameters passed on to the underlying \code{\link{efetch}}
 #' query.
 #'
-#' @return A \linkS4class{taxon} or \linkS4class{taxonList} instance.
+#' @return An \linkS4class{XMLInternalDocument} or if #' parsed a
+#'  \linkS4class{taxon} or \linkS4class{taxonList} instance.
 #' @rdname taxon
 #' @export
 #' @autoImports
-taxon <- function (id, ...) {
-  if (missing(id)) {
+taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
+  if (missing(taxid)) {
     return(new("taxon"))
   }
-  if (is.numeric(id) || !any(is.na(suppressWarnings(as.numeric(id))))) {
-    field <- "Taxonomy ID"
+  args <- taxonomy_args(taxid, rettype, retmax, ...)
+  response <- fetch_records(args, 500)
+  if (parse) {
+    switch(args$rettype %||% "xml",
+           xml = parseTaxon(taxaSet=response),
+           uilist = parseUilist(response),
+           response)
   } else {
-    field <- "All Names"
-  }
-  taxon_search <- esearch(id, "taxonomy", field=field,
-                          usehistory=TRUE, ...)
-  if (count(taxon_search) == 0) {
-    return(new("taxon"))
-  } else {
-    taxonXML <- content(efetch(taxon_search))
-    e <- getNodeSet(xmlRoot(taxonXML), path="//ERROR")
-    if (not_empty(e)) {
-      stop("Error retrieving data from NCBI: ", sQuote(xmlValue(e[[1]])))
-    } else {
-      parseTaxon(taxonXML)
-    }
+    response
   }
 }
 
 
 #' @export
+#' @importFrom XML xmlName
 #' @autoImports
-parseTaxon <- function (taxonXML) {
-  stopifnot(is(taxonXML, "XMLInternalDocument"))
-  taxaSet <- getNodeSet(xmlRoot(taxonXML), '//TaxaSet/Taxon')
+parseTaxon <- function (taxaSet) {
   
+  if (is(taxaSet, "efetch")) {
+    taxaSet <- content(taxaSet)
+  }
+  
+  if (!is(taxaSet, "XMLInternalDocument")) {
+    return(taxaSet)
+  }
+  
+  taxaSet <- getNodeSet(xmlRoot(taxaSet), '//TaxaSet/Taxon')
   if (is_empty(taxaSet)) {
-    stop("No 'TaxaSet' provided")
+    e <- unlist(xpathApply(response, "//ERROR", xmlValue))
+    if (not.null(e)) {
+      stop("ERROR in efetch: ", paste(e, collapse=", "))
+      
+    } else {
+      stop("No 'TaxaSet' provided")
+    }
   }
   
   tx <- lapply(taxaSet, function (taxon) {
-    #     taxon <- taxaSet[[1]]
+    # taxon <- xmlDoc(taxaSet[[1]])
     taxon <- xmlDoc(taxon)
     taxId <- unlist(xpathApply(taxon, "/Taxon/TaxId", xmlValue))
     parentTaxId <- unlist(xpathApply(taxon, "/Taxon/ParentTaxId", xmlValue))

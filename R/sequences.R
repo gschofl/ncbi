@@ -1,40 +1,19 @@
 #' @include utils.R
 NULL
 
-
 #' @autoImports
-ncbi_sequences <- function (term, db, rettype = "fasta", retmax = 25,
+ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
                             parse = TRUE, ...) {
   
-  rettype <- switch(db,
-                    protein=match.arg(rettype, c("fasta", "gp", "gpc", "ft",
-                                                 "seqid", "acc", "native")),
-                    nuccore=match.arg(rettype, c("fasta", "gb", "gbc", "ft",
-                                                 "seqid", "acc", "native")),
-                    nucgss=match.arg(rettype, c("fasta", "gb", "gbc", "ft",
-                                                "seqid", "acc", "native", "gss")),
-                    nucest=match.arg(rettype, c("fasta", "gb", "gbc", "ft",
-                                                "seqid", "acc", "native", "est")))
-  
-  args <- c(list(...), list(rettype = rettype, retmax = retmax))
-  args <- c(args, list(id = getGI(term=term, db=db)))
-  if (is.null(args[["retmode"]]))
-    args <- c(args, list(retmode = switch(rettype, fasta = "xml", gp = "text",
-                                          gpc = "xml", gb = "text", gbc = "text",
-                                          ft = "text", seqid = "text", acc = "text",
-                                          native = "xml", gss = "text", est = "text")))
-            
-  if (count(args$id) > 500 && args$retmax > 500) {
-    response <- do.call(efetch.batch, args)
-  } else {
-    response <- do.call(efetch, args)
-  }
-  
-  response <- content(response)
+  args <- sequence_args(gi, db, rettype, retmax, ...)
+  response <- fetch_records(args, 500)
   if (parse) {
-    switch(rettype,
-           fasta = parseSeqSet(response),
-           gp = gbRecord(textConnection(response, open="r")),
+    switch(args$rettype %||% "asn.1",
+           fasta = parseTSeqSet(response),
+           gb = parseGenBank(response),
+           gp = parseGenBank(response),
+           gbwithparts = parseGenBank(response),
+           acc = parseAcc(response),
            response)
   } else {
     response
@@ -42,34 +21,79 @@ ncbi_sequences <- function (term, db, rettype = "fasta", retmax = 25,
 }
 
 
+#' Parse GenBank flatfiles
+#' 
+#' @param gb An \linkS4class{efetch} instance or a character vector
+#' containing a GenBank flatfile.
+#' 
+#' @return A \linkS4class{gbRecord} instance.
+#'
 #' @export
 #' @autoImports
-parseSeqSet <- function(seqSet) {
-  if (!is(seqSet, "XMLInternalDocument"))
-    return(seqSet)
+parseGenBank <- function(gb) {
   
-  seqSet <- getNodeSet(xmlRoot(seqSet), '//TSeqSet/TSeq')
-  
-  if (is_empty(seqSet)) {
-    stop("No 'TSeqSet' provided")
+  if (is(gb, "efetch")) {
+    gb <- content(gb)
   }
   
-  seqs <- lapply(seqSet, function (seq) {
-#     seq <- xmlRoot(xmlDoc(seqSet[[1]]))
+  if (is(gb, "XMLInternalDocument")) {
+    return(gb)
+  }
+  
+  gb <- gbRecord(textConnection(gb, open="r"))
+  gb
+}
+
+#' Parse Tiny Bioseq FASTA files
+#' 
+#' @param tSeqSet An \linkS4class{efetch} or \linkS4class{XMLInternalDocument}
+#' instance contining TSeqSet XML file.
+#' 
+#' @return An \linkS4class{XStringSet} instance with additional innformation
+#' in the \code{elementMetadata} slot.
+#'
+#' @export
+#' @autoImports
+parseTSeqSet <- function(tSeqSet) {
+  
+  if (is(tSeqSet, "efetch")) {
+    tSeqSet <- content(tSeqSet)
+  }
+  
+  if (!is(tSeqSet, "XMLInternalDocument")) {
+    return(tSeqSet)
+  }
+  
+  tSeqSet <- getNodeSet(xmlRoot(tSeqSet), '//TSeqSet/TSeq')
+  if (is_empty(tSeqSet)) {
+    e <- unlist(xpathApply(response, "//ERROR", xmlValue))
+    if (not.null(e)) {
+      stop("ERROR in efetch: ", paste(e, collapse=", "))
+    } else {
+      stop("No 'TSeqSet' provided")
+    }
+  }
+  
+  seqs <- lapply(tSeqSet, function (seq) {
+    # seq <- xmlRoot(xmlDoc(seqSet[[1]]))
     seq <- xmlRoot(xmlDoc(seq))
     seqtype <- xmlGetAttr(seq[["TSeq_seqtype"]], name="value")
-    gi <- xmlValue(seq[["TSeq_gi"]])
-    acc <- xmlValue(seq[["TSeq_accver"]])
-    taxid <- xmlValue(seq[["TSeq_taxid"]])
-    orgname <- xmlValue(seq[["TSeq_orgname"]])
+    gi <- xmlValue(seq[["TSeq_gi"]]) # optional
+    accver <- xmlValue(seq[["TSeq_accver"]]) # optional
+    sid <- xmlValue(seq[["TSeq_sid"]]) # optional
+    local <- xmlValue(seq[["TSeq_local"]]) # optional
+    taxid <- xmlValue(seq[["TSeq_taxid"]]) # optional
+    orgname <- xmlValue(seq[["TSeq_orgname"]]) # optional
     defline <- xmlValue(seq[["TSeq_defline"]])
+    length <- xmlValue(seq[["TSeq_length"]])
     sequence <- switch(seqtype,
                        protein=AAStringSet(xmlValue(seq[["TSeq_sequence"]])),
                        nucleotide=DNAStringSet(xmlValue(seq[["TSeq_sequence"]])))
-    names(sequence) <- paste(acc, defline)
-    elementMetadata(sequence) <- DataFrame(gi = gi, acc = acc,
-                                           taxid = taxid, orgname = orgname,
-                                           defline = defline)
+    names(sequence) <- paste(accver, defline)
+    elementMetadata(sequence) <- DataFrame(gi = gi, accver = accver, sid = sid,
+                                           local = local, taxid = taxid,
+                                           orgname = orgname, defline = defline,
+                                           length = length)
     sequence
   })
   
@@ -90,13 +114,15 @@ parseSeqSet <- function(seqSet) {
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK44863/}{NCBI}
 #' for more information.
 #' 
-#' @usage protein(term, rettype = "fasta", retmax = 25, parse = TRUE, ...)
+#' @usage protein(gi, rettype = "fasta", retmax = 25, parse = TRUE, ...)
 #' 
-#' @param term A valid NCBI search term or \sQuote{GI} numbers.
-#' @param rettype
-#' @param retmax
-#' @param parse
-#' @param ... Parameters passed on to the underlying \code{\link{esearch}}
+#' @param gi \sQuote{GI}s or a valid NCBI search term.
+#' @param rettype Which type of data should be retrieved? \sQuote{fasta}
+#' (default), \sQuote{gp}, \sQuote{acc}, \sQuote{seqid}, \sQuote{ft},
+#' \sQuote{native}, or \code{NULL} (text ASN.1).
+#' @param retmax Maximal number of records to be retrieved (default: 25).
+#' @param parse Should the retrieved data be parsed?
+#' @param ... Parameters passed on to the underlying \code{\link{efetch}}
 #' query.
 #'
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
@@ -113,13 +139,16 @@ protein <- Curry(ncbi_sequences, db="protein")
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK44863/}{NCBI}
 #' for more information.
 #' 
-#' @usage nucleotide(term, rettype = "fasta", retmax = 25, parse = TRUE, ...)
+#' @usage nucleotide(gi, rettype = "fasta", retmax = 25, parse = TRUE, ...)
 #' 
-#' @param term A valid NCBI search term or \sQuote{GI} numbers.
-#' @param rettype
-#' @param retmax
-#' @param parse
-#' @param ... Parameters passed on to the underlying \code{\link{esearch}}
+#' @param gi \sQuote{GI}s or a valid NCBI search term.
+#' @param rettype Which type of data should be retrieved? \sQuote{fasta}
+#' (default), \sQuote{gb}, \sQuote{gbwithparts}, \sQuote{acc}, \sQuote{seqid},
+#' \sQuote{ft}, \sQuote{fasta_cds_na}, \sQuote{fasta_cds_aa}, \sQuote{native},
+#' or \code{NULL} (text ASN.1).
+#' @param retmax Maximal number of records to be retrieved (default: 25).
+#' @param parse Should the retrieved data be parsed?
+#' @param ... Parameters passed on to the underlying \code{\link{efetch}}
 #' query.
 #'
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
@@ -135,13 +164,15 @@ nucleotide <- Curry(ncbi_sequences, db="nuccore")
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK44863/}{NCBI}
 #' for more information.
 #' 
-#' @usage GSS(term, rettype = "fasta", retmax = 25, parse = TRUE, ...)
+#' @usage GSS(gi, rettype = "fasta", retmax = 25, parse = TRUE, ...)
 #' 
-#' @param term A valid NCBI search term or \sQuote{GI} numbers.
-#' @param rettype
-#' @param retmax
-#' @param parse
-#' @param ... Parameters passed on to the underlying \code{\link{esearch}}
+#' @param gi \sQuote{GI}s or a valid NCBI search term.
+#' @param rettype Which type of data should be retrieved? \sQuote{fasta}
+#' (default), \sQuote{gb}, \sQuote{acc}, \sQuote{seqid}, \sQuote{gss},
+#' \sQuote{native}, or \code{NULL} (text ASN.1).
+#' @param retmax Maximal number of records to be retrieved (default: 25).
+#' @param parse Should the retrieved data be parsed?
+#' @param ... Parameters passed on to the underlying \code{\link{efetch}}
 #' query.
 #'
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
@@ -157,20 +188,20 @@ GSS <- Curry(ncbi_sequences, db="nucgss")
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK44863/}{NCBI}
 #' for more information.
 #' 
-#' @usage GSS(term, rettype = "fasta", retmax = 25, parse = TRUE, ...)
+#' @usage EST(gi, rettype = "fasta", retmax = 25, parse = TRUE, ...)
 #' 
-#' @param term A valid NCBI search term or \sQuote{GI} numbers.
-#' @param rettype
-#' @param retmax
-#' @param parse
-#' @param ... Parameters passed on to the underlying \code{\link{esearch}}
+#' @param gi \sQuote{GI}s or a valid NCBI search term.
+#' @param rettype Which type of data should be retrieved? \sQuote{fasta}
+#' (default), \sQuote{gp}, \sQuote{acc}, \sQuote{seqid}, \sQuote{est},
+#' \sQuote{native}, or \code{NULL} (text ASN.1).
+#' @param retmax Maximal number of records to be retrieved (default: 25).
+#' @param parse Should the retrieved data be parsed?
+#' @param ... Parameters passed on to the underlying \code{\link{efetch}}
 #' query.
 #'
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname EST
 #' @export
 EST <- Curry(ncbi_sequences, db="nucest")
-
-
 
 
