@@ -140,7 +140,7 @@ parseTaxon <- function (taxaSet) {
       l <- xmlDoc(l)
       new("taxon", taxId = xpathSApply(l, "//TaxId", xmlValue),
           scientificName = xpathSApply(l, "//ScientificName", xmlValue),
-          rank = xpathSApply(l, "//ScientificName", xmlValue))
+          rank = xpathSApply(l, "//Rank", xmlValue))
     })
     
     free(taxon)
