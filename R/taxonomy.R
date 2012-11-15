@@ -103,20 +103,13 @@ parseTaxon <- function (taxaSet) {
   if (is(taxaSet, "efetch")) {
     taxaSet <- content(taxaSet)
   }
-  
+  catchEFetchError(taxaSet)
   if (!is(taxaSet, "XMLInternalDocument")) {
     return(taxaSet)
   }
-  
   taxaSet <- getNodeSet(xmlRoot(taxaSet), '//TaxaSet/Taxon')
   if (is_empty(taxaSet)) {
-    e <- unlist(xpathApply(response, "//ERROR", xmlValue))
-    if (not.null(e)) {
-      stop("ERROR in efetch: ", paste(e, collapse=", "))
-      
-    } else {
-      stop("No 'TaxaSet' provided")
-    }
+    stop("No 'TaxaSet' provided")
   }
   
   tx <- lapply(taxaSet, function (taxon) {

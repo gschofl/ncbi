@@ -93,3 +93,53 @@ fetch_records <- function(args, maxrec = 500) {
   response
 }
 
+
+#' @autoImports
+catchEFetchError <- function (response) {
+  if (is(response, "efetch")) {
+    response <- content(response)
+  }
+  if (!is(response, "XMLInternalDocument")) {
+    warning("No XML response", call.=FALSE, immediate.=TRUE)
+    return(invisible(TRUE))
+  }
+  e <- xvalue(response, '//ERROR')
+  if (not.na(e)) {
+    stop("ERROR in efetch: ", paste(e, collapse=", "), call.=FALSE)  
+  }
+  invisible(TRUE)  
+}
+
+
+set_type <- function(x, as) {
+  switch(as,
+         character=as.character(x),
+         numeric=as.numeric(x),
+         integer=as.integer(x),
+         double=as.double(x),
+         logical=as.logical(x),
+         complex=as.complex(x),
+         x)
+}
+
+
+xvalue <- function(xdoc, path, as = 'character') {
+  v <- xpathSApply(xdoc, path, xmlValue) %||% NA_character_
+  set_type(v, as)
+}
+
+
+xname <- function(xdoc, path, as = 'character') {
+  n <- xpathSApply(xdoc, path, xmlName) %||% NA_character_
+  set_type(n, as)
+}
+
+
+xattr <- function(xdoc, path, name, as = 'character') {
+  a <- xpathSApply(xdoc, path, xmlGetAttr, name=name) %||% NA_character_
+  set_type(a, as)
+}
+
+
+
+

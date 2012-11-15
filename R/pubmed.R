@@ -47,20 +47,13 @@ parsePubmed <- function (pmArticleSet) {
   if (is(pmArticleSet, "efetch")) {
     pmArticleSet <- content(pmArticleSet)
   }
-  
+  catchEFetchError(pmArticleSet)
   if (!is(pmArticleSet, "XMLInternalDocument")) {
     return(pmArticleSet)
   }
-  
-  pmArtSet <- getNodeSet(xmlRoot(pmArticleSet),
-                         '//PubmedArticleSet/PubmedArticle')
+  pmArtSet <- getNodeSet(xmlRoot(pmArticleSet), '//PubmedArticleSet/PubmedArticle')
   if (is_empty(pmArtSet)) {
-    e <- unlist(xpathApply(response, "//ERROR", xmlValue))
-    if (not.null(e)) {
-      stop("ERROR in efetch: ", paste(e, collapse=", "))
-    } else {
-    stop("No 'PubmedArticle' provided")
-    }
+    stop("No 'PubmedArticleSet' provided")
   }
   
   reff <- lapply(pmArtSet, function (art) {

@@ -59,19 +59,13 @@ parseTSeqSet <- function(tSeqSet) {
   if (is(tSeqSet, "efetch")) {
     tSeqSet <- content(tSeqSet)
   }
-  
+  catchEFetchError(tSeqSet)
   if (!is(tSeqSet, "XMLInternalDocument")) {
     return(tSeqSet)
   }
-  
   tSeqSet <- getNodeSet(xmlRoot(tSeqSet), '//TSeqSet/TSeq')
   if (is_empty(tSeqSet)) {
-    e <- unlist(xpathApply(response, "//ERROR", xmlValue))
-    if (not.null(e)) {
-      stop("ERROR in efetch: ", paste(e, collapse=", "))
-    } else {
-      stop("No 'TSeqSet' provided")
-    }
+    stop("No 'tSeqSet' provided")
   }
   
   seqs <- lapply(tSeqSet, function (seq) {
