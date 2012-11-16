@@ -27,7 +27,14 @@ setOldClass("bibentry")
 #' @export
 pubmed <- function(pmid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
   
-  args <- pubmed_args(pmid, rettype, retmax, ...)
+  if (is(pmid, "esearch")) {
+    if (database(pmid) != 'pubmed')
+      stop("Database ", sQuote(database(pmid)), " not supported")
+    if (!has_webenv(pmid))
+      pmid <- idList(pmid)
+  }
+  
+  args <- getArgs(pmid, "pubmed", rettype, retmax, ...)
   response <- fetch_records(args, 500)
   if (parse) {
     switch(args$rettype %||% "xml",

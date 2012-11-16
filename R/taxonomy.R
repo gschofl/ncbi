@@ -82,7 +82,15 @@ taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
   if (missing(taxid)) {
     return(new("taxon"))
   }
-  args <- taxonomy_args(taxid, rettype, retmax, ...)
+  
+  if (is(taxid, "esearch")) {
+    if (database(taxid) != 'taxonomy')
+      stop("Database ", sQuote(database(taxid)), " not supported")
+    if (!has_webenv(taxid))
+      taxid <- idList(taxid)
+  }
+  
+  args <- getArgs(taxid, "taxonomy", rettype, retmax, ...)
   response <- fetch_records(args, 500)
   if (parse) {
     switch(args$rettype %||% "xml",

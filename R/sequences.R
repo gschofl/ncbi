@@ -5,7 +5,15 @@ NULL
 ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
                             parse = TRUE, ...) {
   
-  args <- sequence_args(gi, db, rettype, retmax, ...)
+  if (is(gi, "esearch")) {
+    if (database(gi) %ni% c('nuccore', 'nucest','nucgss', 'protein', 'popset',
+                            'nucleotide'))
+      stop("Database ", sQuote(database(gi)), " not supported")
+    if (!has_webenv(gi))
+      gi <- idList(gi)
+  }
+  
+  args <- getArgs(gi, db, rettype, retmax, ...)
   response <- fetch_records(args, 500)
   if (parse) {
     switch(args$rettype %||% "asn.1",

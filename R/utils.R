@@ -1,84 +1,24 @@
 #' @autoImports
-getID <- function(id, db) {  
-  if (is.numeric(id) || !any(is.na(suppressWarnings(as.numeric(id))))) {
-    epost(id, db)
+getID <- function(id, db) {
+  if (has_webenv(id)) {
+    return( id )
+  } else if (is.numeric(id) || !any(is.na(suppressWarnings(as.numeric(id))))) {
+    return( epost(id, db) )
   } else {
-    esearch(id, db, usehistory=TRUE)
+    return( esearch(id, db, usehistory=TRUE) )
   }
 }
 
 
 #' @autoImports
-sequence_args <- function(gi, db, rettype, retmax, ...) {
-  
-  rettype <- if (is.null(rettype)) {
-    NULL
-  } else {
-    rettype <- switch(db,
-                      protein=match.arg(rettype, c("fasta", "gp", "gpc", "ft",
-                                                   "seqid", "acc", "native")),
-                      nuccore=match.arg(rettype, c("fasta", "gb", "gbc", "ft",
-                                                   "gbwithparts", "fasta_cds_na",
-                                                   "fasta_cds_aa", "seqid", "acc",
-                                                   "native")),
-                      nucgss=match.arg(rettype, c("fasta", "gb", "gbc",
-                                                  "seqid", "acc", "native", "gss")),
-                      nucest=match.arg(rettype, c("fasta", "gb", "gbc",
-                                                  "seqid", "acc", "native", "est")),
-                      popset=match.arg(rettype, c("fasta", "gb", "gbc", )))
-  }
-  
-  args <- c(list(...), list(rettype = rettype, retmax = retmax))
-  args <- c(args, list(id = getID(id=gi, db=db)))
-  if (is.null(args[["retmode"]]))
-    args <- c(args, list(retmode = switch(rettype %||% "asn.1", fasta = "xml",
-                                          gp = "text", gpc = "xml", gb = "text",
-                                          gbc = "text", gbwithparts = "text",
-                                          fasta_cds_na = "text", fasta_cds_aa = "text", 
-                                          ft = "text", seqid = "text", acc = "text",
-                                          native = "xml", gss = "text", est = "text",
-                                          asn.1 = "text")))
+getArgs <- function(id, db, rettype, retmax, ...) {
+  args <- list(..., retmax = retmax)
+  rtype <- set_record_type(db, rettype, args$retmode)
+  args$retmode <- NULL
+  args <- c(list(id = getID(id, db)), rtype, args)
   args
 }
-
-
-#' @autoImports
-pubmed_args <- function(pmid, rettype, retmax, ...) {
-  rettype <- if (is.null(rettype)) {
-    NULL
-  } else {
-    match.arg(rettype, c("medline", "uilist", "abstract"))
-  }
   
-  args <- c(list(...), list(rettype = rettype, retmax = retmax))
-  args <- c(args, list(id = getID(id=pmid, db="pubmed")))
-  if (is.null(args[["retmode"]]))
-    args <- c(args, list(retmode = switch(rettype %||% "xml",
-                                          medline = "text",
-                                          uilist = "text",
-                                          abstract = "text",
-                                          xml = "xml")))
-  args
-}
-
-
-#' @autoImports
-taxonomy_args <- function(taxid, rettype, retmax, ...) {
-  rettype <- if (is.null(rettype)) {
-    NULL
-  } else {
-    match.arg(rettype, "uilist")
-  }
-  
-  args <- c(list(...), list(rettype = rettype, retmax = retmax))
-  args <- c(args, list(id = getID(id=taxid, db="taxonomy")))
-  if (is.null(args[["retmode"]]))
-    args <- c(args, list(retmode = switch(rettype %||% "xml",
-                                          uilist = "xml",
-                                          xml = "xml")))
-  args
-}
-
 
 #' @importFrom rentrez efetch
 #' @importFrom rentrez efetch.batch
@@ -141,5 +81,12 @@ xattr <- function(xdoc, path, name, as = 'character') {
 }
 
 
+#' @autoImports
+has_webenv <- function (x) {
+  if (is(x, "eutil") && not.na(webEnv(x)) && not.na(queryKey(x)))
+    TRUE
+  else
+    FALSE
+}
 
 

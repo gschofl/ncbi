@@ -66,8 +66,7 @@ install_github("ncbi", "gschofl")
 
 Let's first retrieve the accession numbers for all proteins for _C. psittaci_
 6BC. As a default `retmax` is set to 100. To get all accession numbers we set
-`retmax = NULL`
-
+`retmax = NULL` and `rettype='acc'`.
 
 
 ```r
@@ -84,8 +83,9 @@ psit_acc
 
 
 
-Download the first 10 proteins
-
+Download the first 10 proteins. The default retrieval type is `fasta` and gets
+parsed into an `AAStringSet` or `DNAStringSet`. Parsing can be turned of
+by setting the attribute `parse = FALSE`. 
 
 
 ```r
@@ -102,9 +102,26 @@ psit_seq
 
 
 
+
+
+```r
+protein(psit_acc[1:10], parse = FALSE)
+
+ ##  <?xml version="1.0"?>
+ ##  <!DOCTYPE TSeqSet PUBLIC "-//NCBI//NCBI TSeq/EN" "http://www.ncbi.nlm.nih.gov/dtd/NCBI_TSeq.dtd">
+ ##  <TSeqSet>
+ ##    <TSeq>
+ ##      <TSeq_seqtype value="protein"/>
+ ##      <TSeq_gi>75428263</TSeq_gi>
+ ##      <TSeq_accver>Q46203.1</TSeq_accver>
+ ##      <TSeq_taxid>331636</TSeq_taxid>
+....
+```
+
+
+
+
 Look at the metadata that comes with the sequences
-
-
 
 
 ```r
@@ -142,16 +159,15 @@ elementMetadata(psit_seq)[["defline"]]
 Fetch the full Genbank entry for a protein
 
 
-
 ```r
 gi5 <- elementMetadata(psit_seq)[["gi"]][5]
 p <- protein(gi5, "gp")
 
- ##  Parsing features into "file5e4d1970e654.db"
+ ##  Parsing features into "file237a68605ce7.db"
 r
 p
 
- ##  'gbRecord' database 'file5e4d1970e654.db' with 8 features
+ ##  'gbRecord' database 'file237a68605ce7.db' with 8 features
  ##  LOCUS       YP_005663704 335 aa AA linear BCT 27-SEP-2012
  ##  DEFINITION  site-specific recombinase, phage integrase family
  ##               [Chlamydophila psittaci 6BC].
@@ -265,8 +281,8 @@ sciName(txlist)[taxRank(txlist) == "species"]
 
 #### Retrieving data from Pubmed:
 
-Search PubMed for all publications with _Chlamydia psittaci_ in the title
-from 2010 to 2012.
+First we search PubMed for all publications with _Chlamydia psittaci_ in the
+title from 2010 to 2012. We use the `esearch` function from [rentrez](https://github.com/gschofl/rentrez) for greater control over the search.
 
 
 ```r
@@ -287,16 +303,18 @@ pmid
 
 
 
-Now fetch the first 5 of these records from pubmed
+Now we fetch the first 5 of these records from PubMed. We can extract the 
+PMIDs from the `esearch` object using the function `idList` and pass them to
+`pubmed` or, more conveniently, simply pass on the subsetted `esearch object.
 
 
 ```r
-pmids <- idList(pmid)[1:5]
-pmids
+ids <- idList(pmid)
+ids[1:5]
 
  ##  [1] "23098816" "22957128" "22689815" "22506068" "22472082"
 r
-p <- pubmed(pmids)
+p <- pubmed(pmid[1:5])
 p
 
  ##  Yin L, Kalmar I, Lagae S, Vandendriessche S, Vanderhaeghen W,
@@ -310,7 +328,7 @@ p
 
 
 
-Which journals where they published in
+Which journals where they published in?
 
 
 ```r
