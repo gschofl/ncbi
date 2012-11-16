@@ -38,7 +38,7 @@ install:
 ```r
 require(devtools)
 install_github("rmisc", "gschofl")
-install_github("rentrez", "gschofl", ref = "no_parsing")
+install_github("rentrez", "gschofl")
 install_github("biofiles", "gschofl")
 install_github("ncbi", "gschofl")
 ```
