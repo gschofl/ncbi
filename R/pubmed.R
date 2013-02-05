@@ -74,14 +74,14 @@ parsePubmed <- function (pmArticleSet) {
     stop("No 'PubmedArticleSet' provided")
   }
   
+  # art <- pmArtSet[[1]]
   reff <- lapply(pmArtSet, function (art) {
     art <- xmlDoc(art)
     pmid <- xvalue(art, '//MedlineCitation/PMID')
     if (not.na(xattr(art, '//ELocationID', 'EIdType'))) {
-      id <- xvalue(art, '//ELocationID')
-      doi <- new("doi", doi=id)
+      doi <- new("doi", doi=xvalue(art, '//ELocationID'))
     } else {
-      doi <- new("doi")
+      doi <- new("doi", doi=xvalue(art, '//ArticleId[@IdType="doi"]'))
     }
     
     dateCreated <- as.POSIXlt(xvalue(art, '//MedlineCitation/DateCreated', NA),

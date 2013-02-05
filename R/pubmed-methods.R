@@ -25,14 +25,13 @@ setMethod("journal", "pubmed", function(x) {
 })
 
 setMethod("browsePubmed", "doi", function(x, browser = getOption("browser")) {
-  if (all(is.na(x@prefix))) return("No doi available")
-  
-  x <- initialize(x, prefix=Filter(not.na, x@prefix),
-                  suffix=Filter(not.na, x@suffix))
-  l <- Map(function (p, s) {
-    browseURL(paste0('http://dx.doi.org/', p, "/", s),
-              browser = browser)
-  }, p=x@prefix, s=x@suffix)
+  if (all(is.na(x@doi))) {
+    return("No doi available")
+  }
+  x <- initialize(x, doi=Filter(not.na, x@doi))
+  l <- Map(function (d) {
+    browseURL(paste0('http://dx.doi.org/', d), browser = browser)
+  }, d=x@doi)
   
   invisible(NULL)
 })
@@ -79,6 +78,14 @@ setMethod("show", "doi",
             showme <- sprintf("[%s] doi:%s\n", seq_len(lo), object@doi)
             showme[1] <- paste0(" ", showme[1])
             cat(showme)
+          })
+
+
+setMethod("[", "pubmed",
+          function(x, i, j, ..., drop = TRUE) {
+            initialize(x, pmid = x@pmid[i], doi = x@doi[i],
+                       cites = x@cites[i], date = x@date[i],
+                       ref = x@ref[i])
           })
 
 
