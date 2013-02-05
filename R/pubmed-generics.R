@@ -44,5 +44,10 @@ setGeneric("doi", function(x, ...) standardGeneric("doi"))
 #' @rdname pubmed-accessors
 #' @export
 #' @genericMethods
+setGeneric("cites", function(x, ...) standardGeneric("cites"))
+
+#' @rdname pubmed-accessors
+#' @export
+#' @genericMethods
 setGeneric("browsePubmed", function(x, ...) standardGeneric("browsePubmed"))
 

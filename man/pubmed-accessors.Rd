@@ -3,6 +3,7 @@
 \alias{abstract}
 \alias{author}
 \alias{browsePubmed}
+\alias{cites}
 \alias{doi}
 \alias{issue}
 \alias{journal}
@@ -24,6 +25,8 @@
 
   doi(x, ...)
 
+  cites(x, ...)
+
   browsePubmed(x, ...)
 }
 \arguments{
@@ -37,56 +40,64 @@ Access the various slots of \code{\link[utils]{bibentry}} instances.
 }
 \section{Method signatures for generic author}{
 \itemize{
-  \item bibentry (S3)
+  \item \linkS4class{pubmed}
 }
 
 }
 
 \section{Method signatures for generic title}{
 \itemize{
-  \item bibentry (S3)
+  \item \linkS4class{pubmed}
 }
 
 }
 
 \section{Method signatures for generic abstract}{
 \itemize{
-  \item bibentry (S3)
+  \item \linkS4class{pubmed}
 }
 
 }
 
 \section{Method signatures for generic journal}{
 \itemize{
-  \item bibentry (S3)
+  \item \linkS4class{pubmed}
 }
 
 }
 
 \section{Method signatures for generic issue}{
 \itemize{
-  \item bibentry (S3)
+  \item \linkS4class{pubmed}
 }
 
 }
 
 \section{Method signatures for generic pmid}{
 \itemize{
-  \item bibentry (S3)
+  \item \linkS4class{pubmed}
 }
 
 }
 
 \section{Method signatures for generic doi}{
 \itemize{
-  \item bibentry (S3)
+  \item \linkS4class{pubmed}
+}
+
+}
+
+\section{Method signatures for generic cites}{
+\itemize{
+  \item \linkS4class{pubmed}
 }
 
 }
 
 \section{Method signatures for generic browsePubmed}{
 \itemize{
-  \item bibentry (S3)
+  \item \linkS4class{doi}
+  \item \linkS4class{pubmed}
 }
 
 }

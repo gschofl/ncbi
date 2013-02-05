@@ -1,8 +1,18 @@
 #' @include utils.R
 NULL
 
-
 setOldClass("bibentry")
+
+setClass("doi", 
+         representation(doi = "character"),
+         prototype(doi = NA_character_))
+
+setClass("pubmed",
+         representation(pmid = "character",
+                        doi = "doi",
+                        cites = "list",
+                        date = "list",
+                        ref = "bibentry"))
 
 
 #' Retrieve records from the PubMed database.
@@ -58,67 +68,78 @@ parsePubmed <- function (pmArticleSet) {
   if (!is(pmArticleSet, "XMLInternalDocument")) {
     return(pmArticleSet)
   }
-  pmArtSet <- getNodeSet(xmlRoot(pmArticleSet), '//PubmedArticleSet/PubmedArticle')
+  pmArticleSet <- xmlRoot(pmArticleSet)
+  pmArtSet <- getNodeSet(pmArticleSet, '//PubmedArticleSet/PubmedArticle')
   if (is_empty(pmArtSet)) {
     stop("No 'PubmedArticleSet' provided")
   }
   
   reff <- lapply(pmArtSet, function (art) {
-    # art <- xmlDoc(pmArtSet[[1]])
     art <- xmlDoc(art)
-    author <- {
-      lastName <- xpathApply(art, "//AuthorList//LastName", xmlValue)
-      foreName <- xpathApply(art, "//AuthorList//ForeName", xmlValue)
-      list(author = do.call(personList,
-                            Map(person, given=foreName, family=lastName)))
+    pmid <- xvalue(art, '//MedlineCitation/PMID')
+    if (not.na(xattr(art, '//ELocationID', 'EIdType'))) {
+      id <- xvalue(art, '//ELocationID')
+      doi <- new("doi", doi=id)
+    } else {
+      doi <- new("doi")
     }
-    issue <- list(
-      volume = xpathSApply(art, '//JournalIssue/Volume', xmlValue),
-      number = xpathSApply(art, '//JournalIssue/Issue', xmlValue),
-      year = {
-        year <- xpathSApply(art, '//JournalIssue/PubDate/Year', xmlValue)
-        medlineDate <- xpathSApply(art, '//JournalIssue/PubDate/MedlineDate', xmlValue)
-        if (length(year) > 0) year else medlineDate
-      },
-      month = xpathSApply(art, '//JournalIssue/PubDate/Month', xmlValue),
-      pages = xpathSApply(art, '//Pagination/MedlinePgn', xmlValue)
+    
+    dateCreated <- as.POSIXlt(xvalue(art, '//MedlineCitation/DateCreated', NA),
+                              format="%Y%m%d")
+    
+    cites <- xvalue(art, '//CommentsCorrections[ @RefType="Cites"]/PMID', NA)
+  
+    # bibentry
+    author <- {
+      lastName <- xvalue(art, '//AuthorList//LastName')
+      foreName <- xvalue(art, '//AuthorList//ForeName')
+      person(given=as.list(foreName), family=as.list(lastName))
+    }
+    abstract <- {
+      abs <- xvalue(art, '//Abstract/AbstractText', '')
+      headers <- xattr(art, '//Abstract/AbstractText', 'Label')
+      if (headers == "NULL" || is.na(headers)) {
+        abs
+      } else {
+        paste0(headers, ": ", abs, collapse="\n")
+      }
+    }
+    article <- list(
+      title = xvalue(art, '//ArticleTitle', ''),
+      abstract = abstract,
+      doi = xvalue(art, '//ArticleIdList/ArticleId[@IdType="doi"]', ''),
+      pii = xvalue(art, '//ArticleIdList/ArticleId[@IdType="pii"]', ''),
+      pmid = xvalue(art, '//ArticleIdList/ArticleId[@IdType="pubmed"]', ''),
+      pmc = xvalue(art, '//ArticleIdList/ArticleId[@IdType="pmc"]', '')
     )
     journal <- list(
-      issn = xpathSApply(art, '//Journal/ISSN', xmlValue),
-      journal = xpathSApply(art, '//Journal/Title', xmlValue),
-      abbrev = xpathSApply(art, '//Journal/ISOAbbreviation', xmlValue) 
-    )
-    article <- list(
-      title = xpathSApply(art, '//ArticleTitle', xmlValue),
-      abstract = {
-        abs <- xpathSApply(art, '//Abstract/AbstractText', xmlValue)
-        headers <- xpathSApply(art, '//Abstract/AbstractText', xmlGetAttr, "Label")
-        if (is.null(headers[[1]])) {
-          abs
-        } else {
-          paste0(headers, ": ", abs, collapse="\n")
-        }
+      issn = xvalue(art, '//Journal/ISSN', ''),
+      journal = xvalue(art, '//Journal/Title', ''),
+      abbrev = xvalue(art, '//Journal/ISOAbbreviation', ''),
+      volume = xvalue(art, '//JournalIssue/Volume', ''),
+      number = xvalue(art, '//JournalIssue/Issue', ''),
+      year = {
+        year <- xvalue(art, '//JournalIssue/PubDate/Year', '')
+        medlineDate <- xvalue(art, '//JournalIssue/PubDate/MedlineDate', '')
+        if (nzchar(year)) year else medlineDate
       },
-      doi = xpathSApply(art, '//ArticleIdList/ArticleId[@IdType="doi"]', xmlValue),
-      pii = xpathSApply(art, '//ArticleIdList/ArticleId[@IdType="pii"]', xmlValue),
-      pmid = xpathSApply(art, '//ArticleIdList/ArticleId[@IdType="pubmed"]', xmlValue),
-      pmc = xpathSApply(art, '//ArticleIdList/ArticleId[@IdType="pmc"]', xmlValue)
+      month = xvalue(art, '//JournalIssue/PubDate/Month', ''),
+      pages = xvalue(art, '//Pagination/MedlinePgn', '')
     )
     affiliation <- list(
-      affiliation = xpathSApply(art, "//Affiliation", xmlValue)
+      affiliation = xvalue(art, '//Affiliation', '')
     )
-    
-    issue[vapply(issue, is_empty, logical(1))] <- ""
-    journal[vapply(journal, is_empty, logical(1))] <- ""
-    article[vapply(article, is_empty, logical(1))] <- ""
-    affiliation[vapply(affiliation, is_empty, logical(1))] <- ""
-    
+
     free(art)
-    ref <- bibentry('Article', other=c(author, article, journal, issue, affiliation))
-    ref
-    
+    key <- paste0(author[1]$family, journal$year)
+    ref <- bibentry('Article', key=key, author=author,
+                    other=c(article, journal, affiliation))
+    pm <- new("pubmed", pmid = pmid, doi = doi,
+              cites = list(cites), date = list(dateCreated), ref = ref)
+    pm
   })
   
   reff <- do.call(c, reff)
   reff
 }
+

@@ -63,20 +63,20 @@ set_type <- function(x, as) {
 }
 
 
-xvalue <- function(xdoc, path, as = 'character') {
-  v <- xpathSApply(xdoc, path, xmlValue) %||% NA_character_
+xvalue <- function(xdoc, path, alt = NA_character_, as = 'character') {
+  v <- xpathSApply(xdoc, path, xmlValue) %||% alt
   set_type(v, as)
 }
 
 
-xname <- function(xdoc, path, as = 'character') {
-  n <- xpathSApply(xdoc, path, xmlName) %||% NA_character_
+xname <- function(xdoc, path, alt = NA_character_, as = 'character') {
+  n <- xpathSApply(xdoc, path, xmlName) %||% alt
   set_type(n, as)
 }
 
 
-xattr <- function(xdoc, path, name, as = 'character') {
-  a <- xpathSApply(xdoc, path, xmlGetAttr, name=name) %||% NA_character_
+xattr <- function(xdoc, path, name, alt = NA_character_, as = 'character') {
+  a <- xpathSApply(xdoc, path, xmlGetAttr, name=name) %||% alt
   set_type(a, as)
 }
 
