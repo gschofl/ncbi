@@ -78,8 +78,8 @@ parsePubmed <- function (pmArticleSet) {
   reff <- lapply(pmArtSet, function (art) {
     art <- xmlDoc(art)
     pmid <- xvalue(art, '//MedlineCitation/PMID')
-    if (not.na(xattr(art, '//ELocationID', 'EIdType'))) {
-      doi <- new("doi", doi=xvalue(art, '//ELocationID'))
+    if (not.na(xvalue(art, '//ELocationID[@EIdType="doi"]'))) {
+      doi <- new("doi", doi=xvalue(art, '//ELocationID[@EIdType="doi"]'))
     } else {
       doi <- new("doi", doi=xvalue(art, '//ArticleId[@IdType="doi"]'))
     }
