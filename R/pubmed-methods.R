@@ -37,8 +37,8 @@ setMethod("browsePubmed", "doi", function(x, browser = getOption("browser")) {
 })
 
 
-setMethod("browsePubmed", "pubmed", function(x) {
-  browsePubmed(doi(x))
+setMethod("browsePubmed", "pubmed", function(x, browser = getOption("browser")) {
+  browsePubmed(doi(x), browser = browser)
 })
 
 
