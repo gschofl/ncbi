@@ -16,7 +16,7 @@ ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
   args <- getArgs(gi, db, rettype, retmax, ...)
   response <- fetch_records(args, 500)
   if (parse) {
-    switch(args$rettype %||% "asn.1",
+    switch(args$rettype %|null|% "asn.1",
            fasta = parseTSeqSet(response),
            gb = parseGenBank(response),
            gp = parseGenBank(response),
@@ -62,7 +62,7 @@ parseGenBank <- function(gb) {
 #'
 #' @export
 #' @autoImports
-parseTSeqSet <- function(tSeqSet) {
+parseTSeqSet <- function(tSeqSet = response) {
   
   if (is(tSeqSet, "efetch")) {
     tSeqSet <- content(tSeqSet)
@@ -72,25 +72,25 @@ parseTSeqSet <- function(tSeqSet) {
     return(tSeqSet)
   }
   tSeqSet <- getNodeSet(xmlRoot(tSeqSet), '//TSeqSet/TSeq')
-  if (is_empty(tSeqSet)) {
+  if (all_empty(tSeqSet)) {
     stop("No 'tSeqSet' provided")
   }
   
   seqs <- lapply(tSeqSet, function (seq) {
-    # seq <- xmlRoot(xmlDoc(seqSet[[1]]))
+    # seq <- xmlRoot(xmlDoc(tSeqSet[[1]]))
     seq <- xmlRoot(xmlDoc(seq))
-    seqtype <- xmlGetAttr(seq[["TSeq_seqtype"]], name="value")
-    gi <- xmlValue(seq[["TSeq_gi"]]) # optional
-    accver <- xmlValue(seq[["TSeq_accver"]]) # optional
-    sid <- xmlValue(seq[["TSeq_sid"]]) # optional
-    local <- xmlValue(seq[["TSeq_local"]]) # optional
-    taxid <- xmlValue(seq[["TSeq_taxid"]]) # optional
-    orgname <- xmlValue(seq[["TSeq_orgname"]]) # optional
-    defline <- xmlValue(seq[["TSeq_defline"]])
-    length <- xmlValue(seq[["TSeq_length"]])
+    seqtype <- xattr(seq, '//TSeq_seqtype', "value")
+    gi <- xvalue(seq, '//TSeq_gi') # optional
+    accver <- xvalue(seq, '//TSeq_accver') # optional
+    sid <- xvalue(seq, '//TSeq_sid') # optional
+    local <- xvalue(seq, '//TSeq_local') # optional
+    taxid <- xvalue(seq, '//TSeq_taxid') # optional
+    orgname <- xvalue(seq, '//TSeq_orgname') # optional
+    defline <- xvalue(seq, '//TSeq_defline')
+    length <- xvalue(seq, '//TSeq_length', as="numeric")
     sequence <- switch(seqtype,
-                       protein=AAStringSet(xmlValue(seq[["TSeq_sequence"]])),
-                       nucleotide=DNAStringSet(xmlValue(seq[["TSeq_sequence"]])))
+                       protein=AAStringSet(xvalue(seq, '//TSeq_sequence')),
+                       nucleotide=DNAStringSet(xvalue(seq, '//TSeq_sequence')))
     names(sequence) <- paste(accver, defline)
     elementMetadata(sequence) <- DataFrame(gi = gi, accver = accver, sid = sid,
                                            local = local, taxid = taxid,
@@ -131,7 +131,7 @@ parseTSeqSet <- function(tSeqSet) {
 #' @rdname protein
 #' @export
 #' @importFrom rmisc Curry
-protein <- Curry(ncbi_sequences, db="protein")
+protein <- Curry("ncbi_sequences", db="protein")
 
 
 #' Retrieve sequences and annotations from the Nucleotide database
@@ -156,7 +156,7 @@ protein <- Curry(ncbi_sequences, db="protein")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname nucleotide
 #' @export
-nucleotide <- Curry(ncbi_sequences, db="nuccore")
+nucleotide <- Curry("ncbi_sequences", db="nuccore")
 
 
 #' Retrieve sequences and annotations from the GSS database
@@ -180,7 +180,7 @@ nucleotide <- Curry(ncbi_sequences, db="nuccore")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname GSS
 #' @export
-GSS <- Curry(ncbi_sequences, db="nucgss")
+GSS <- Curry("ncbi_sequences", db="nucgss")
 
 
 #' Retrieve sequences and annotations from the EST database
@@ -204,6 +204,6 @@ GSS <- Curry(ncbi_sequences, db="nucgss")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname EST
 #' @export
-EST <- Curry(ncbi_sequences, db="nucest")
+EST <- Curry("ncbi_sequences", db="nucest")
 
 

@@ -9,7 +9,6 @@ getID <- function(id, db) {
   }
 }
 
-
 #' @autoImports
 getArgs <- function(id, db, rettype, retmax, ...) {
   args <- list(..., retmax = retmax)
@@ -19,7 +18,6 @@ getArgs <- function(id, db, rettype, retmax, ...) {
   args
 }
   
-
 #' @importFrom rentrez efetch
 #' @importFrom rentrez efetch.batch
 #' @autoImports
@@ -32,7 +30,6 @@ fetch_records <- function(args, maxrec = 500) {
   response <- content(response)
   response
 }
-
 
 #' @autoImports
 catchEFetchError <- function (response) {
@@ -49,37 +46,6 @@ catchEFetchError <- function (response) {
   }
   invisible(TRUE)  
 }
-
-
-set_type <- function(x, as) {
-  switch(as,
-         character=as.character(x),
-         numeric=as.numeric(x),
-         integer=as.integer(x),
-         double=as.double(x),
-         logical=as.logical(x),
-         complex=as.complex(x),
-         x)
-}
-
-
-xvalue <- function(xdoc, path, alt = NA_character_, as = 'character') {
-  v <- xpathSApply(xdoc, path, xmlValue) %||% alt
-  set_type(v, as)
-}
-
-
-xname <- function(xdoc, path, alt = NA_character_, as = 'character') {
-  n <- xpathSApply(xdoc, path, xmlName) %||% alt
-  set_type(n, as)
-}
-
-
-xattr <- function(xdoc, path, name, alt = NA_character_, as = 'character') {
-  a <- xpathSApply(xdoc, path, xmlGetAttr, name=name) %||% alt
-  set_type(a, as)
-}
-
 
 #' @autoImports
 has_webenv <- function (x) {

@@ -3,7 +3,7 @@
 \alias{parseTSeqSet}
 \title{Parse Tiny Bioseq FASTA files}
 \usage{
-  parseTSeqSet(tSeqSet)
+  parseTSeqSet(tSeqSet = response)
 }
 \arguments{
   \item{tSeqSet}{An \linkS4class{efetch} or \linkS4class{XMLInternalDocument}

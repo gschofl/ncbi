@@ -93,8 +93,8 @@ taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
   args <- getArgs(taxid, "taxonomy", rettype, retmax, ...)
   response <- fetch_records(args, 500)
   if (parse) {
-    switch(args$rettype %||% "xml",
-           xml = parseTaxon(taxaSet=response),
+    switch(args$rettype %|null|% "xml",
+           xml = parseTaxon(response),
            uilist = parseUilist(response),
            response)
   } else {
@@ -104,9 +104,8 @@ taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
 
 
 #' @export
-#' @importFrom XML xmlName
 #' @autoImports
-parseTaxon <- function (taxaSet) {
+parseTaxon <- function (taxaSet = response) {
   
   if (is(taxaSet, "efetch")) {
     taxaSet <- content(taxaSet)
@@ -116,32 +115,32 @@ parseTaxon <- function (taxaSet) {
     return(taxaSet)
   }
   taxaSet <- getNodeSet(xmlRoot(taxaSet), '//TaxaSet/Taxon')
-  if (is_empty(taxaSet)) {
+  if (all_empty(taxaSet)) {
     stop("No 'TaxaSet' provided")
   }
   
   tx <- lapply(taxaSet, function (taxon) {
     # taxon <- xmlDoc(taxaSet[[1]])
     taxon <- xmlDoc(taxon)
-    taxId <- unlist(xpathApply(taxon, "/Taxon/TaxId", xmlValue))
-    parentTaxId <- unlist(xpathApply(taxon, "/Taxon/ParentTaxId", xmlValue))
-    sciName <- unlist(xpathApply(taxon, "/Taxon/ScientificName", xmlValue))
-    rank <- unlist(xpathApply(taxon, "/Taxon/Rank", xmlValue))
+    taxId <- xvalue(taxon, '/Taxon/TaxId')
+    parentTaxId <- xvalue(taxon, '/Taxon/ParentTaxId')
+    sciName <- xvalue(taxon, '/Taxon/ScientificName')
+    rank <- xvalue(taxon, '/Taxon/Rank')
     
-    nm <- xpathSApply(taxon, "//OtherNames/*", xmlName)
-    obj <- xpathSApply(taxon, "//OtherNames/*", xmlValue)[nm != "Name"]
+    nm <- xname(taxon, '//OtherNames/*')
+    obj <- xvalue(taxon, '//OtherNames/*')[nm != "Name"]
     otherName <- setNames(obj, nm[nm != "Name"]) %||% NA_character_
     
-    classCDE <- xpathSApply(taxon, "//OtherNames/Name/ClassCDE", xmlValue)
-    dispName <- xpathSApply(taxon, "//OtherNames/Name/DispName", xmlValue)
+    classCDE <- xvalue(taxon, '//OtherNames/Name/ClassCDE')
+    dispName <- xvalue(taxon, '//OtherNames/Name/DispName')
     authority <-  dispName[classCDE == "authority"] %||% NA_character_
     typeMaterial <- dispName[classCDE == "type material"] %||% NA_character_
     
     lineage <- lapply(getNodeSet(taxon, "//LineageEx/Taxon"), function (l) {
       l <- xmlDoc(l)
-      new("taxon", taxId = xpathSApply(l, "//TaxId", xmlValue),
-          scientificName = xpathSApply(l, "//ScientificName", xmlValue),
-          rank = xpathSApply(l, "//Rank", xmlValue))
+      new("taxon", taxId = xvalue(l, '//TaxId'),
+          scientificName = xvalue(l, '//ScientificName'),
+          rank = xvalue(l, '//Rank'))
     })
     
     free(taxon)

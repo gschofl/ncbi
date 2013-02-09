@@ -44,10 +44,10 @@ pubmed <- function(pmid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
       pmid <- idList(pmid)
   }
   
-  args <- getArgs(pmid, "pubmed", rettype, retmax, ...)
+  args <- getArgs(id=pmid, db="pubmed", rettype, retmax, ...)
   response <- fetch_records(args, 500)
   if (parse) {
-    switch(args$rettype %||% "xml",
+    switch(args$rettype %|null|% "xml",
            xml = parsePubmed(response),
            uilist = parseUilist(response),
            response)
@@ -59,7 +59,7 @@ pubmed <- function(pmid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
 
 #' @export
 #' @autoImports
-parsePubmed <- function (pmArticleSet) {
+parsePubmed <- function (pmArticleSet = response) {
   
   if (is(pmArticleSet, "efetch")) {
     pmArticleSet <- content(pmArticleSet)
@@ -70,7 +70,7 @@ parsePubmed <- function (pmArticleSet) {
   }
   pmArticleSet <- xmlRoot(pmArticleSet)
   pmArtSet <- getNodeSet(pmArticleSet, '//PubmedArticleSet/PubmedArticle')
-  if (is_empty(pmArtSet)) {
+  if (all_empty(pmArtSet)) {
     stop("No 'PubmedArticleSet' provided")
   }
   

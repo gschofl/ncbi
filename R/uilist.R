@@ -14,9 +14,9 @@ parseUilist <- function (uilist) {
     }
   }
 
-  id <- xpathSApply(uilist, "//Id", xmlValue)
-  if (is_empty(id)) {
-    e <- unlist(xpathApply(response, "//ERROR", xmlValue))
+  id <- xvalue(uilist, '//Id')
+  if (all_empty(id)) {
+    e <- xvalue(response, '//ERROR')
     if (not.null(e)) {
       stop("ERROR in efetch: ", paste(e, collapse=", "))
     } else {
