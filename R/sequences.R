@@ -31,8 +31,8 @@ ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
 
 #' Parse GenBank flatfiles
 #' 
-#' @param gb An \linkS4class{efetch} instance or a character vector
-#' containing a GenBank flatfile.
+#' @param gb An \linkS4class{efetch} instance, acharacter vector
+#' containing a GenBank flatfile, or a file path to a GenBank file.
 #' 
 #' @return A \linkS4class{gbRecord} instance.
 #'
@@ -40,16 +40,20 @@ ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
 #' @autoImports
 parseGenBank <- function(gb) {
   
-  if (is(gb, "efetch")) {
+  ## see if gb is a valid file path
+  if (tryCatch(file.exists(gb), error=function(e) FALSE)) {
+    return( gbRecord(gb) )
+  ## or if it's an efetch instance
+  } else if (is(gb, "efetch")) {
     gb <- content(gb)
   }
   
+  ## don't try to parse XML
   if (is(gb, "XMLInternalDocument")) {
     return(gb)
   }
   
-  gb <- gbRecord(textConnection(gb, open="r"))
-  gb
+  gbRecord(textConnection(gb, open="r"))
 }
 
 #' Parse Tiny Bioseq FASTA files
