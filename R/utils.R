@@ -41,7 +41,7 @@ catchEFetchError <- function (response) {
     return(invisible(TRUE))
   }
   e <- xvalue(response, '//ERROR')
-  if (not.na(e)) {
+  if (!is.na(e)) {
     stop("ERROR in efetch: ", paste(e, collapse=", "), call.=FALSE)  
   }
   invisible(TRUE)  
@@ -49,10 +49,7 @@ catchEFetchError <- function (response) {
 
 #' @autoImports
 has_webenv <- function (x) {
-  if (is(x, "eutil") && not.na(webEnv(x)) && not.na(queryKey(x)))
-    TRUE
-  else
-    FALSE
+  is(x, "eutil") && !is.na(webEnv(x)) && !is.na(queryKey(x))
 }
 
 
