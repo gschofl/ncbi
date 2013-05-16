@@ -1,6 +1,6 @@
 #' @importFrom RSQLite SQLite dbConnect dbDisconnect dbGetQuery dbSendQuery
 NULL
-#' @importFrom RSQLite dbBeginTransaction dbSendPreparedQuery dbCommit
+#' @importFrom RSQLite dbBeginTransaction dbSendPreparedQuery dbCommit dbListTables
 NULL
 #' @importFrom rmisc trim compact is_empty
 NULL
@@ -34,7 +34,11 @@ CREATE INDEX Fnodes ON nodes (tax_id);
 CREATE INDEX Dnames on names (tax_id);
 '
 
-#' Create a local install of the NCBI Taxonomy database
+#' Create a local install of the NCBI Taxonomy database.
+#' 
+#' @details
+#' From the commandline:
+#' \code{R -q -e "require(ncbi);createTaxonDB('/path/to/db')"}
 #
 #' @param dbPath Source directory for SQLite database files.
 #' @param with_geneid Include mappings of Gene ID to Taxonomy ID (very large table!)
@@ -71,7 +75,7 @@ make_taxondb <- function (dbPath = file.path(path.package("ncbi"), "extdata"),
     if (is.null(status))
       return( dbName )
   } else {
-    #db_fetch(dbPath, zip, check_timestamp=FALSE)
+    db_fetch(dbPath, zip, check_timestamp=FALSE)
   }
   con <- db_create(SQLite(), dbName, taxon_db.sql)
   on.exit(db_disconnect(con))
