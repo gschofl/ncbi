@@ -9,15 +9,21 @@ Description: Search and retrieve data from the NCBI databases.
 License: MIT
 Encoding: latin1
 Depends:
-    R (>= 2.15)
+    R (>= 2.15),
+    Rcpp (>= 0.10.1),
+LinkingTo: Rcpp
 Imports:
-    methods,
-    Rentrez,
+    BiocGenerics,
     biofiles,
-    rmisc,
-    IRanges,
     Biostrings,
+    IRanges,
+    methods,
+    RCurl,
+    Rentrez,
+    rmisc,
+    RSQLite,
     stats,
+    utils,
     XML
 Collate:
     'utils.R'
@@ -26,7 +32,10 @@ Collate:
     'pubmed-generics.R'
     'pubmed-methods.R'
     'sequences.R'
-    'taxonomy.R'
-    'taxonomy-generics.R'
-    'taxonomy-methods.R'
+    'RcppExports.R'
+    'Taxon_minimal-class.R'
+    'LineageList-class.R'
+    'Taxon_full-class.R'
+    'TaxonList-class.R'
+    'Taxon-db.R'
     'ncbi.R'

@@ -24,7 +24,9 @@ Retrieve data from NCBI.
     \item \code{\link{EST}}: Retrieve records from the
     \emph{nucest} database.        
     \item \code{\link{taxon}}: Retrieve records from the
-    \emph{Taxonomy} database.  
+    \emph{Taxonomy} database.
+    \item \code{\link{taxonDB}}: Retrieve records from a local install of
+    the \emph{Taxonomy} database.    
     
   }
 }

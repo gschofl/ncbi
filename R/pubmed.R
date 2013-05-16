@@ -32,7 +32,7 @@ setClass("pubmed",
 #' query.
 #'
 #' @return An \linkS4class{XMLInternalDocument}, a character vector, or if
-#' parsed a (list of) \linkS4class{bibentry} instance(s).
+#' parsed a (list of) \linkS4class{pubmed} instance(s).
 #' @rdname pubmed
 #' @export
 pubmed <- function(pmid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
@@ -57,6 +57,7 @@ pubmed <- function(pmid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
 }
 
 
+#' @rdname pubmed
 #' @export
 #' @autoImports
 parsePubmed <- function (pmArticleSet = response) {
@@ -75,13 +76,15 @@ parsePubmed <- function (pmArticleSet = response) {
   }
   
   # art <- pmArtSet[[1]]
-  reff <- lapply(pmArtSet, function (art) {
+  reff <- base::lapply(pmArtSet, function (art) {
     art <- xmlDoc(art)
     pmid <- xvalue(art, '//MedlineCitation/PMID')
-    if (not.na(xvalue(art, '//ELocationID[@EIdType="doi"]'))) {
-      doi <- new("doi", doi=xvalue(art, '//ELocationID[@EIdType="doi"]'))
+    if (!is.na(xvalue(art, '//ELocationID[@EIdType="doi"]'))) {
+      doi <- new("doi",
+               doi=xvalue(art, '//ELocationID[@EIdType="doi"]'))
     } else {
-      doi <- new("doi", doi=xvalue(art, '//ArticleId[@IdType="doi"]'))
+      doi <- new("doi",
+               doi=xvalue(art, '//ArticleId[@IdType="doi"]'))
     }
     
     dateCreated <- as.POSIXlt(xvalue(art, '//MedlineCitation/DateCreated', NA),
@@ -93,7 +96,7 @@ parsePubmed <- function (pmArticleSet = response) {
     author <- {
       lastName <- xvalue(art, '//AuthorList//LastName')
       foreName <- xvalue(art, '//AuthorList//ForeName')
-      person(given=as.list(foreName), family=as.list(lastName))
+      person(given=base::as.list(foreName), family=base::as.list(lastName))
     }
     abstract <- {
       abs <- xvalue(art, '//Abstract/AbstractText', '')
@@ -129,13 +132,14 @@ parsePubmed <- function (pmArticleSet = response) {
     affiliation <- list(
       affiliation = xvalue(art, '//Affiliation', '')
     )
-
+    
     free(art)
     key <- paste0(author[1]$family, journal$year)
     ref <- bibentry('Article', key=key, author=author,
                     other=c(article, journal, affiliation))
     pm <- new("pubmed", pmid = pmid, doi = doi,
-              cites = list(cites), date = list(dateCreated), ref = ref)
+              cites = list(cites), date = list(dateCreated),
+              ref = ref)
     pm
   })
   
