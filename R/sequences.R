@@ -31,7 +31,7 @@ ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
 
 #' Parse GenBank flatfiles
 #' 
-#' @param gb An \linkS4class{efetch} instance, acharacter vector
+#' @param gb An \linkS4class{efetch} instance, a character vector
 #' containing a GenBank flatfile, or a file path to a GenBank file.
 #' 
 #' @return A \linkS4class{gbRecord} instance.
@@ -80,7 +80,7 @@ parseTSeqSet <- function(tSeqSet = response) {
     stop("No 'tSeqSet' provided")
   }
   
-  seqs <- lapply(tSeqSet, function (seq) {
+  seqs <- base::lapply(tSeqSet, function (seq) {
     # seq <- xmlRoot(xmlDoc(tSeqSet[[1]]))
     seq <- xmlRoot(xmlDoc(seq))
     seqtype <- xattr(seq, '//TSeq_seqtype', "value")
@@ -95,7 +95,7 @@ parseTSeqSet <- function(tSeqSet = response) {
     sequence <- switch(seqtype,
                        protein=AAStringSet(xvalue(seq, '//TSeq_sequence')),
                        nucleotide=DNAStringSet(xvalue(seq, '//TSeq_sequence')))
-    names(sequence) <- paste(accver, defline)
+    names(sequence) <- base::paste(accver, defline)
     elementMetadata(sequence) <- DataFrame(gi = gi, accver = accver, sid = sid,
                                            local = local, taxid = taxid,
                                            orgname = orgname, defline = defline,
@@ -105,7 +105,7 @@ parseTSeqSet <- function(tSeqSet = response) {
   
   if (length(seqs) == 1) {
     return( seqs[[1]] )
-  } else if (length(unique(vapply(seqs, class, character(1)))) == 1) {
+  } else if (length(base::unique(vapply(seqs, class, character(1)))) == 1) {
     return( do.call(c, seqs) )
   } else {
     return( seqs )

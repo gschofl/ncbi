@@ -18,8 +18,7 @@ getArgs <- function(id, db, rettype, retmax, ...) {
   args
 }
   
-#' @importFrom rentrez efetch
-#' @importFrom rentrez efetch.batch
+
 #' @autoImports
 fetch_records <- function(args, maxrec = 500) {
   if (count(args$id) > maxrec && args$retmax %||% Inf > maxrec) {
@@ -42,7 +41,7 @@ catchEFetchError <- function (response) {
   }
   e <- xvalue(response, '//ERROR')
   if (!is.na(e)) {
-    stop("ERROR in efetch: ", paste(e, collapse=", "), call.=FALSE)  
+    stop("ERROR in efetch: ", base::paste(e, collapse=", "), call.=FALSE)  
   }
   invisible(TRUE)  
 }
@@ -52,4 +51,12 @@ has_webenv <- function (x) {
   is(x, "eutil") && !is.na(webEnv(x)) && !is.na(queryKey(x))
 }
 
+
+#' @autoImports
+ellipsize <- function(obj, width = getOption("width"), ellipsis = "...") {
+  str <- encodeString(obj)
+  base::ifelse(base::nchar(str) > width - 1,
+         paste0(base::substring(str, 1, width - base::nchar(ellipsis) - 1), ellipsis),
+         str)
+}
 

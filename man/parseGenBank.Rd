@@ -6,8 +6,8 @@
   parseGenBank(gb)
 }
 \arguments{
-  \item{gb}{An \linkS4class{efetch} instance or a character vector
-containing a GenBank flatfile.}
+  \item{gb}{An \linkS4class{efetch} instance, a character vector
+containing a GenBank flatfile, or a file path to a GenBank file.}
 }
 
 \value{

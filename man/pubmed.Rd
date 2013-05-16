@@ -1,10 +1,13 @@
 % Built by roxygen3 0.1
 \name{pubmed}
+\alias{parsePubmed}
 \alias{pubmed}
 \title{Retrieve records from the PubMed database.}
 \usage{
   pubmed(pmid, rettype = NULL, retmax = 25, parse = TRUE,
     ...)
+
+  parsePubmed(pmArticleSet = response)
 }
 \arguments{
   \item{pmid}{\sQuote{PMID}s or a valid NCBI search term.}
@@ -23,7 +26,7 @@ query.}
 
 \value{
 An \linkS4class{XMLInternalDocument}, a character vector, or if
-parsed a (list of) \linkS4class{bibentry} instance(s).
+parsed a (list of) \linkS4class{pubmed} instance(s).
 }
 \description{
 Retrieve records from the PubMed database.

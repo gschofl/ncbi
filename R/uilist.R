@@ -17,8 +17,8 @@ parseUilist <- function (uilist) {
   id <- xvalue(uilist, '//Id')
   if (all_empty(id)) {
     e <- xvalue(response, '//ERROR')
-    if (not.null(e)) {
-      stop("ERROR in efetch: ", paste(e, collapse=", "))
+    if (!is.null(e)) {
+      stop("ERROR in efetch: ", base::paste(e, collapse=", "))
     } else {
       stop("No 'uiliist' provided")
     }
