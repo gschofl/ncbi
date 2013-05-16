@@ -48,7 +48,7 @@ createTaxonDB <- function(dbPath = file.path(path.package("ncbi"), "extdata"),
                           with_geneid = TRUE) {
   make_taxondb(dbPath, update=FALSE)
   if (with_geneid)
-    make_geneiddb(dbPath, , update=FALSE)
+    make_geneiddb(dbPath, update=FALSE)
   return(TRUE)
 }
 
@@ -69,7 +69,7 @@ make_taxondb <- function (dbPath = file.path(path.package("ncbi"), "extdata"),
 { 
   dbName <- normalizePath(file.path(dbPath, "taxon.db"), mustWork=FALSE)  
   zip <- "taxdmp.zip"
-  zipPath <- normalizePath(file.path(dbPath, zip))
+  zipPath <- normalizePath(file.path(dbPath, zip), mustWork=FALSE)
   if (update) {
     status <- db_fetch(dbPath, zip, check_timestamp=TRUE)
     if (is.null(status))
@@ -96,7 +96,7 @@ make_geneiddb <- function (dbPath = file.path(path.package("ncbi"), "extdata"),
     # TODO IMPLEMENT
   } else {
     zip <- c("gi_taxid_nucl.zip","gi_taxid_prot.zip")
-    zipPath <- normalizePath(file.path(dbPath, zip))
+    zipPath <- normalizePath(file.path(dbPath, zip), mustWork=FALSE)
     
     db_fetch(dbPath, zip, check_timestamp=TRUE)
     
