@@ -2,7 +2,7 @@
 \name{createTaxonDB}
 \alias{createTaxonDB}
 \alias{updateTaxonDB}
-\title{Create a local install of the NCBI Taxonomy database}
+\title{Create a local install of the NCBI Taxonomy database.}
 \usage{
   createTaxonDB(dbPath = file.path(path.package("ncbi"), "extdata"),
     with_geneid = TRUE)
@@ -17,5 +17,9 @@
 }
 
 \description{
-Create a local install of the NCBI Taxonomy database
+Create a local install of the NCBI Taxonomy database.
+}
+\details{
+From the commandline:
+\code{R -q -e "require(ncbi);createTaxonDB('/path/to/db')"}
 }
