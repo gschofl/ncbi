@@ -3,5 +3,9 @@
 .RData
 init.R
 cache/
+CopyOfNAMESPACE
 README.Rmd
 README.html
+*.o
+*.so
+*.db

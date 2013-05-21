@@ -127,7 +127,8 @@ taxonDB <- function (taxid, dbPath=NULL, full=TRUE) {
     dbPath <- file.path(path.package("ncbi"), "extdata")
   }
   taxondb <- normalizePath(file.path(dbPath, "taxon.db"), mustWork=TRUE)
-  con <- db_connect(dbName=taxondb)
+  con <- db_connect(taxondb, paste0("Run 'createTaxonDB()' for a local ",
+                                    "install of the NCBI Taxonomy database"))
   if (full) {
     tx <- lapply(taxid, dbGetTaxon, con = con)
   } else {
@@ -159,8 +160,11 @@ taxonByGeneID <- function (geneid, dbPath = NULL, full = TRUE) {
   }
   geneiddb <- normalizePath(file.path(dbPath, "geneid.db"), mustWork=TRUE)
   taxondb <- normalizePath(file.path(dbPath, "taxon.db"), mustWork=TRUE)
-  con_gi <- db_connect(dbName=geneiddb)
-  con_tx <- db_connect(dbName=taxondb)
+  con_gi <- db_connect(geneiddb, paste0("Run 'createTaxonDB(with_geneid = TRUE)' ",
+                                        "for a local install of the GI_to_TaxId ",
+                                        "database"))
+  con_tx <- db_connect(taxondb, paste0("Run 'createTaxonDB()' for a local ",
+                                       "install of the NCBI Taxonomy database"))
   if (length(getTaxidByGeneID(con_gi, 2)) == 0) {
     stop("'genes' table is empty. Run 'createTaxonDB()' setting 'with_geneid = TRUE'")
   }
@@ -171,8 +175,7 @@ taxonByGeneID <- function (geneid, dbPath = NULL, full = TRUE) {
     tx <- lapply(geneid, dbGetTaxonMinimalByGeneID, con1 = con_gi, con2 = con_tx)
   }
   
-  db_disconnect(con_gi)
-  db_disconnect(con_tx)
+  db_disconnect(con_gi, con_tx)
   
   if (length(tx) == 1) {
     return( tx[[1]] )
