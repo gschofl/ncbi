@@ -28,7 +28,7 @@ setMethod("browsePubmed", "doi", function(x, browser = getOption("browser")) {
   if (all(is.na(x@doi))) {
     return("No doi available")
   }
-  x <- initialize(x, doi=Filter(not.na, x@doi))
+  x <- initialize(x, doi=Filter(!is.na, x@doi))
   l <- Map(function (d) {
     browseURL(paste0('http://dx.doi.org/', d), browser = browser)
   }, d=x@doi)
