@@ -1,11 +1,12 @@
-#' @importFrom RSQLite SQLite dbConnect dbDisconnect dbGetQuery dbSendQuery
+#' @importFrom rmisc db_create db_connect db_disconnect db_query db_count
 NULL
-#' @importFrom RSQLite dbBeginTransaction dbSendPreparedQuery dbCommit dbListTables
-NULL
-#' @importFrom rmisc trim compact is_empty
+#' @importFrom rmisc db_bulk_insert trim compact is_empty "%has_tables%"
 NULL
 #' @importFrom RCurl basicTextGatherer curlPerform curlOptions CFILE close
 NULL
+#' @importFrom RSQLite dbSendQuery
+NULL
+#' @importFrom assertthat assert_that
 
 geneid_db.sql <- '
 CREATE TABLE genes (
@@ -77,11 +78,9 @@ make_taxondb <- function (dbPath = file.path(path.package("ncbi"), "extdata"),
   } else {
     db_fetch(dbPath, zip, check_timestamp=FALSE)
   }
-  con <- db_create(SQLite(), dbName, taxon_db.sql)
+  con <- db_create(dbName, taxon_db.sql)
   on.exit(db_disconnect(con))
-  if (!all(c("nodes", "names") %in% dbListTables(con))) {
-    stop("Missing tables in database ", sQuote(basename(dbName)))
-  }
+  assert_that(con %has_tables% c("nodes", "names"))
   db_load(con, dbPath, "taxon")
 }
 
@@ -110,7 +109,7 @@ make_geneiddb <- function (dbPath = file.path(path.package("ncbi"), "extdata"),
     message("Generating 'gi_index' ...")
     index_gi_taxid(dmpPath[1], dmpPath[2], dmpPath[3])
   }
-  con <- db_create(SQLite(), dbName, geneid_db.sql)
+  con <- db_create(dbName, geneid_db.sql)
   on.exit(db_disconnect(con))
   success <- db_load(con, dbPath, "geneid")
   if (success) {
@@ -169,54 +168,6 @@ db_update <- function (file, check_timestamp = FALSE, verbose = FALSE) {
 }
 
 
-db_create <- function(driver=SQLite(), dbName="taxon.db", dbSchema=taxon_db.sql)
-{
-  message('Creating new database ', sQuote(basename(dbName)))
-  if (file.exists(dbName)) {
-    unlink(dbName)
-  }
-  con <- dbConnect(driver, dbname=dbName)
-  sql <- rmisc::compact(rmisc::trim(strsplit(dbSchema, ";\n")[[1L]]), rmisc::is_empty)
-  tryCatch(lapply(sql, dbGetQuery, conn = con), error = function (e) {
-    message(e)
-  })
-  con
-}
-
-
-db_connect <- function(driver=SQLite(), dbName="taxon.db") {
-  if (!file.exists(dbName)) {
-    stop("Database ", sQuote(basename(dbName)), " does not exist. ",
-         "Run 'createTaxonDB()' to generate a local install of the ",
-         "NCBI Taxonomy database")
-  }
-  dbConnect(driver, dbname=dbName)
-}
-
-
-db_disconnect <- function(con) {
-  dbDisconnect(con)
-}
-
-
-db_query <- function(con, sql, j=NA) {
-  if (!is.character(sql) || length(sql) != 1 || is.na(sql))
-    stop("'sql' must be a single string")
-  data <- dbGetQuery(con, sql)
-  if (is.na(j))
-    return(data)
-  if (base::nrow(data) == 0)
-    return(character(0))
-  else
-    return(data[[j]])
-}
-
-
-db_count <- function(con, tbl) {
-  db_query(con, paste0("SELECT count(*) FROM ", tbl), 1)
-}
-
-
 db_load <- function(con, dbPath, type = "taxon") {
   if (type == "taxon")
   {
@@ -224,14 +175,14 @@ db_load <- function(con, dbPath, type = "taxon") {
     files <- c("nodes.dmp", "names.dmp")
     unzip(zipfile, files, exdir=dbPath)
     dmp <- normalizePath(file.path(dbPath, c("nodes.dmp", "names.dmp")), mustWork=TRUE)
-    if ( bulk_insert(con, "nodes", 
-           df=as.data.frame(readNodes(dmp[1]), stringsAsFactors=FALSE)) )
+    if ( db_bulk_insert(con, "nodes", 
+                        df=as.data.frame(readNodes(dmp[1]), stringsAsFactors=FALSE)) )
     {
       message("Inserted ", db_count(con, "nodes"),
               " rows into ", sQuote("nodes"), " table.")
     }
-    if ( bulk_insert(con, "names", 
-           df=as.data.frame(readNames(dmp[2]), stringsAsFactors=FALSE)) )
+    if ( db_bulk_insert(con, "names", 
+                        df=as.data.frame(readNames(dmp[2]), stringsAsFactors=FALSE)) )
     {
       message("Inserted ", db_count(con, "names"),
               " rows into ", sQuote("names"), " table.")
@@ -257,15 +208,6 @@ db_load <- function(con, dbPath, type = "taxon") {
   } else {
     return( FALSE )
   }
-}
-
-
-bulk_insert <- function(con, table, df) {
-  sql <- sprintf("insert into %s values (%s)", table,
-                 paste0("$", names(df), collapse=", "))
-  dbBeginTransaction(con)
-  dbSendPreparedQuery(con, sql, df)
-  dbCommit(con)
 }
 
 

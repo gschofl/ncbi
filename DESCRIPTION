@@ -13,6 +13,7 @@ Depends:
     Rcpp (>= 0.10.1),
 LinkingTo: Rcpp
 Imports:
+    assertthat,
     BiocGenerics,
     biofiles,
     Biostrings,
