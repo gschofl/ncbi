@@ -23,6 +23,7 @@
 #'   }
 #'   
 #' @author Gerhard Schöfl \email{gschofl@@yahoo.de}
+#' @useDynLib ncbi
 #' @docType package
 #' @name ncbi
 NA

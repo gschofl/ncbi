@@ -3,7 +3,6 @@ NULL
 
 # Class definition -------------------------------------------------------
 
-
 #' @slot TaxId The Taxonomy Identifier, a stable unique identifier for
 #' each taxon in the NCBI Taxonomy database.
 #' @slot ScientificName The unique scientific name of the taxon.

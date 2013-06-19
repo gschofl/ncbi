@@ -17,8 +17,6 @@ Super classes:
 \itemize{
   \item \linkS4class{list}
   \item \linkS4class{vector}
-  \item \linkS4class{listOrDataFrame}
-  \item \linkS4class{vectorORfactor}
 }
 
 }
@@ -37,8 +35,6 @@ Super classes:
 \itemize{
   \item \linkS4class{list}
   \item \linkS4class{vector}
-  \item \linkS4class{listOrDataFrame}
-  \item \linkS4class{vectorORfactor}
 }
 
 }

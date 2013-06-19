@@ -19,7 +19,7 @@ getArgs <- function(id, db, rettype, retmax, ...) {
 }
   
 
-#' @autoImports
+#' @importFrom Rentrez efetch efetch.batch count
 fetch_records <- function(args, maxrec = 500) {
   if (count(args$id) > maxrec && args$retmax %||% Inf > maxrec) {
     response <- do.call(efetch.batch, c(args, list(chunk_size = 500)))
