@@ -95,7 +95,8 @@ parseTSeqSet <- function(tSeqSet = response) {
     sequence <- switch(seqtype,
                        protein=AAStringSet(xvalue(seq, '//TSeq_sequence')),
                        nucleotide=DNAStringSet(xvalue(seq, '//TSeq_sequence')))
-    names(sequence) <- base::paste(accver, defline)
+    ncbi_defline <- paste0('gi|', gi, '|gnl|', accver, ' ', defline)  
+    names(sequence) <- ncbi_defline
     elementMetadata(sequence) <- DataFrame(gi = gi, accver = accver, sid = sid,
                                            local = local, taxid = taxid,
                                            orgname = orgname, defline = defline,
@@ -135,7 +136,7 @@ parseTSeqSet <- function(tSeqSet = response) {
 #' @rdname protein
 #' @export
 #' @importFrom rmisc Curry
-protein <- Curry("ncbi_sequences", db="protein")
+protein <- Curry(ncbi_sequences, db="protein")
 
 
 #' Retrieve sequences and annotations from the Nucleotide database
@@ -160,7 +161,7 @@ protein <- Curry("ncbi_sequences", db="protein")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname nucleotide
 #' @export
-nucleotide <- Curry("ncbi_sequences", db="nuccore")
+nucleotide <- Curry(ncbi_sequences, db="nuccore")
 
 
 #' Retrieve sequences and annotations from the GSS database
@@ -184,7 +185,7 @@ nucleotide <- Curry("ncbi_sequences", db="nuccore")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname GSS
 #' @export
-GSS <- Curry("ncbi_sequences", db="nucgss")
+GSS <- Curry(ncbi_sequences, db="nucgss")
 
 
 #' Retrieve sequences and annotations from the EST database
@@ -208,6 +209,6 @@ GSS <- Curry("ncbi_sequences", db="nucgss")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname EST
 #' @export
-EST <- Curry("ncbi_sequences", db="nucest")
+EST <- Curry(ncbi_sequences, db="nucest")
 
 

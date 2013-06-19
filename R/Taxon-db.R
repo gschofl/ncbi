@@ -1,6 +1,6 @@
 #' @importFrom rmisc db_create db_connect db_disconnect db_query db_count
 NULL
-#' @importFrom rmisc db_bulk_insert trim compact is_empty "%has_tables%"
+#' @importFrom rmisc db_bulk_insert trim compact "%has_tables%"
 NULL
 #' @importFrom RCurl basicTextGatherer curlPerform curlOptions CFILE close
 NULL
