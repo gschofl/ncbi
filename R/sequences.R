@@ -82,21 +82,26 @@ parseTSeqSet <- function(tSeqSet = response) {
   
   seqs <- base::lapply(tSeqSet, function (seq) {
     # seq <- xmlRoot(xmlDoc(tSeqSet[[1]]))
-    seq <- xmlRoot(xmlDoc(seq))
-    seqtype <- xattr(seq, '//TSeq_seqtype', "value")
-    gi <- xvalue(seq, '//TSeq_gi') # optional
-    accver <- xvalue(seq, '//TSeq_accver') # optional
-    sid <- xvalue(seq, '//TSeq_sid') # optional
-    local <- xvalue(seq, '//TSeq_local') # optional
-    taxid <- xvalue(seq, '//TSeq_taxid') # optional
-    orgname <- xvalue(seq, '//TSeq_orgname') # optional
-    defline <- xvalue(seq, '//TSeq_defline')
-    length <- xvalue(seq, '//TSeq_length', as="numeric")
-    sequence <- switch(seqtype,
-                       protein=AAStringSet(xvalue(seq, '//TSeq_sequence')),
-                       nucleotide=DNAStringSet(xvalue(seq, '//TSeq_sequence')))
-    ncbi_defline <- paste0('gi|', gi, '|gnl|', accver, ' ', defline)  
-    names(sequence) <- ncbi_defline
+    seq       <- xmlRoot(xmlDoc(seq))
+    seqtype   <- xattr(seq, '//TSeq_seqtype', "value")
+    gi        <- xvalue(seq, '//TSeq_gi') # optional
+    accver    <- xvalue(seq, '//TSeq_accver') # optional
+    sid       <- xvalue(seq, '//TSeq_sid') # optional
+    local     <- xvalue(seq, '//TSeq_local') # optional
+    taxid     <- xvalue(seq, '//TSeq_taxid') # optional
+    orgname   <- xvalue(seq, '//TSeq_orgname') # optional
+    defline   <- xvalue(seq, '//TSeq_defline')
+    length    <- xvalue(seq, '//TSeq_length', as="numeric")
+    sequence  <- switch(seqtype,
+                        protein=AAStringSet(xvalue(seq, '//TSeq_sequence')),
+                        nucleotide=DNAStringSet(xvalue(seq, '//TSeq_sequence')))
+    
+    ## construct a defline
+    df_gi_db  <- ifelse(is.na(gi), '', 'gi|')
+    df_gi     <- gi %|NA|% ''
+    df_acc_db <- ifelse(is.na(accver), '|', '|gb|')
+    df_acc    <- accver %|NA|% sid
+    names(sequence) <- paste0(df_gi_db, df_gi, df_acc_db, df_acc, ' ', defline)
     elementMetadata(sequence) <- DataFrame(gi = gi, accver = accver, sid = sid,
                                            local = local, taxid = taxid,
                                            orgname = orgname, defline = defline,
