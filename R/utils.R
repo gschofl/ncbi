@@ -60,3 +60,6 @@ ellipsize <- function(obj, width = getOption("width"), ellipsis = "...") {
          str)
 }
 
+## vectorised %|na|%
+#' @autoImports
+"%|NA|%" <- Curry(`%|%`, filter = "is.na")
