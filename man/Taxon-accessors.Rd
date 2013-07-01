@@ -1,7 +1,8 @@
 % Built by roxygen3 0.1
+\docType{methods}
 \name{getParentTaxId}
 \alias{getAuthority}
-\alias{getByRank}
+\alias{getByRank,Taxon_full-method}
 \alias{getLineage}
 \alias{getOtherName}
 \alias{getParentTaxId}
@@ -18,15 +19,25 @@
 
   getLineage(x, ...)
 
+  \S4method{getByRank}{Taxon_full}(x, rank, value = NULL,
+    ...)
+
   getTaxId(x, ...)
 
   getScientificName(x, ...)
 
   getRank(x, ...)
-
-  getByRank(x, rank, value = NULL, ...)
 }
 \arguments{
+  \item{x}{A \code{\linkS4class{Taxon}, \code{\linkS4class{TaxonList}},
+\code{\linkS4class{Lineage}}, or \code{\linkS4class{LineageList}} object.}
+
+  \item{rank}{One of the valid ranks for NCBI taxonomies (see Details).}
+
+  \item{value}{One of \code{NULL}, \sQuote{TaxId}, or \sQuote{ScientificName}.
+If \code{NULL}, \code{Taxon} objects are returned, otherwise a character
+vector of TaxIds or scientific names, respectively.}
+
   \item{x}{A \linkS4class{Taxon} or \linkS4class{TaxonList}.}
 
   \item{...}{Further arguments passed on to methods.}
@@ -84,15 +95,6 @@ instances.
 \section{Method signatures for generic getRank}{
 \itemize{
   \item \linkS4class{Taxon}
-  \item \linkS4class{TaxonList}
-}
-
-}
-
-\section{Method signatures for generic getByRank}{
-\itemize{
-  \item \linkS4class{Lineage}
-  \item \linkS4class{LineageList}
   \item \linkS4class{TaxonList}
 }
 

@@ -1,6 +1,6 @@
 % Built by roxygen3 0.1
 \docType{class}
-\name{Taxon_full-class}
+\name{Lineage-class}
 \alias{Lineage-class}
 \alias{Taxon-class}
 \alias{Taxon_full-class}
@@ -32,7 +32,7 @@ query.}
 
   \item{taxid}{A vector of valid NCBI Taxonomy Identifiers.}
 
-  \item{dbPath}{}
+  \item{dbPath}{Path to a valid Taxon.db}
 
   \item{full}{if \code{FALSE} a minimal taxonomic description is extracted
 (TaxId, ScientificName, Rank).}
@@ -54,22 +54,37 @@ A \linkS4class{Taxon} or \linkS4class{TaxonList} instance.
 A \linkS4class{Taxon} or \linkS4class{TaxonList} instance.
 }
 \description{
-\dQuote{Taxon} is a virtual class (with no slots) that provides a
-container for records retrieved from the NCBI Taxonomy database.
-It is extended by the class \dQuote{Taxon_minimal} with three slots
-\emph{TaxId}, \emph{ScientificName}, and \emph{Rank}, and by class
-\dQuote{Taxon_full}, with the additional slots \emph{ParentTaxId},
-\emph{OtherName}, \emph{Authority}, \emph{TypeMaterial}, and
-\emph{Lineage}.
-
-\dQuote{Lineage} is a class (with no slots) that holds the taxonomic
-lineage from a \emph{taxid} to the root node of the taxonomy.
+\dQuote{Taxon} is an S4 class that provides a container for records
+retrieved from the NCBI Taxonomy database.
+It is extended by the classes \dQuote{Taxon_minimal} and \dQuote{Lineage}
+with three slots \emph{TaxId}, \emph{ScientificName}, and \emph{Rank},
+and by class \dQuote{Taxon_full}, with the additional slots
+\emph{ParentTaxId}, \emph{OtherName}, \emph{Authority},
+\emph{TypeMaterial}, and \emph{Lineage}.
 }
 \details{
 See the documentation at 
 \href{http://www.ncbi.nlm.nih.gov/books/NBK21100/}{NCBI}
 for more information.
 }
+\section{Class hierarchy for Lineage}{
+Super classes:
+\itemize{
+  \item \linkS4class{Taxon_minimal}
+  \item \linkS4class{Taxon}
+}
+
+}
+
+\section{Generics with methods for Lineage}{
+\itemize{
+  \item \code{\link{[}}
+  \item \code{\link{getByRank}}
+  \item \code{\link{show}}
+}
+
+}
+
 \section{Class hierarchy for Taxon_full}{
 Super classes:
 \itemize{
@@ -82,6 +97,7 @@ Super classes:
 \section{Generics with methods for Taxon_full}{
 \itemize{
   \item \code{\link{getAuthority}}
+  \item \code{\link{getByRank}}
   \item \code{\link{getLineage}}
   \item \code{\link{getOtherName}}
   \item \code{\link{getParentTaxId}}
@@ -101,9 +117,10 @@ Sub classes:
 
 \section{Generics with methods for Taxon}{
 \itemize{
+  \item \code{\link{.DB}}
   \item \code{\link{[}}* (1 methods defined for subclasses)
   \item \code{\link{getAuthority}}* (1 methods defined for subclasses)
-  \item \code{\link{getByRank}}* (1 methods defined for subclasses)
+  \item \code{\link{getByRank}}* (2 methods defined for subclasses)
   \item \code{\link{getLineage}}* (1 methods defined for subclasses)
   \item \code{\link{getOtherName}}* (1 methods defined for subclasses)
   \item \code{\link{getParentTaxId}}* (1 methods defined for subclasses)
@@ -134,7 +151,7 @@ Super classes:
 \itemize{
   \item \code{\link{[}}* (1 methods defined for subclasses)
   \item \code{\link{getAuthority}}* (1 methods defined for subclasses)
-  \item \code{\link{getByRank}}* (1 methods defined for subclasses)
+  \item \code{\link{getByRank}}* (2 methods defined for subclasses)
   \item \code{\link{getLineage}}* (1 methods defined for subclasses)
   \item \code{\link{getOtherName}}* (1 methods defined for subclasses)
   \item \code{\link{getParentTaxId}}* (1 methods defined for subclasses)
@@ -142,24 +159,6 @@ Super classes:
 }
 
 * = methods only defined for subclasses
-}
-
-\section{Class hierarchy for Lineage}{
-Super classes:
-\itemize{
-  \item \linkS4class{Taxon_minimal}
-  \item \linkS4class{Taxon}
-}
-
-}
-
-\section{Generics with methods for Lineage}{
-\itemize{
-  \item \code{\link{[}}
-  \item \code{\link{getByRank}}
-  \item \code{\link{show}}
-}
-
 }
 
 \keyword{classes}
