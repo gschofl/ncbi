@@ -64,6 +64,14 @@ setGeneric("getLineage", function(x, ...) standardGeneric("getLineage"))
 setMethod("getLineage", "Taxon_full", function(x) x@Lineage)
 
 
+#' @rdname Taxon-accessors
+#' @export
+#' @genericMethods
+setMethod("getByRank", "Taxon_full", function (x, rank, value = NULL) {
+  getByRank(getLineage(x), rank=rank, value=value)
+})
+
+
 # Constructors -----------------------------------------------------------
 
 
@@ -110,8 +118,24 @@ taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
 }
 
 
+#' @keywords internal
+new_taxon_db <- function(taxid, db, full = TRUE) {
+  assert_that(!is.null(db$taxonDBcon))
+  if (full) {
+    tx <- lapply(taxid, dbGetTaxon, db=db)
+  } else {
+    tx <- lapply(taxid, dbGetTaxonMinimal, db=db)
+  }
+  if (length(tx) == 1) {
+    return( tx[[1]] )
+  } else {
+    return( TaxonList(tx) )
+  }
+}
+
+
 #' @param taxid A vector of valid NCBI Taxonomy Identifiers.
-#' @param dbPath 
+#' @param dbPath Path to a valid Taxon.db 
 #' @param full if \code{FALSE} a minimal taxonomic description is extracted
 #' (TaxId, ScientificName, Rank).
 #'
@@ -122,18 +146,27 @@ taxonDB <- function (taxid, dbPath=NULL, full=TRUE) {
   if (missing(taxid)) {
     return( new("Taxon_full") )
   }
-  if (is.null(dbPath)) {
-    dbPath <- file.path(path.package("ncbi"), "extdata")
+  db <- new.env(parent=emptyenv())
+  db$taxonDBcon <- taxonDBConnect(dbPath)
+  new_taxon_db(taxid, db, full=full)
+}
+
+
+#' @keywords internal
+new_taxon_by_geneid <- function(geneid, db, full=TRUE) {
+  assert_that(!is.null(db$taxonDBcon))
+  assert_that(!is.null(db$geneidDBcon))
+  
+  if (length(getTaxidByGeneID(db$geneidDBcon, 2)) == 0) {
+    stop("'genes' table is empty. Run 'createTaxonDB()' setting 'with_geneid = TRUE'")
   }
-  taxondb <- normalizePath(file.path(dbPath, "taxon.db"), mustWork=TRUE)
-  con <- db_connect(taxondb, paste0("Run 'createTaxonDB()' for a local ",
-                                    "install of the NCBI Taxonomy database"))
+  
   if (full) {
-    tx <- lapply(taxid, dbGetTaxon, con = con)
+    tx <- lapply(geneid, dbGetTaxonByGeneID, db=db)
   } else {
-    tx <- lapply(taxid, dbGetTaxonMinimal, con = con)
+    tx <- lapply(geneid, dbGetTaxonMinimalByGeneID, db=db)
   }
-  db_disconnect(con)
+  
   if (length(tx) == 1) {
     return( tx[[1]] )
   } else {
@@ -150,39 +183,16 @@ taxonDB <- function (taxid, dbPath=NULL, full=TRUE) {
 #' @return A \linkS4class{Taxon} or \linkS4class{TaxonList} instance.
 #' @rdname Taxon
 #' @export
-taxonByGeneID <- function (geneid, dbPath = NULL, full = TRUE) {
+taxonByGeneID <- function (geneid, dbPath=NULL, full=TRUE) {
   if (missing(geneid)) {
     return( new("Taxon_full") )
   }
-  if (is.null(dbPath)) {
-    dbPath <- file.path(path.package("ncbi"), "extdata")
-  }
-  geneiddb <- normalizePath(file.path(dbPath, "geneid.db"), mustWork=TRUE)
-  taxondb <- normalizePath(file.path(dbPath, "taxon.db"), mustWork=TRUE)
-  con_gi <- db_connect(geneiddb, paste0("Run 'createTaxonDB(with_geneid = TRUE)' ",
-                                        "for a local install of the GI_to_TaxId ",
-                                        "database"))
-  con_tx <- db_connect(taxondb, paste0("Run 'createTaxonDB()' for a local ",
-                                       "install of the NCBI Taxonomy database"))
-  if (length(getTaxidByGeneID(con_gi, 2)) == 0) {
-    stop("'genes' table is empty. Run 'createTaxonDB()' setting 'with_geneid = TRUE'")
-  }
-  
-  if (full) {
-    tx <- lapply(geneid, dbGetTaxonByGeneID, con1 = con_gi, con2 = con_tx)
-  } else {
-    tx <- lapply(geneid, dbGetTaxonMinimalByGeneID, con1 = con_gi, con2 = con_tx)
-  }
-  
-  db_disconnect(con_gi, con_tx)
-  
-  if (length(tx) == 1) {
-    return( tx[[1]] )
-  } else {
-    return( TaxonList(tx) )
-  }
-}
 
+  db <- new.env(parent=emptyenv())
+  db$taxonDBcon <- taxonDBConnect(dbPath)
+  db$geneidDBcon <- geneidDBConnect(dbPath)
+  new_taxon_by_geneid(taxid, db, full=full)
+}
 
 
 # Parser -----------------------------------------------------------------
@@ -244,18 +254,16 @@ parseTaxon <- function (taxaSet = response) {
 # show -------------------------------------------------------------------
 
 
-.show.Taxon <- function (x, width = getOption("width"), ellipsis = "...") {
+.show_Taxon <- function (x, width = getOption("width"), ellipsis = "...") {
   ellipsize(sprintf("%s (%s; %s)", getTaxId(x, FALSE), getScientificName(x),
                     getRank(x)), width = width, ellipsis = ellipsis)
 }
-
-
 setMethod("show", "Taxon",
           function (object) {
-            showme <- .show.Taxon(object)
+            showme <- .show_Taxon(object)
             cat(showme, sep="\n")
             if (is(object, "Taxon_full")) {
-              lin <- .show.Lineage(getLineage(object),
+              lin <- .show_Lineage(getLineage(object),
                                    width = getOption("width") - 10) %||% NA_character_
               cat(sprintf("Lineage: %s\n", lin), sep="")
             }

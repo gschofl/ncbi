@@ -9,11 +9,13 @@ using namespace Rcpp;
 void index_gi_taxid(const std::string& nucfile, const std::string& protfile, const std::string& outfile);
 RcppExport SEXP ncbi_index_gi_taxid(SEXP nucfileSEXP, SEXP protfileSEXP, SEXP outfileSEXP) {
 BEGIN_RCPP
-    Rcpp::RNGScope __rngScope;
-    std::string nucfile = Rcpp::as<std::string >(nucfileSEXP);
-    std::string protfile = Rcpp::as<std::string >(protfileSEXP);
-    std::string outfile = Rcpp::as<std::string >(outfileSEXP);
-    index_gi_taxid(nucfile, protfile, outfile);
+    {
+        Rcpp::RNGScope __rngScope;
+        std::string nucfile = Rcpp::as<std::string >(nucfileSEXP);
+        std::string protfile = Rcpp::as<std::string >(protfileSEXP);
+        std::string outfile = Rcpp::as<std::string >(outfileSEXP);
+        index_gi_taxid(nucfile, protfile, outfile);
+    }
     return R_NilValue;
 END_RCPP
 }
@@ -21,11 +23,13 @@ END_RCPP
 void merge_gi_taxid(const std::string& nucfile, const std::string& protfile, const std::string& outfile);
 RcppExport SEXP ncbi_merge_gi_taxid(SEXP nucfileSEXP, SEXP protfileSEXP, SEXP outfileSEXP) {
 BEGIN_RCPP
-    Rcpp::RNGScope __rngScope;
-    std::string nucfile = Rcpp::as<std::string >(nucfileSEXP);
-    std::string protfile = Rcpp::as<std::string >(protfileSEXP);
-    std::string outfile = Rcpp::as<std::string >(outfileSEXP);
-    merge_gi_taxid(nucfile, protfile, outfile);
+    {
+        Rcpp::RNGScope __rngScope;
+        std::string nucfile = Rcpp::as<std::string >(nucfileSEXP);
+        std::string protfile = Rcpp::as<std::string >(protfileSEXP);
+        std::string outfile = Rcpp::as<std::string >(outfileSEXP);
+        merge_gi_taxid(nucfile, protfile, outfile);
+    }
     return R_NilValue;
 END_RCPP
 }
@@ -33,29 +37,44 @@ END_RCPP
 Rcpp::List readNodes(const std::string& filename);
 RcppExport SEXP ncbi_readNodes(SEXP filenameSEXP) {
 BEGIN_RCPP
-    Rcpp::RNGScope __rngScope;
-    std::string filename = Rcpp::as<std::string >(filenameSEXP);
-    Rcpp::List __result = readNodes(filename);
-    return Rcpp::wrap(__result);
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        std::string filename = Rcpp::as<std::string >(filenameSEXP);
+        Rcpp::List __result = readNodes(filename);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
 END_RCPP
 }
 // readNames
 Rcpp::List readNames(const std::string& filename);
 RcppExport SEXP ncbi_readNames(SEXP filenameSEXP) {
 BEGIN_RCPP
-    Rcpp::RNGScope __rngScope;
-    std::string filename = Rcpp::as<std::string >(filenameSEXP);
-    Rcpp::List __result = readNames(filename);
-    return Rcpp::wrap(__result);
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        std::string filename = Rcpp::as<std::string >(filenameSEXP);
+        Rcpp::List __result = readNames(filename);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
 END_RCPP
 }
 // readMerged
 Rcpp::List readMerged(const std::string& filename);
 RcppExport SEXP ncbi_readMerged(SEXP filenameSEXP) {
 BEGIN_RCPP
-    Rcpp::RNGScope __rngScope;
-    std::string filename = Rcpp::as<std::string >(filenameSEXP);
-    Rcpp::List __result = readMerged(filename);
-    return Rcpp::wrap(__result);
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        std::string filename = Rcpp::as<std::string >(filenameSEXP);
+        Rcpp::List __result = readMerged(filename);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
 END_RCPP
 }

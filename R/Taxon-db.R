@@ -4,9 +4,116 @@ NULL
 NULL
 #' @importFrom RCurl basicTextGatherer curlPerform curlOptions CFILE close
 NULL
-#' @importFrom RSQLite dbSendQuery
+#' @importFrom RSQLite dbSendQuery dbListTables dbListFields
 NULL
 #' @importFrom assertthat assert_that
+NULL
+#' @importClassesFrom RSQLite dbObjectId  SQLiteObject  SQLiteConnection
+NULL
+#' @importClassesFrom DBI DBIObject DBIConnection
+
+.valid_TaxonDB <- function (object) {
+  errors <- character()
+  if (!all(c("nodes", "names") %in% dbListTables(object))) {
+    errors <- c(errors, "Table missing from 'TaxonDB'\n")
+  }
+  if (!all(c("tax_id", "parent_id", "rank", "embl_code", "division_id")
+           %in% dbListFields(object, "nodes"))) {
+    errors <- c(errors, "Field missing from table 'nodes'\n")
+  }
+  if (!all(c("tax_id", "tax_name", "unique_name", "class")
+           %in% dbListFields(object, "names"))) {
+    errors <- c(errors, "Field missing from table 'names'\n")
+  }
+  
+  if (length(errors) == 0L)
+    TRUE
+  else
+    errors
+}
+
+
+#' TaxonDB-class
+#' 
+#' \sQuote{\code{TaxonDB}} is an S4 class that represents a connection
+#' to an SQLite database holding the NCBI taxonomy organised in two tables:
+#' 
+#' \bold{nodes} with fields:
+#' 
+#' \itemize{
+#'    \item tax_id        CHAR(10)    Primary key
+#'    \item parent_id     CHAR(10)
+#'    \item rank          VARCHAR(50)
+#'    \item embl_code     CHAR(2)
+#'    \item division_id   CHAR(2)
+#' }
+#' 
+#' \bold{names} with fields:
+#' 
+#' \itemize{
+#'    \item tax_id        CHAR(10)     Primary key
+#'    \item tax_name      VARCHAR(200)    
+#'    \item unique_name   VARCHAR(100)
+#'    \item class         VARCHAR(50)
+#' }
+#' 
+#' @seealso
+#'  The constructor \code{\link{TaxonDB}}.  
+#' @name TaxonDB-class
+#' @rdname TaxonDB-class
+#' @exportClass TaxonDB
+setClass('TaxonDB', contains='SQLiteConnection',
+         validity=.valid_TaxonDB)
+
+
+#' @keywords internal
+taxonDBConnect <- function (db_path = NULL) {
+  if (is.null(db_path)) {
+    db_path <- file.path(path.package("ncbi"), "extdata")
+  }
+  db_path <- strip_ext(db_path, "/taxon.db")
+  taxondb <- normalizePath(file.path(db_path, "taxon.db"), mustWork=TRUE)
+  con <- db_connect(taxondb, paste0("Run 'createTaxonDB()' for a local ",
+                                    "install of the NCBI Taxonomy database"))
+  new('TaxonDB', con)
+}
+
+
+.valid_GeneidDB <- function (object) {
+  errors <- character()
+  if (!"genes" %in% dbListTables(object)) {
+    errors <- c(errors, "Table missing from 'GeneidDB'\n")
+  }
+  if (!"tax_id" %in% dbListFields(object, "genes")) {
+    errors <- c(errors, "Field missing from table 'genes'\n")
+  }
+  
+  if (length(errors) == 0L)
+    TRUE
+  else
+    errors
+}
+
+#' @name GeneidDB-class
+#' @rdname GeneidDB-class
+#' @exportClass GeneidDB
+setClass('GeneidDB', contains='SQLiteConnection',
+         validity=.valid_GeneidDB)
+
+
+#' @keywords internal
+geneidDBConnect <- function (db_path = NULL) {
+  if (is.null(db_path)) {
+    db_path <- file.path(path.package("ncbi"), "extdata")
+  }
+  db_path <- strip_ext(db_path, "/geneid.db")
+  geneiddb <- normalizePath(file.path(db_path, "geneid.db"), mustWork=TRUE)
+  con <- db_connect(geneiddb,  paste0("Run 'createTaxonDB(with_geneid = TRUE)' ",
+                                      "for a local install of the GI_to_TaxId ",
+                                      "database"))
+  new('GeneidDB', con)
+}
+
 
 geneid_db.sql <- '
 CREATE TABLE genes (
@@ -211,117 +318,127 @@ db_load <- function(con, dbPath, type = "taxon") {
 }
 
 
-dbGetTaxon <- function(con, taxId) {
-  node <- dbGetNode(con, taxId)
-  new("Taxon_full",
+dbGetTaxon <- function(db, taxId) {
+  node <- dbGetNode(db, taxId)
+  new("Taxon_full", db = db,
       TaxId = node[["tax_id"]] %||% NA_character_,
       ScientificName = node[["tax_name"]] %||% NA_character_,
       Rank = node[["rank"]] %||% NA_character_,
       ParentTaxId = node[["parent_id"]] %||% NA_character_,
-      OtherName = dbGetOtherName(con, taxId),
-      Authority = dbGetAuthority(con, taxId),
-      TypeMaterial = dbGetTypeMaterial(con, taxId),
-      Lineage = dbGetLineage(con, taxId))
+      OtherName = dbGetOtherName(db, taxId),
+      Authority = dbGetAuthority(db, taxId),
+      TypeMaterial = dbGetTypeMaterial(db, taxId),
+      Lineage = dbGetLineage(db, taxId))
 }
 
 
-dbGetTaxonByGeneID <- function(con1, con2, geneid) {
-  taxid <- getTaxidByGeneID(con1, geneid)
+dbGetTaxonByGeneID <- function(db, geneid) {
+  taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0)
-    return( new("Taxon_full") )
+    return( new("Taxon_full", db = db) )
   else
-    dbGetTaxon(con2, taxid)
+    dbGetTaxon(db, taxid)
 }
 
 
-dbGetTaxonMinimal <- function(con, taxId) {
+dbGetTaxonMinimal <- function(db, taxId) {
+  taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_id, tax_name, rank FROM nodes JOIN names USING ( tax_id ) ",
                 "WHERE tax_id = ", taxId, " AND class = 'scientific name'") 
-  data <- db_query(con, sql)
+  data <- db_query(db$taxonDBcon, sql)
   new("Taxon_minimal",
+      db = db,
       TaxId = data[["tax_id"]] %||% NA_character_,
       ScientificName = data[["tax_name"]] %||% NA_character_,
       Rank = data[["rank"]] %||% NA_character_)
 }
 
 
-dbGetTaxonMinimalByGeneID <- function(con1, con2, geneid) {
-  taxid <- getTaxidByGeneID(con1, geneid)
+dbGetTaxonMinimalByGeneID <- function(db, geneid) {
+  taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0)
-    return( new("Taxon_full") )
+    return( new("Taxon_full", db = db) )
   else
-    dbGetTaxonMinimal(con2, taxid)
+    dbGetTaxonMinimal(db, taxid)
 }
 
 
-getTaxidByGeneID <- function(con, geneid) {
+getTaxidByGeneID <- function(db, geneid) {
+  geneid <- geneid %|na|% 0
   sql <- paste0("SELECT tax_id FROM genes WHERE rowid = ", geneid)
-  db_query(con, sql, 1)
+  db_query(db$geneidDBcon, sql, 1)
 }
 
 
-dbGetParentTaxId <- function(con, taxId) {
+dbGetParentTaxId <- function(db, taxId) {
+  taxId <- taxId %|na|% 0
   sql <- paste0("SELECT parent_id FROM nodes WHERE tax_id = ", taxId)
-  db_query(con, sql, 1) %||% NA_character_
+  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
 }
 
 
-dbGetScientificName <- function(con, taxId) {
+dbGetScientificName <- function(db, taxId) {
+  taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxId,
                 " AND class = 'scientific name'")
-  db_query(con, sql, 1) %||% NA_character_
+  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
 }
 
 
-dbGetOtherName <- function(con, taxId) {
+dbGetOtherName <- function(db, taxId) {
+  taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxId,
                 " AND class != 'scientific name' AND class != 'type material'",
                 " AND class != 'authority'")
-  data <- db_query(con, sql)
+  data <- db_query(db$taxonDBcon, sql)
   setNames(data[["tax_name"]], nm=camelise(data[["class"]])) %||% NA_character_
 }
 
 
-dbGetTypeMaterial <- function(con, taxId) {
+dbGetTypeMaterial <- function(db, taxId) {
+  taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxId,
                 " AND class = 'type material'")
-  db_query(con, sql, 1) %||% NA_character_
+  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
 }
 
 
-dbGetAuthority <- function(con, taxId) {
+dbGetAuthority <- function(db, taxId) {
+  taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxId,
                 " AND class = 'authority'")
-  db_query(con, sql, 1) %||% NA_character_
+  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
 }
 
 
-dbGetRank <- function(con, taxId) {
+dbGetRank <- function(db, taxId) {
+  taxId <- taxId %|na|% 0
   sql <- paste0("SELECT rank FROM nodes WHERE tax_id = ", taxId)
-  db_query(con, sql, 1) %||% NA_character_
+  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
 }
 
 
 #' @return TaxId, ParentId, ScientificName, Rank
-dbGetNode <- function(con, taxId) {
+dbGetNode <- function(db, taxId) {
+  taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_id, parent_id, tax_name, rank FROM nodes JOIN names",
                 " USING ( tax_id ) WHERE tax_id = ", taxId,
                 " AND class = 'scientific name'")
-  db_query(con, sql)
+  db_query(db$taxonDBcon, sql)
 }
 
 
-dbGetLineage <- function(con, taxId) {
-  Lineage( (function (con, taxId) {
-    node <- dbGetNode(con, taxId)
+dbGetLineage <- function(db, taxId) {
+  Lineage(db = db, (function (db, taxId) {
+    node <- dbGetNode(db, taxId)
     parentId <- node[["parent_id"]]
     lineage <- cbind(tax_id=node[["tax_id"]],
                      tax_name=node[["tax_name"]],
                      rank=node[["rank"]])
     if (length(parentId) > 0 && parentId != taxId)
-      lineage <- rbind(Recall(con, parentId), lineage)
+      lineage <- rbind(Recall(db, parentId), lineage)
     lineage
-  })(con, taxId)[-1,] )
+  })(db, taxId)[-1,] )
 }
 
 

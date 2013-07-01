@@ -1,7 +1,7 @@
 Package: ncbi
 Type: Package
 Title: Retrieve data from NCBI.
-Version: 0.0-1
+Version: 0.1.0
 Date: 2012-11-13
 Authors@R: person("Gerhard", "Schöfl", role=c("aut","cre"),
     email="gschofl@yahoo.de")
@@ -17,6 +17,7 @@ Imports:
     BiocGenerics,
     biofiles,
     Biostrings,
+    DBI,
     IRanges,
     methods,
     RCurl,
@@ -34,7 +35,8 @@ Collate:
     'pubmed-methods.R'
     'sequences.R'
     'RcppExports.R'
-    'Taxon_minimal-class.R'
+    'Taxon-class.R'
+    'Lineage-class.R'
     'LineageList-class.R'
     'Taxon_full-class.R'
     'TaxonList-class.R'

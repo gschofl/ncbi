@@ -23,6 +23,7 @@ Super classes:
 
 \section{Generics with methods for LineageList}{
 \itemize{
+  \item \code{\link{.DB}}
   \item \code{\link{[}}
   \item \code{\link{getByRank}}
   \item \code{\link{show}}
@@ -41,6 +42,7 @@ Super classes:
 
 \section{Generics with methods for TaxonList}{
 \itemize{
+  \item \code{\link{.DB}}
   \item \code{\link{[}}
   \item \code{\link{getByRank}}
   \item \code{\link{getLineage}}
