@@ -1,6 +1,6 @@
 % Built by roxygen3 0.1
 \docType{class}
-\name{Lineage-class}
+\name{Taxon-class}
 \alias{Lineage-class}
 \alias{Taxon-class}
 \alias{Taxon_full-class}
@@ -67,6 +67,66 @@ See the documentation at
 \href{http://www.ncbi.nlm.nih.gov/books/NBK21100/}{NCBI}
 for more information.
 }
+\section{Class hierarchy for Taxon}{
+Sub classes:
+\itemize{
+  \item \linkS4class{Taxon_minimal}
+  \item \linkS4class{Lineage}
+  \item \linkS4class{Taxon_full}
+}
+
+}
+
+\section{Generics with methods for Taxon}{
+\itemize{
+  \item \code{\link{[}}* (1 methods defined for subclasses)
+  \item \code{\link{getAuthority}}* (1 methods defined for subclasses)
+  \item \code{\link{getByRank}}* (2 methods defined for subclasses)
+  \item \code{\link{getLineage}}* (1 methods defined for subclasses)
+  \item \code{\link{getOtherName}}* (1 methods defined for subclasses)
+  \item \code{\link{getParentTaxId}}* (1 methods defined for subclasses)
+  \item \code{\link{getRank}}* (1 methods defined for subclasses)
+  \item \code{\link{getScientificName}}* (1 methods defined for subclasses)
+  \item \code{\link{getTaxId}}* (1 methods defined for subclasses)
+  \item \code{\link{is.na}}* (1 methods defined for subclasses)
+  \item \code{\link{shared}}
+  \item \code{\link{show}} (1 methods defined for subclasses)
+}
+
+* = methods only defined for subclasses
+}
+
+\section{Class hierarchy for Taxon_minimal}{
+Sub classes:
+\itemize{
+  \item \linkS4class{Lineage}
+  \item \linkS4class{Taxon_full}
+}
+Super classes:
+\itemize{
+  \item \linkS4class{Taxon}
+}
+
+}
+
+\section{Generics with methods for Taxon_minimal}{
+\itemize{
+  \item \code{\link{[}}* (1 methods defined for subclasses)
+  \item \code{\link{getAuthority}}* (1 methods defined for subclasses)
+  \item \code{\link{getByRank}}* (2 methods defined for subclasses)
+  \item \code{\link{getLineage}}* (1 methods defined for subclasses)
+  \item \code{\link{getOtherName}}* (1 methods defined for subclasses)
+  \item \code{\link{getParentTaxId}}* (1 methods defined for subclasses)
+  \item \code{\link{getRank}}
+  \item \code{\link{getScientificName}}
+  \item \code{\link{getTaxId}}
+  \item \code{\link{is.na}}
+  \item \code{\link{show}}* (1 methods defined for subclasses)
+}
+
+* = methods only defined for subclasses
+}
+
 \section{Class hierarchy for Lineage}{
 Super classes:
 \itemize{
@@ -103,62 +163,6 @@ Super classes:
   \item \code{\link{getParentTaxId}}
 }
 
-}
-
-\section{Class hierarchy for Taxon}{
-Sub classes:
-\itemize{
-  \item \linkS4class{Taxon_minimal}
-  \item \linkS4class{Lineage}
-  \item \linkS4class{Taxon_full}
-}
-
-}
-
-\section{Generics with methods for Taxon}{
-\itemize{
-  \item \code{\link{.DB}}
-  \item \code{\link{[}}* (1 methods defined for subclasses)
-  \item \code{\link{getAuthority}}* (1 methods defined for subclasses)
-  \item \code{\link{getByRank}}* (2 methods defined for subclasses)
-  \item \code{\link{getLineage}}* (1 methods defined for subclasses)
-  \item \code{\link{getOtherName}}* (1 methods defined for subclasses)
-  \item \code{\link{getParentTaxId}}* (1 methods defined for subclasses)
-  \item \code{\link{getRank}}
-  \item \code{\link{getScientificName}}
-  \item \code{\link{getTaxId}}
-  \item \code{\link{is.na}}
-  \item \code{\link{show}} (1 methods defined for subclasses)
-}
-
-* = methods only defined for subclasses
-}
-
-\section{Class hierarchy for Taxon_minimal}{
-Sub classes:
-\itemize{
-  \item \linkS4class{Lineage}
-  \item \linkS4class{Taxon_full}
-}
-Super classes:
-\itemize{
-  \item \linkS4class{Taxon}
-}
-
-}
-
-\section{Generics with methods for Taxon_minimal}{
-\itemize{
-  \item \code{\link{[}}* (1 methods defined for subclasses)
-  \item \code{\link{getAuthority}}* (1 methods defined for subclasses)
-  \item \code{\link{getByRank}}* (2 methods defined for subclasses)
-  \item \code{\link{getLineage}}* (1 methods defined for subclasses)
-  \item \code{\link{getOtherName}}* (1 methods defined for subclasses)
-  \item \code{\link{getParentTaxId}}* (1 methods defined for subclasses)
-  \item \code{\link{show}}* (1 methods defined for subclasses)
-}
-
-* = methods only defined for subclasses
 }
 
 \keyword{classes}

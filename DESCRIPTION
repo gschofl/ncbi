@@ -1,7 +1,7 @@
 Package: ncbi
 Type: Package
 Title: Retrieve data from NCBI.
-Version: 0.1.0
+Version: 0.1.1
 Date: 2012-11-13
 Authors@R: person("Gerhard", "Schöfl", role=c("aut","cre"),
     email="gschofl@yahoo.de")
@@ -36,9 +36,6 @@ Collate:
     'sequences.R'
     'RcppExports.R'
     'Taxon-class.R'
-    'Lineage-class.R'
-    'LineageList-class.R'
-    'Taxon_full-class.R'
     'TaxonList-class.R'
     'Taxon-db.R'
     'ncbi.R'
