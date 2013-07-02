@@ -1,71 +1,133 @@
-#' @include Taxon_full-class.R
+#' @include Taxon-class.R
 NULL
 
-setOldClass("list")
 
-## Validator
-.valid_TaxonList <- listclassValidator('TaxonList', 'Taxon')
+# Class-definitions ------------------------------------------------------
+
+
+## Validators
+#' @importFrom rmisc collectionValidator
+.valid_TaxonList <- collectionValidator('TaxonList')
+.valid_LineageList <- collectionValidator('LineageList')
 
 #' TaxonList and LineageList
 #' 
 #' \dQuote{TaxonList} and \dQuote{LineageList} are lists of \linkS4class{Taxon}
 #' and \linkS4class{Lineage} objects, respectively.
 #' 
+#' @importClassesFrom rmisc Collection
 #' @rdname TaxonList
 #' @export
 #' @classHierarchy
 #' @classMethods
-setClass("TaxonList", contains="list", validity=.valid_TaxonList)
+setClass("TaxonList",
+         contains="Collection",
+         representation(),
+         prototype(elementType = "Taxon"),
+         validity=.valid_TaxonList)
 
-## Constructor
-TaxonList <- listclassConstructor('TaxonList', 'Taxon')
+#' @rdname TaxonList
+#' @export
+#' @classHierarchy
+#' @classMethods
+setClass("LineageList",
+         contains="Collection",
+         representation(),
+         prototype(elementType = "Taxon"),
+         validity=.valid_LineageList)
 
-## show method
-.show_TaxonList <- listclassShower(.show_Taxon, numOfElements=12, linesPerElement=NULL)
+## Constructors
+#' @importFrom rmisc collectionConstructor
+TaxonList <- collectionConstructor('TaxonList')
+LineageList <- collectionConstructor('LineageList')
+
+## show methods
+#' @importFrom rmisc collectionShower
+.show_TaxonList <- collectionShower(.show_Taxon, numOfElements=12, linesPerElement=NULL)
 setMethod("show", "TaxonList", function (object) {
   .show_TaxonList(object)
 })
 
-setMethod(".DB", "TaxonList", function (x) x[[1]]@db )
-
-# Accessor methods ----------------------------------------------------------
-
-
-#' @autoImports
-setMethod("getTaxId", "TaxonList", function (x, use.names = FALSE) {
-  if (use.names)
-    setNames(vapply(x, getTaxId, FUN.VALUE=character(1)),
-             nm=getScientificName(x))
-  else 
-    vapply(x, getTaxId, FUN.VALUE=character(1))
+.show_LineageList <- collectionShower(.show_Lineage, numOfElements=6, linesPerElement=2)
+setMethod("show", "LineageList", function (object) {
+  .show_LineageList(object) 
 })
 
 
-#' @autoImports
+# Accessors --------------------------------------------------------------
+
+
+setMethod("getByRank", "LineageList", function(x, rank, value = NULL) {
+  rank <- match.arg(rank, .ranks)
+  i <- vapply(x, function (x) which(getRank(x) == rank) %||% NA_integer_, integer(1))
+  
+  if (!is.null(value)) {
+    value <- match.arg(value, c("TaxId", "ScientificName"))
+    unlist(Map(`[`, x=x, i=i, value=value))
+  }
+  else {
+    taxids <- unlist(Map(`[`, x=x, i=i, value='TaxId'))
+    new_taxon_db(taxids, shared(x))
+  }
+})
+
+
+setMethod("getTaxId", "TaxonList", function (x, use.names = FALSE) {
+  if (use.names)
+    setNames(vapply(x, getTaxId, character(1)), nm=getScientificName(x))
+  else 
+    vapply(x, getTaxId, character(1))
+})
+
+
 setMethod("getScientificName", "TaxonList", function (x) {
-  vapply(x, getScientificName, FUN.VALUE=character(1))
+  vapply(x, getScientificName, character(1))
 })
 
 
 setMethod("getRank", "TaxonList", function(x) {
-  vapply(x, getRank, FUN.VALUE=character(1))
+  vapply(x, getRank, character(1))
+})
+
+
+setMethod("getParentTaxId", "TaxonList", function(x) {
+  if (!is(x[[1]], 'Taxon_full'))
+    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+  
+  vapply(x, getParentTaxId, character(1))
+})
+
+
+setMethod("getOtherName", "TaxonList", function(x) {
+  if (!is(x[[1]], 'Taxon_full'))
+    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+  
+  lapply(x, getOtherName)
+})
+
+
+setMethod("getAuthority", "TaxonList", function(x) {
+  if (!is(x[[1]], 'Taxon_full'))
+    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+  
+  lapply(x, getAuthority)
 })
 
 
 setMethod("getLineage", "TaxonList", function(x) {
-  LineageList(lapply(x, getLineage))
+  if (!is(x[[1]], 'Taxon_full'))
+    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+  
+  LineageList(lapply(x, getLineage), shared=shared(x))
 })
 
 
-setMethod("getByRank", "TaxonList", function(x, rank, value = NULL) { 
+setMethod("getByRank", "TaxonList", function(x, rank, value = NULL) {
+  if (!is(x[[1]], 'Taxon_full'))
+    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+  
   getByRank(getLineage(x), rank=rank, value=value)
 })
-
-
-setMethod("[", "TaxonList",
-          function(x, i, j, ..., drop) {
-              TaxonList( callNextMethod() )
-          })
 
 
 #' @importFrom BiocGenerics table
@@ -78,6 +140,3 @@ setMethod("table", "TaxonList",
             names(attr(tbl, "dimnames")) <- "Scientific Names"
             tbl
           })
-
-
-

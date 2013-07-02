@@ -62,8 +62,7 @@ NULL
 #' @name TaxonDB-class
 #' @rdname TaxonDB-class
 #' @exportClass TaxonDB
-setClass('TaxonDB', contains='SQLiteConnection',
-         validity=.valid_TaxonDB)
+setClass('TaxonDB', contains='SQLiteConnection', validity=.valid_TaxonDB)
 
 
 #' @keywords internal
@@ -97,8 +96,7 @@ taxonDBConnect <- function (db_path = NULL) {
 #' @name GeneidDB-class
 #' @rdname GeneidDB-class
 #' @exportClass GeneidDB
-setClass('GeneidDB', contains='SQLiteConnection',
-         validity=.valid_GeneidDB)
+setClass('GeneidDB', contains='SQLiteConnection', validity=.valid_GeneidDB)
 
 
 #' @keywords internal
@@ -317,10 +315,11 @@ db_load <- function(con, dbPath, type = "taxon") {
   }
 }
 
-
+#db <- shared
+#taxId <- taxid[1]
 dbGetTaxon <- function(db, taxId) {
   node <- dbGetNode(db, taxId)
-  new("Taxon_full", db = db,
+  new("Taxon_full", shared = db,
       TaxId = node[["tax_id"]] %||% NA_character_,
       ScientificName = node[["tax_name"]] %||% NA_character_,
       Rank = node[["rank"]] %||% NA_character_,
@@ -335,7 +334,7 @@ dbGetTaxon <- function(db, taxId) {
 dbGetTaxonByGeneID <- function(db, geneid) {
   taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0)
-    return( new("Taxon_full", db = db) )
+    new("Taxon_full", shared = db)
   else
     dbGetTaxon(db, taxid)
 }
@@ -346,8 +345,7 @@ dbGetTaxonMinimal <- function(db, taxId) {
   sql <- paste0("SELECT tax_id, tax_name, rank FROM nodes JOIN names USING ( tax_id ) ",
                 "WHERE tax_id = ", taxId, " AND class = 'scientific name'") 
   data <- db_query(db$taxonDBcon, sql)
-  new("Taxon_minimal",
-      db = db,
+  new("Taxon_minimal", shared = db,
       TaxId = data[["tax_id"]] %||% NA_character_,
       ScientificName = data[["tax_name"]] %||% NA_character_,
       Rank = data[["rank"]] %||% NA_character_)
@@ -357,7 +355,7 @@ dbGetTaxonMinimal <- function(db, taxId) {
 dbGetTaxonMinimalByGeneID <- function(db, geneid) {
   taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0)
-    return( new("Taxon_full", db = db) )
+    new("Taxon_full", shared = db)
   else
     dbGetTaxonMinimal(db, taxid)
 }
@@ -429,7 +427,7 @@ dbGetNode <- function(db, taxId) {
 
 
 dbGetLineage <- function(db, taxId) {
-  Lineage(db = db, (function (db, taxId) {
+  Lineage((function (db, taxId) {
     node <- dbGetNode(db, taxId)
     parentId <- node[["parent_id"]]
     lineage <- cbind(tax_id=node[["tax_id"]],
@@ -438,7 +436,7 @@ dbGetLineage <- function(db, taxId) {
     if (length(parentId) > 0 && parentId != taxId)
       lineage <- rbind(Recall(db, parentId), lineage)
     lineage
-  })(db, taxId)[-1,] )
+  })(db, taxId)[-1,], shared = db)
 }
 
 
