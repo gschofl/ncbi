@@ -427,7 +427,7 @@ dbGetNode <- function(db, taxId) {
 
 
 dbGetLineage <- function(db, taxId) {
-  Lineage((function (db, taxId) {
+   Lineage( (function (db, taxId) {
     node <- dbGetNode(db, taxId)
     parentId <- node[["parent_id"]]
     lineage <- cbind(tax_id=node[["tax_id"]],
@@ -436,7 +436,7 @@ dbGetLineage <- function(db, taxId) {
     if (length(parentId) > 0 && parentId != taxId)
       lineage <- rbind(Recall(db, parentId), lineage)
     lineage
-  })(db, taxId)[-1,], shared = db)
+  })(db, taxId)[-1, , drop = FALSE], shared = db)
 }
 
 
