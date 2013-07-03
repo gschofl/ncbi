@@ -140,3 +140,11 @@ setMethod("table", "TaxonList",
             names(attr(tbl, "dimnames")) <- "Scientific Names"
             tbl
           })
+
+
+setMethod("is.na", "TaxonList", function (x) {
+  vapply(x, is.na, logical(1))
+})
+
+
+
