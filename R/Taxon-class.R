@@ -238,7 +238,7 @@ setMethod("show", "Lineage",
 #' @genericMethods
 setGeneric("getByRank", function(x, rank, value = NULL, ...) standardGeneric("getByRank"))
 setMethod("getByRank", "Lineage", function (x, rank, value = NULL, drop = FALSE) {
-  rank <- match.arg(rank, .ranks)
+  rank <- match.arg(rank, ncbi:::.ranks)
   i <- which(getRank(x) == rank)
   
   if (!is.null(value)) {
@@ -246,7 +246,7 @@ setMethod("getByRank", "Lineage", function (x, rank, value = NULL, drop = FALSE)
     x[i, value = value, drop = drop]
   }
   else {
-    new_taxon_db(x[i, value = "TaxId"], shared(x))
+    new_taxon_db(taxid=x[i, value = "TaxId"], shared=shared(x))
   }
 })
 
@@ -430,7 +430,7 @@ taxonDB <- function (taxid, dbPath=NULL, full=TRUE) {
 new_taxon_by_geneid <- function(geneid, shared, full=TRUE) {
   assert_that(!is.null(shared$taxonDBcon))
   assert_that(!is.null(shared$geneidDBcon))
-  if (length(getTaxidByGeneID(shared$geneidDBcon, 2)) == 0)
+  if (length(getTaxidByGeneID(shared, 2)) == 0)
     stop("'genes' table is empty. Run 'createTaxonDB()' setting 'with_geneid = TRUE'")
   
   if (full)
@@ -461,7 +461,7 @@ taxonByGeneID <- function (geneid, dbPath=NULL, full=TRUE) {
   shared <- new.env(parent=emptyenv())
   shared$taxonDBcon <- taxonDBConnect(dbPath)
   shared$geneidDBcon <- geneidDBConnect(dbPath)
-  new_taxon_by_geneid(taxid, shared, full=full)
+  new_taxon_by_geneid(geneid, shared, full=full)
 }
 
 
