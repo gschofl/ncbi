@@ -117,7 +117,7 @@ setGeneric("getRank", function(x, ...) standardGeneric("getRank"))
 setMethod("getRank", "Taxon_minimal", function(x) x@Rank)
 
 
-setMethod("is.na", "Taxon_minimal", function (x) {
+setMethod("is.na", "Taxon", function (x) {
   is.na(getTaxId(x)) && is.na(getScientificName(x)) && is.na(getRank(x))
 })
 
