@@ -9,7 +9,9 @@
 \alias{journal}
 \alias{pmid}
 \alias{title}
-\title{PubMed accessors}
+\title{PubMed accessors
+
+Access the various slots of \code{\link[utils]{bibentry}} instances.}
 \usage{
   author(x, ...)
 
@@ -35,9 +37,6 @@
   \item{...}{Further arguments passed on to methods.}
 }
 
-\description{
-Access the various slots of \code{\link[utils]{bibentry}} instances.
-}
 \section{Method signatures for generic author}{
 \itemize{
   \item \linkS4class{pubmed}

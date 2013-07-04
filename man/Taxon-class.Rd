@@ -5,67 +5,15 @@
 \alias{Taxon-class}
 \alias{Taxon_full-class}
 \alias{Taxon_minimal-class}
-\alias{taxon}
-\alias{taxonByGeneID}
-\alias{taxonDB}
-\title{Retrieve records from the NCBI Taxonomy database.}
-\usage{
-  taxon(taxid, rettype = NULL, retmax = 25, parse = TRUE,
-    ...)
-
-  taxonDB(taxid, dbPath = NULL, full = TRUE)
-
-  taxonByGeneID(geneid, dbPath = NULL, full = TRUE)
-}
-\arguments{
-  \item{taxid}{\sQuote{taxids} or a valid NCBI search term.}
-
-  \item{rettype}{Which type of data should be retrieved? Full records
-(default: \code{NULL}) or an \sQuote{uilist}.}
-
-  \item{retmax}{Maximal number of records to be retrieved (default: 25).}
-
-  \item{parse}{Should the retrieved data be parsed?}
-
-  \item{...}{Parameters passed on to the underlying \code{\link{efetch}}
-query.}
-
-  \item{taxid}{A vector of valid NCBI Taxonomy Identifiers.}
-
-  \item{dbPath}{Path to a valid Taxon.db}
-
-  \item{full}{if \code{FALSE} a minimal taxonomic description is extracted
-(TaxId, ScientificName, Rank).}
-
-  \item{geneid}{A vector of valid NCBI Gene Identifiers.}
-
-  \item{dbPath}{}
-
-  \item{full}{if \code{FALSE} a minimal taxonomic description is extracted
-(TaxId, ScientificName, Rank).}
-}
-
-\value{
-An \linkS4class{XMLInternalDocument} or if parsed a
- \linkS4class{taxon} or \linkS4class{TaxonList} instance.
-
-A \linkS4class{Taxon} or \linkS4class{TaxonList} instance.
-
-A \linkS4class{Taxon} or \linkS4class{TaxonList} instance.
-}
+\title{Taxon-classes}
 \description{
-\dQuote{Taxon} is an S4 class that provides a container for records
+\dQuote{\bold{Taxon}} is a (virtual) class that provides a container for records
 retrieved from the NCBI Taxonomy database.
-It is extended by the classes \dQuote{Taxon_minimal} and \dQuote{Lineage}
-with three slots \emph{TaxId}, \emph{ScientificName}, and \emph{Rank},
-and by class \dQuote{Taxon_full}, with the additional slots
-\emph{ParentTaxId}, \emph{OtherName}, \emph{Authority},
+It is extended by the classes \dQuote{\bold{Taxon_minimal}} and
+\dQuote{\bold{Lineage}} with three slots \emph{TaxId}, \emph{ScientificName},
+and \emph{Rank}, and by class \dQuote{\bold{Taxon_full}}, with the additional
+slots \emph{ParentTaxId}, \emph{OtherName}, \emph{Authority},
 \emph{TypeMaterial}, and \emph{Lineage}.
-}
-\details{
-See the documentation at 
-\href{http://www.ncbi.nlm.nih.gov/books/NBK21100/}{NCBI}
-for more information.
 }
 \section{Class hierarchy for Taxon}{
 Sub classes:
@@ -88,7 +36,7 @@ Sub classes:
   \item \code{\link{getRank}}* (1 methods defined for subclasses)
   \item \code{\link{getScientificName}}* (1 methods defined for subclasses)
   \item \code{\link{getTaxId}}* (1 methods defined for subclasses)
-  \item \code{\link{is.na}}* (1 methods defined for subclasses)
+  \item \code{\link{is.na}}
   \item \code{\link{shared}}
   \item \code{\link{show}} (1 methods defined for subclasses)
 }
@@ -120,7 +68,6 @@ Super classes:
   \item \code{\link{getRank}}
   \item \code{\link{getScientificName}}
   \item \code{\link{getTaxId}}
-  \item \code{\link{is.na}}
   \item \code{\link{show}}* (1 methods defined for subclasses)
 }
 

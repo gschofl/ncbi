@@ -97,9 +97,9 @@ parseTSeqSet <- function(tSeqSet = response) {
                         nucleotide=DNAStringSet(xvalue(seq, '//TSeq_sequence')))
     
     ## construct a defline
-    df_gi_db  <- ifelse(is.na(gi), '', 'gi|')
+    df_gi_db  <- base::ifelse(is.na(gi), '', 'gi|')
     df_gi     <- gi %|NA|% ''
-    df_acc_db <- ifelse(is.na(accver), '|', '|gb|')
+    df_acc_db <- base::ifelse(is.na(accver), '|', '|gb|')
     df_acc    <- accver %|NA|% sid
     names(sequence) <- paste0(df_gi_db, df_gi, df_acc_db, df_acc, ' ', defline)
     elementMetadata(sequence) <- DataFrame(gi = gi, accver = accver, sid = sid,

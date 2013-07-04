@@ -12,29 +12,26 @@ NULL
 
 #' TaxonList and LineageList
 #' 
-#' \dQuote{TaxonList} and \dQuote{LineageList} are lists of \linkS4class{Taxon}
-#' and \linkS4class{Lineage} objects, respectively.
+#' \dQuote{\bold{TaxonList}} and \dQuote{\bold{LineageList}
+#' are lists of \linkS4class{Taxon} and \linkS4class{Lineage}
+#' objects, respectively.
 #' 
 #' @importClassesFrom rmisc Collection
 #' @rdname TaxonList
 #' @export
 #' @classHierarchy
 #' @classMethods
-setClass("TaxonList",
-         contains="Collection",
-         representation(),
-         prototype(elementType = "Taxon"),
-         validity=.valid_TaxonList)
+setClass("TaxonList", contains="Collection",
+         prototype = prototype(elementType = "Taxon"),
+         validity = .valid_TaxonList)
 
 #' @rdname TaxonList
 #' @export
 #' @classHierarchy
 #' @classMethods
-setClass("LineageList",
-         contains="Collection",
-         representation(),
-         prototype(elementType = "Taxon"),
-         validity=.valid_LineageList)
+setClass("LineageList", contains="Collection",
+         prototype = prototype(elementType = "Taxon"),
+         validity = .valid_LineageList)
 
 ## Constructors
 #' @importFrom rmisc collectionConstructor
@@ -58,7 +55,7 @@ setMethod("show", "LineageList", function (object) {
 
 
 setMethod("getByRank", "LineageList", function(x, rank, value = NULL) {
-  rank <- match.arg(rank, .ranks)
+  rank <- match.arg(rank, ncbi:::.ranks)
   i <- vapply(x, function (x) which(getRank(x) == rank) %||% NA_integer_, integer(1))
   
   if (!is.null(value)) {
@@ -67,7 +64,7 @@ setMethod("getByRank", "LineageList", function(x, rank, value = NULL) {
   }
   else {
     taxids <- unlist(Map(`[`, x=x, i=i, value='TaxId'))
-    new_taxon_db(taxids, shared(x))
+    new_taxon(taxids, shared(x))
   }
 })
 
@@ -92,7 +89,7 @@ setMethod("getRank", "TaxonList", function(x) {
 
 setMethod("getParentTaxId", "TaxonList", function(x) {
   if (!is(x[[1]], 'Taxon_full'))
-    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+    x <- new_taxon(taxid, shared(x), full = TRUE)
   
   vapply(x, getParentTaxId, character(1))
 })
@@ -100,7 +97,7 @@ setMethod("getParentTaxId", "TaxonList", function(x) {
 
 setMethod("getOtherName", "TaxonList", function(x) {
   if (!is(x[[1]], 'Taxon_full'))
-    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+    x <- new_taxon(taxid, shared(x), full = TRUE)
   
   lapply(x, getOtherName)
 })
@@ -108,7 +105,7 @@ setMethod("getOtherName", "TaxonList", function(x) {
 
 setMethod("getAuthority", "TaxonList", function(x) {
   if (!is(x[[1]], 'Taxon_full'))
-    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+    x <- new_taxon(taxid, shared(x), full = TRUE)
   
   lapply(x, getAuthority)
 })
@@ -116,7 +113,7 @@ setMethod("getAuthority", "TaxonList", function(x) {
 
 setMethod("getLineage", "TaxonList", function(x) {
   if (!is(x[[1]], 'Taxon_full'))
-    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+    x <- new_taxon(taxid, shared(x), full = TRUE)
   
   LineageList(lapply(x, getLineage), shared=shared(x))
 })
@@ -124,7 +121,7 @@ setMethod("getLineage", "TaxonList", function(x) {
 
 setMethod("getByRank", "TaxonList", function(x, rank, value = NULL) {
   if (!is(x[[1]], 'Taxon_full'))
-    x <- new_taxon_db(taxid, shared(x), full = TRUE)
+    x <- new_taxon(taxid, shared(x), full = TRUE)
   
   getByRank(getLineage(x), rank=rank, value=value)
 })

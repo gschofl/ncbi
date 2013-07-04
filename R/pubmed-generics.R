@@ -1,7 +1,6 @@
 
 #' @title PubMed accessors
 #' 
-#' @description
 #' Access the various slots of \code{\link[utils]{bibentry}} instances.
 #' 
 #' @param x A \code{\link[utils]{bibentry}} instance.

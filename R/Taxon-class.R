@@ -12,25 +12,23 @@ NULL
 
 # Class definition - Taxon -----------------------------------------------
 
-
-#' Retrieve records from the NCBI Taxonomy database.
+#' Taxon-classes
 #'
-#' \dQuote{Taxon} is an S4 class that provides a container for records
+#' \dQuote{\bold{Taxon}} is a (virtual) class that provides a container for records
 #' retrieved from the NCBI Taxonomy database.
-#' It is extended by the classes \dQuote{Taxon_minimal} and \dQuote{Lineage}
-#' with three slots \emph{TaxId}, \emph{ScientificName}, and \emph{Rank},
-#' and by class \dQuote{Taxon_full}, with the additional slots
-#' \emph{ParentTaxId}, \emph{OtherName}, \emph{Authority},
+#' It is extended by the classes \dQuote{\bold{Taxon_minimal}} and
+#' \dQuote{\bold{Lineage}} with three slots \emph{TaxId}, \emph{ScientificName},
+#' and \emph{Rank}, and by class \dQuote{\bold{Taxon_full}}, with the additional
+#' slots \emph{ParentTaxId}, \emph{OtherName}, \emph{Authority},
 #' \emph{TypeMaterial}, and \emph{Lineage}.
 #'  
-#' @rdname Taxon
+#' @rdname Taxon-class
 #' @export
 #' @classHierarchy
 #' @classMethods 
-setClass("Taxon",
-         representation(shared = "environment"),
-         prototype(shared = new.env(parent=emptyenv())))
-
+setClass("Taxon", contains = "VIRTUAL",
+         slots = c(shared = "environment"),
+         prototype = prototype(shared = new.env(parent=emptyenv())))
 
 ## extract the shared database environment from objects
 #' @importFrom rmisc shared
@@ -68,24 +66,23 @@ setMethod("shared", "Taxon", function(x, value = NULL) {
 }
 
 
-#' @rdname Taxon
+#' @rdname Taxon-class
 #' @export
 #' @classHierarchy
 #' @classMethods
-setClass("Taxon_minimal",
-         contains="Taxon",
-         representation(TaxId = "character",
-                        ScientificName = "character",
-                        Rank = "character"),
-         prototype(TaxId = NA_character_,
-                   ScientificName = NA_character_,
-                   Rank = NA_character_),
-         validity = .valid_TaxonMinimal)
+new_Taxon_minimal <-
+  setClass("Taxon_minimal", contains = "Taxon",
+           slots = c(TaxId = "character",
+                     ScientificName = "character",
+                     Rank = "character"),
+           prototype = prototype(TaxId = NA_character_,
+                                 ScientificName = NA_character_,
+                                 Rank = NA_character_),
+           validity = .valid_TaxonMinimal)
 
 
 #' @title Taxon accessors
 #' 
-#' @description
 #' Access the slots of \linkS4class{Taxon} or \linkS4class{TaxonList}
 #' instances.
 #' 
@@ -144,32 +141,37 @@ setMethod("is.na", "Taxon", function (x) {
 }
 
 
-#' @rdname Taxon
+#' @rdname Taxon-class
 #' @export
 #' @classHierarchy
 #' @classMethods 
-setClass("Lineage", contains="Taxon_minimal", validity = .valid_Lineage)
+new_Lineage <-
+  setClass("Lineage", contains = "Taxon_minimal", validity = .valid_Lineage)
 
 
 Lineage <- function (..., shared = new.env(parent=emptyenv())) {
   listData <- list(...)
   if (all_empty(listData)) {
-    new('Lineage', shared = shared)
+    new_Lineage(shared = shared)
   }
   else {
     if (length(listData) == 1L && ( is.list(listData[[1L]]) || is.matrix(listData[[1L]] ))) 
       listData <- listData[[1L]]
     if (all(vapply(listData, is, "Taxon", FUN.VALUE=logical(1)))) {
-      new('Lineage', shared = shared,
-          TaxId = vapply(listData, getTaxId, character(1)),
-          ScientificName = vapply(listData, getScientificName, character(1)),
-          Rank = vapply(listData, getRank, character(1)))
+      new_Lineage(
+        shared = shared,
+        TaxId = vapply(listData, getTaxId, character(1)),
+        ScientificName = vapply(listData, getScientificName, character(1)),
+        Rank = vapply(listData, getRank, character(1))
+      )
     }
     else if (all(colnames(listData) %in% c("tax_id", "tax_name", "rank"))) {
-      new('Lineage', shared = shared,
-          TaxId = listData[, "tax_id"] %||% NA_character_,
-          ScientificName = listData[, "tax_name"] %||% NA_character_,
-          Rank = listData[, "rank"] %||% NA_character_)
+      new_Lineage(
+        shared = shared,
+        TaxId = listData[, "tax_id"] %||% NA_character_,
+        ScientificName = listData[, "tax_name"] %||% NA_character_,
+        Rank = listData[, "rank"] %||% NA_character_
+      )
     }
     else {
       stop("All elements in '...' must be 'Taxon' objects or a named list ",
@@ -246,7 +248,7 @@ setMethod("getByRank", "Lineage", function (x, rank, value = NULL, drop = FALSE)
     x[i, value = value, drop = drop]
   }
   else {
-    new_taxon_db(taxid=x[i, value = "TaxId"], shared=shared(x))
+    new_taxon(x[i, value = "TaxId"], shared(x))
   }
 })
 
@@ -266,22 +268,22 @@ setMethod("getByRank", "Lineage", function (x, rank, value = NULL, drop = FALSE)
 #' @slot TypeMaterial
 #' @slot Lineage
 #' 
-#' @rdname Taxon
+#' @rdname Taxon-class
 #' @export
 #' @classHierarchy
 #' @classMethods
-setClass("Taxon_full",
-         contains = "Taxon_minimal",
-         representation(ParentTaxId = "character",
-                        OtherName = "character",
-                        Authority = "character",
-                        TypeMaterial = "character",
-                        Lineage = "Lineage"),
-         prototype(ParentTaxId = NA_character_,
-                   OtherName = NA_character_,
-                   Authority = NA_character_,
-                   TypeMaterial = NA_character_,
-                   Lineage = new("Lineage")))
+new_Taxon_full <- 
+  setClass("Taxon_full", contains = "Taxon_minimal",
+           slots = c(ParentTaxId = "character",
+                     OtherName = "character",
+                     Authority = "character",
+                     TypeMaterial = "character",
+                     Lineage = "Lineage"),
+           prototype = prototype(ParentTaxId = NA_character_,
+                                 OtherName = NA_character_,
+                                 Authority = NA_character_,
+                                 TypeMaterial = NA_character_,
+                                 Lineage = new_Lineage()))
 
 
 .show_Taxon <- function (x, width = getOption("width"), ellipsis = "...") {
@@ -331,9 +333,6 @@ setGeneric("getLineage", function(x, ...) standardGeneric("getLineage"))
 setMethod("getLineage", "Taxon_full", function(x) x@Lineage)
 
 
-#' @rdname Taxon-accessors
-#' @export
-#' @genericMethods
 setMethod("getByRank", "Taxon_full", function (x, rank, value = NULL) {
   getByRank(getLineage(x), rank=rank, value=value)
 })
@@ -341,12 +340,8 @@ setMethod("getByRank", "Taxon_full", function (x, rank, value = NULL) {
 
 # Constructors -----------------------------------------------------------
 
-
-#' @details
-#' See the documentation at 
-#' \href{http://www.ncbi.nlm.nih.gov/books/NBK21100/}{NCBI}
-#' for more information.
-#' 
+#' Retrieve records from the NCBI Taxonomy database (locally or remote)
+#'  
 #' @param taxid \sQuote{taxids} or a valid NCBI search term.
 #' @param rettype Which type of data should be retrieved? Full records
 #' (default: \code{NULL}) or an \sQuote{uilist}. 
@@ -357,12 +352,12 @@ setMethod("getByRank", "Taxon_full", function (x, rank, value = NULL) {
 #'
 #' @return An \linkS4class{XMLInternalDocument} or if parsed a
 #'  \linkS4class{taxon} or \linkS4class{TaxonList} instance.
-#' @rdname Taxon
+#' @rdname taxon-constructors
 #' @export
 #' @autoImports
 taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
   if (missing(taxid)) {
-    return(new("Taxon_full"))
+    return( new_Taxon_full() )
   }
   
   if (is(taxid, "esearch")) {
@@ -390,35 +385,39 @@ taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
 #' and (optionally) geneid.db
 #' @param full Taxon_minimal or Taxon_full
 #' @keywords internal
-new_taxon_db <- function(taxid, shared, full = TRUE) {
-  assert_that(!is.null(shared$taxonDBcon))
+new_taxon <- function(taxid, shared, full = TRUE) {
+  assert_that(!is.null(shared$taxonDBConnection))
+  
   if (full)
-    tx <- lapply(taxid, dbGetTaxon, db=shared)
+    tx <- lapply(taxid, dbGetTaxon, db = shared)
   else
-    tx <- lapply(taxid, dbGetTaxonMinimal, db=shared)
+    tx <- lapply(taxid, dbGetTaxonMinimal, db = shared)
   
   if (length(tx) == 1)
     tx[[1]]
   else
-    TaxonList(tx, shared=shared)
+    TaxonList(tx, shared = shared)
 }
 
 
 #' @param taxid A vector of valid NCBI Taxonomy Identifiers.
-#' @param dbPath Path to a valid Taxon.db 
+#' @param taxon_db A \code{\linkS4class{taxonDBConnection}}.
 #' @param full if \code{FALSE} a minimal taxonomic description is extracted
 #' (TaxId, ScientificName, Rank).
 #'
-#' @return A \linkS4class{Taxon} or \linkS4class{TaxonList} instance.
-#' @rdname Taxon
+#' @rdname taxon-constructors
 #' @export
-taxonDB <- function (taxid, dbPath=NULL, full=TRUE) {
+taxonDB <- function (taxid, taxon_db = NULL, full = TRUE) {
   if (missing(taxid)) {
-    return( new("Taxon_full") )
+    return( new_Taxon_full() )
   }
+  if (is.null(taxon_db)) {
+    taxon_db <- taxonDBConnect(file.path(path.package('ncbi'), 'extdata'))
+  }
+  assert_that(is(taxon_db, "TaxonDBConnection"))
   shared <- new.env(parent=emptyenv())
-  shared$taxonDBcon <- taxonDBConnect(dbPath)
-  new_taxon_db(taxid, shared, full=full)
+  shared$taxonDBConnection <- taxon_db
+  new_taxon(taxid, shared, full = full)
 }
 
 
@@ -428,8 +427,8 @@ taxonDB <- function (taxid, dbPath=NULL, full=TRUE) {
 #' @param full Taxon_minimal or Taxon_full
 #' @keywords internal
 new_taxon_by_geneid <- function(geneid, shared, full=TRUE) {
-  assert_that(!is.null(shared$taxonDBcon))
-  assert_that(!is.null(shared$geneidDBcon))
+  assert_that(!is.null(shared$taxonDBConnection))
+  assert_that(!is.null(shared$geneidDBConnection))
   if (length(getTaxidByGeneID(shared, 2)) == 0)
     stop("'genes' table is empty. Run 'createTaxonDB()' setting 'with_geneid = TRUE'")
   
@@ -446,22 +445,43 @@ new_taxon_by_geneid <- function(geneid, shared, full=TRUE) {
 
 
 #' @param geneid A vector of valid NCBI Gene Identifiers.
-#' @param dbPath 
-#' @param full if \code{FALSE} a minimal taxonomic description is extracted
-#' (TaxId, ScientificName, Rank).
+#' @param geneid_db A \code{\linkS4class{geneidDBConnection}}.
 #'
-#' @return A \linkS4class{Taxon} or \linkS4class{TaxonList} instance.
-#' @rdname Taxon
+#' @details
+#' If no \code{geneid_db} or \code{taxon_db} are provided the databases are
+#' searched in the \code{extdata} directory of the installed \code{ncbi}
+#' package. To create these databases in the default location, run
+#' \code{createTaxonDB(with_geneid = TRUE)}.
+#' 
+#' The \bold{geneid.db} file, however, gets fairly large (currently ~6GB) and
+#' takes a long time to create. It might be advisable to provide a custom 
+#' install path when creating these databases.
+#'
+#' See the documentation at 
+#' \href{http://www.ncbi.nlm.nih.gov/books/NBK21100/}{NCBI}
+#' for more information on the NCBI Taxonomy database.
+#'
+#' @seealso
+#' \code{\link{createTaxonDB}}, \code{\link{updateTaxonDB}}
+#'
+#' @rdname taxon-constructors
 #' @export
-taxonByGeneID <- function (geneid, dbPath=NULL, full=TRUE) {
+taxonByGeneID <- function (geneid, geneid_db = NULL, taxon_db = NULL, full=TRUE) {
   if (missing(geneid)) {
-    return( new("Taxon_full") )
+    return( new_Taxon_full() )
   }
-  
+  if (is.null(taxon_db)) {
+    taxon_db <- taxonDBConnect(file.path(path.package('ncbi'), 'extdata'))
+  }
+  assert_that(is(taxon_db, "TaxonDBConnection"))
+  if (is.null(geneid_db)) {
+    taxon_db <- geneidDBConnect(file.path(path.package('ncbi'), 'extdata'))
+  }
+  assert_that(is(geneid_db, "GeneidDBConnection"))
   shared <- new.env(parent=emptyenv())
-  shared$taxonDBcon <- taxonDBConnect(dbPath)
-  shared$geneidDBcon <- geneidDBConnect(dbPath)
-  new_taxon_by_geneid(geneid, shared, full=full)
+  shared$taxonDBConnection <- taxon_db
+  shared$geneidDBConnection <- geneid_db
+  new_taxon_by_geneid(geneid, shared, full = full)
 }
 
 
@@ -487,10 +507,11 @@ parseTaxon <- function (taxaSet = response) {
   tx <- base::lapply(taxaSet, function (taxon) {
     # taxon <- xmlDoc(taxaSet[[1]])
     taxon <- xmlDoc(taxon)
-    taxMin <- new("Taxon_minimal",
-                  TaxId = xvalue(taxon, '/Taxon/TaxId'),
-                  ScientificName = xvalue(taxon, '/Taxon/ScientificName'),
-                  Rank = xvalue(taxon, '/Taxon/Rank'))
+    taxMin <- new_Taxon_minimal(
+      TaxId = xvalue(taxon, '/Taxon/TaxId'),
+      ScientificName = xvalue(taxon, '/Taxon/ScientificName'),
+      Rank = xvalue(taxon, '/Taxon/Rank')
+    )
     ParentTaxId <- xvalue(taxon, '/Taxon/ParentTaxId')
     nm <- xname(taxon, '//OtherNames/*')
     obj <- xvalue(taxon, '//OtherNames/*')[nm != "Name"]
@@ -502,15 +523,16 @@ parseTaxon <- function (taxaSet = response) {
     Lineage <- Lineage(
       base::lapply(getNodeSet(taxon, "//LineageEx/Taxon"), function (l) {
         l <- xmlDoc(l)
-        new("Taxon_minimal",
-            TaxId = xvalue(l, '/Taxon/TaxId'),
-            ScientificName = xvalue(l, '/Taxon/ScientificName'),
-            Rank = xvalue(l, '/Taxon/Rank'))
+        new_Taxon_minimal(
+          TaxId = xvalue(l, '/Taxon/TaxId'),
+          ScientificName = xvalue(l, '/Taxon/ScientificName'),
+          Rank = xvalue(l, '/Taxon/Rank')
+        )
       }))
     free(taxon)
-    new("Taxon_full", taxMin, ParentTaxId = ParentTaxId,
-        OtherName = OtherName, Authority = Authority,
-        TypeMaterial = TypeMaterial, Lineage = Lineage)
+    new_Taxon_full(taxMin, ParentTaxId = ParentTaxId,
+                   OtherName = OtherName, Authority = Authority,
+                   TypeMaterial = TypeMaterial, Lineage = Lineage)
   })
   
   if (length(tx) == 1)
