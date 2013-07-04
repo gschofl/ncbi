@@ -4,14 +4,14 @@
 \alias{updateTaxonDB}
 \title{Create a local install of the NCBI Taxonomy database.}
 \usage{
-  createTaxonDB(dbPath = file.path(path.package("ncbi"), "extdata"),
+  createTaxonDB(db_path = file.path(path.package("ncbi"), "extdata"),
     with_geneid = TRUE)
 
   updateTaxonDB(dbPath = file.path(path.package("ncbi"), "extdata"),
     with_geneid = TRUE)
 }
 \arguments{
-  \item{dbPath}{Source directory for SQLite database files.}
+  \item{db_path}{Parent directory for SQLite database files.}
 
   \item{with_geneid}{Include mappings of Gene ID to Taxonomy ID (very large table!)}
 }
@@ -21,5 +21,8 @@ Create a local install of the NCBI Taxonomy database.
 }
 \details{
 From the commandline:
-\code{R -q -e "require(ncbi);createTaxonDB('/path/to/db')"}
+\code{R -q -e "require(ncbi); createTaxonDB('/path/to/db')"}
+}
+\seealso{
+\code{\link{taxonDBConnext}}, \code{\link{geneidDBConnext}}
 }

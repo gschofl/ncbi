@@ -1,7 +1,7 @@
 Package: ncbi
 Type: Package
 Title: Retrieve data from NCBI.
-Version: 0.1.1
+Version: 0.1.2
 Date: 2012-11-13
 Authors@R: person("Gerhard", "Schöfl", role=c("aut","cre"),
     email="gschofl@yahoo.de")

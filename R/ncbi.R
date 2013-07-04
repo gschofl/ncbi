@@ -1,10 +1,17 @@
 #' Retrieve data from NCBI.
 #'
-#' @section description:
-#' 
 #'   Important functions:
 #'   \itemize{
-#'    
+#'     \item \code{\link{taxon}}: Retrieve taxonomy records remotely from NCBI's
+#'     \emph{Taxonomy} database.
+#'     \item \code{\link{craeateTaxonDB}}: Install NCBI's \emph{Taxonomy}
+#'     database locally.
+#'     \item \code{\link{taxonDBConnect}}: Connect to a local install of the
+#'     \emph{Taxonomy} database.
+#'     \item \code{\link{taxonDB}}: Retrieve records from a local install of
+#'     the \emph{Taxonomy} database.
+#'     \item \code{\link{taxonByGeneID}}: Retrieve records from a local install of
+#'     the \emph{Taxonomy} database via NCBI GI numbers.
 #'     \item \code{\link{pubmed}}: Retrieve records from the \emph{PubMed}
 #'     database.
 #'     \item \code{\link{protein}}: Retrieve records from the \emph{protein}
@@ -15,11 +22,6 @@
 #'     \emph{nucgss} database.   
 #'     \item \code{\link{EST}}: Retrieve records from the
 #'     \emph{nucest} database.        
-#'     \item \code{\link{taxon}}: Retrieve records from the
-#'     \emph{Taxonomy} database.
-#'     \item \code{\link{taxonDB}}: Retrieve records from a local install of
-#'     the \emph{Taxonomy} database.    
-#'     
 #'   }
 #'   
 #' @author Gerhard Schöfl \email{gschofl@@yahoo.de}

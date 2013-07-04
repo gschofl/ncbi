@@ -9,8 +9,9 @@
   TaxonList(..., shared = new.env(parent = emptyenv()))
 }
 \description{
-\dQuote{TaxonList} and \dQuote{LineageList} are lists of \linkS4class{Taxon}
-and \linkS4class{Lineage} objects, respectively.
+\dQuote{\bold{TaxonList}} and \dQuote{\bold{LineageList}
+are lists of \linkS4class{Taxon} and \linkS4class{Lineage}
+objects, respectively.
 }
 \section{Class hierarchy for TaxonList}{
 Super classes:
@@ -25,11 +26,15 @@ Super classes:
 
 \section{Generics with methods for TaxonList}{
 \itemize{
+  \item \code{\link{getAuthority}}
   \item \code{\link{getByRank}}
   \item \code{\link{getLineage}}
+  \item \code{\link{getOtherName}}
+  \item \code{\link{getParentTaxId}}
   \item \code{\link{getRank}}
   \item \code{\link{getScientificName}}
   \item \code{\link{getTaxId}}
+  \item \code{\link{is.na}}
   \item \code{\link{show}}
   \item \code{\link{table}}
 }

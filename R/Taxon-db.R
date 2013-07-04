@@ -12,18 +12,20 @@ NULL
 NULL
 #' @importClassesFrom DBI DBIObject DBIConnection
 
-.valid_TaxonDB <- function (object) {
+.valid_TaxonDBConnection <- function (object) {
   errors <- character()
   if (!all(c("nodes", "names") %in% dbListTables(object))) {
     errors <- c(errors, "Table missing from 'TaxonDB'\n")
   }
-  if (!all(c("tax_id", "parent_id", "rank", "embl_code", "division_id")
-           %in% dbListFields(object, "nodes"))) {
-    errors <- c(errors, "Field missing from table 'nodes'\n")
-  }
-  if (!all(c("tax_id", "tax_name", "unique_name", "class")
-           %in% dbListFields(object, "names"))) {
-    errors <- c(errors, "Field missing from table 'names'\n")
+  else {
+    if (!all(c("tax_id", "parent_id", "rank", "embl_code", "division_id")
+             %in% dbListFields(object, "nodes"))) {
+      errors <- c(errors, "Field missing from table 'nodes'\n")
+    }
+    if (!all(c("tax_id", "tax_name", "unique_name", "class")
+             %in% dbListFields(object, "names"))) {
+      errors <- c(errors, "Field missing from table 'names'\n")
+    }
   }
   
   if (length(errors) == 0L)
@@ -32,11 +34,10 @@ NULL
     errors
 }
 
-
-#' TaxonDB-class
+#' Database Connections
 #' 
-#' \sQuote{\code{TaxonDB}} is an S4 class that represents a connection
-#' to an SQLite database holding the NCBI taxonomy organised in two tables:
+#' \sQuote{\bold{TaxonDBConnection}}: A connection to an SQLite database
+#' containing the NCBI taxonomy organised in two tables:
 #' 
 #' \bold{nodes} with fields:
 #' 
@@ -57,33 +58,66 @@ NULL
 #'    \item class         VARCHAR(50)
 #' }
 #' 
+#' \sQuote{\bold{GeneidDBConnection}}: A connection to an SQLite database
+#' linking NCBI Gene IDs to TaxIds.
+#' 
+#' 
 #' @seealso
-#'  The constructor \code{\link{TaxonDB}}.  
-#' @name TaxonDB-class
-#' @rdname TaxonDB-class
-#' @exportClass TaxonDB
-setClass('TaxonDB', contains='SQLiteConnection', validity=.valid_TaxonDB)
+#'  The constructors \code{\link{taxonDBConnect}}, \code{\link{geneidDBConnect}}.  
+#'
+#' @rdname Connection-classes
+#' @export
+#' @classHierarchy
+#' @classMethods 
+new_TaxonDBConnection <- setClass('TaxonDBConnection',
+                                  contains = 'SQLiteConnection',
+                                  validity = .valid_TaxonDBConnection)
 
 
-#' @keywords internal
+#' Create a connection to a local NCBI Taxonomy or Gene ID database
+#' 
+#' @param db_path Path to the taxonomy or gene ID database. If \code{NULL} the
+#' databases are looked for in the \code{extdata} directory of the
+#' installed \code{ncbi} package. This is the place where they are installed
+#' by default by \code{\link{createTaxonDB}}.
+#'
+#' @return A \code{\linkS4class{TaxonDBConnection}} or a
+#' \code{\linkS4class{GeneidDBConnection}}, respectively
+#'    
+#' @seealso
+#' \code{\link{taxonDB}}, \code{\link{taxonByGeneID}}, 
+#'
+#' @importFrom assertthat is.dir
+#' @rdname taxonDBConnect
+#' @export
 taxonDBConnect <- function (db_path = NULL) {
   if (is.null(db_path)) {
     db_path <- file.path(path.package("ncbi"), "extdata")
   }
-  db_path <- strip_ext(db_path, "/taxon.db")
-  taxondb <- normalizePath(file.path(db_path, "taxon.db"), mustWork=TRUE)
-  con <- db_connect(taxondb, paste0("Run 'createTaxonDB()' for a local ",
-                                    "install of the NCBI Taxonomy database"))
-  new('TaxonDB', con)
+  errmsg <- paste0("Cannot find a local installation of the the NCBI ",
+                   "Taxonomy database in the directory ", sQuote(db_path),
+                   "\nSpecify the exact path to the database or run the ",
+                   "command 'createTaxonDB()'")
+  if (is.dir(db_path)) {
+    taxon_db <- normalizePath(dir(db_path, pattern="taxon.db", full.names=TRUE),
+                              mustWork=FALSE)
+    if (all_empty(taxon_db))
+      stop(errmsg, call.=FALSE)
+  }
+  else {
+    taxon_db <- normalizePath(db_path, mustWork=TRUE)
+  }
+  conn <- db_connect(taxon_db)
+  new_TaxonDBConnection(conn)
 }
 
 
-.valid_GeneidDB <- function (object) {
+.valid_GeneidDBConnection <- function (object) {
   errors <- character()
   if (!"genes" %in% dbListTables(object)) {
     errors <- c(errors, "Table missing from 'GeneidDB'\n")
   }
-  if (!"tax_id" %in% dbListFields(object, "genes")) {
+  else if (!"tax_id" %in% dbListFields(object, "genes")) {
     errors <- c(errors, "Field missing from table 'genes'\n")
   }
   
@@ -93,23 +127,34 @@ taxonDBConnect <- function (db_path = NULL) {
     errors
 }
 
-#' @name GeneidDB-class
-#' @rdname GeneidDB-class
-#' @exportClass GeneidDB
-setClass('GeneidDB', contains='SQLiteConnection', validity=.valid_GeneidDB)
+#' @rdname Connection-classes
+#' @export
+new_GeneidDBConnection <- setClass('GeneidDBConnection',
+                                  contains = 'SQLiteConnection',
+                                  validity = .valid_GeneidDBConnection)
 
 
-#' @keywords internal
+#' @rdname taxonDBConnect 
+#' @export
 geneidDBConnect <- function (db_path = NULL) {
   if (is.null(db_path)) {
     db_path <- file.path(path.package("ncbi"), "extdata")
   }
-  db_path <- strip_ext(db_path, "/geneid.db")
-  geneiddb <- normalizePath(file.path(db_path, "geneid.db"), mustWork=TRUE)
-  con <- db_connect(geneiddb,  paste0("Run 'createTaxonDB(with_geneid = TRUE)' ",
-                                      "for a local install of the GI_to_TaxId ",
-                                      "database"))
-  new('GeneidDB', con)
+  errmsg <- paste0("Cannot find a local installation of the the GI_to_TaxId ",
+                   "database in the directory ", sQuote(db_path),
+                   "\nSpecify the exact path to the database or run the ",
+                   "command 'createTaxonDB(with_geneid = TRUE)'")
+  if (is.dir(db_path)) {
+    geneid_db <- normalizePath(dir(db_path, pattern="geneid.db", full.names=TRUE),
+                              mustWork=FALSE)
+    if (all_empty(geneid_db))
+      stop(errmsg, call.=FALSE)
+  }
+  else {
+    geneid_db <- normalizePath(db_path, mustWork=TRUE)
+  }
+  conn <- db_connect(geneid_db)
+  new_GeneidDBConnection(conn)
 }
 
 
@@ -144,17 +189,21 @@ CREATE INDEX Dnames on names (tax_id);
 #' 
 #' @details
 #' From the commandline:
-#' \code{R -q -e "require(ncbi);createTaxonDB('/path/to/db')"}
+#' \code{R -q -e "require(ncbi); createTaxonDB('/path/to/db')"}
 #
-#' @param dbPath Source directory for SQLite database files.
+#' @param db_path Parent directory for SQLite database files.
 #' @param with_geneid Include mappings of Gene ID to Taxonomy ID (very large table!)
+#'
+#' @seealso
+#' \code{\link{taxonDBConnext}}, \code{\link{geneidDBConnext}}
+#'
 #' @rdname TaxonDB
 #' @export
-createTaxonDB <- function(dbPath = file.path(path.package("ncbi"), "extdata"),
+createTaxonDB <- function(db_path = file.path(path.package("ncbi"), "extdata"),
                           with_geneid = TRUE) {
-  make_taxondb(dbPath, update=FALSE)
+  make_taxondb(db_path, update=FALSE)
   if (with_geneid)
-    make_geneiddb(dbPath, update=FALSE)
+    make_geneiddb(db_path, update=FALSE)
   return(TRUE)
 }
 
@@ -315,114 +364,125 @@ db_load <- function(con, dbPath, type = "taxon") {
   }
 }
 
-#db <- shared
-#taxId <- taxid[1]
+
 dbGetTaxon <- function(db, taxId) {
   node <- dbGetNode(db, taxId)
-  new("Taxon_full", shared = db,
-      TaxId = node[["tax_id"]] %||% NA_character_,
-      ScientificName = node[["tax_name"]] %||% NA_character_,
-      Rank = node[["rank"]] %||% NA_character_,
-      ParentTaxId = node[["parent_id"]] %||% NA_character_,
-      OtherName = dbGetOtherName(db, taxId),
-      Authority = dbGetAuthority(db, taxId),
-      TypeMaterial = dbGetTypeMaterial(db, taxId),
-      Lineage = dbGetLineage(db, taxId))
+  new_Taxon_full(
+    shared = db,
+    TaxId = node[["tax_id"]] %||% NA_character_,
+    ScientificName = node[["tax_name"]] %||% NA_character_,
+    Rank = node[["rank"]] %||% NA_character_,
+    ParentTaxId = node[["parent_id"]] %||% NA_character_,
+    OtherName = dbGetOtherName(db, taxId),
+    Authority = dbGetAuthority(db, taxId),
+    TypeMaterial = dbGetTypeMaterial(db, taxId),
+    Lineage = dbGetLineage(db, taxId)
+  )
 }
 
 
 dbGetTaxonByGeneID <- function(db, geneid) {
   taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0)
-    new("Taxon_full", shared = db)
+    new_Taxon_full(shared = db)
   else
     dbGetTaxon(db, taxid)
 }
 
 
 dbGetTaxonMinimal <- function(db, taxId) {
+  conn <- db$taxonDBConnection
   taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_id, tax_name, rank FROM nodes JOIN names USING ( tax_id ) ",
                 "WHERE tax_id = ", taxId, " AND class = 'scientific name'") 
-  data <- db_query(db$taxonDBcon, sql)
-  new("Taxon_minimal", shared = db,
-      TaxId = data[["tax_id"]] %||% NA_character_,
-      ScientificName = data[["tax_name"]] %||% NA_character_,
-      Rank = data[["rank"]] %||% NA_character_)
+  data <- db_query(conn, sql)
+  new_Taxon_minimal(
+    shared = db,
+    TaxId = data[["tax_id"]] %||% NA_character_,
+    ScientificName = data[["tax_name"]] %||% NA_character_,
+    Rank = data[["rank"]] %||% NA_character_)
 }
 
 
 dbGetTaxonMinimalByGeneID <- function(db, geneid) {
   taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0)
-    new("Taxon_full", shared = db)
+    new_Taxon_minimal(shared = db)
   else
     dbGetTaxonMinimal(db, taxid)
 }
 
 
 getTaxidByGeneID <- function(db, geneid) {
+  conn <- db$geneidDBConnection 
   geneid <- geneid %|na|% 0
   sql <- paste0("SELECT tax_id FROM genes WHERE rowid = ", geneid)
-  db_query(db$geneidDBcon, sql, 1)
+  db_query(conn, sql, 1)
 }
 
 
 dbGetParentTaxId <- function(db, taxId) {
+  conn <- db$taxonDBConnection 
   taxId <- taxId %|na|% 0
   sql <- paste0("SELECT parent_id FROM nodes WHERE tax_id = ", taxId)
-  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
+  db_query(conn, sql, 1) %||% NA_character_
 }
 
 
 dbGetScientificName <- function(db, taxId) {
+  conn <- db$taxonDBConnection 
   taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxId,
                 " AND class = 'scientific name'")
-  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
+  db_query(conn, sql, 1) %||% NA_character_
 }
 
 
 dbGetOtherName <- function(db, taxId) {
+  conn <- db$taxonDBConnection 
   taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxId,
                 " AND class != 'scientific name' AND class != 'type material'",
                 " AND class != 'authority'")
-  data <- db_query(db$taxonDBcon, sql)
+  data <- db_query(conn, sql)
   setNames(data[["tax_name"]], nm=camelise(data[["class"]])) %||% NA_character_
 }
 
 
 dbGetTypeMaterial <- function(db, taxId) {
+  conn <- db$taxonDBConnection 
   taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxId,
                 " AND class = 'type material'")
-  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
+  db_query(conn, sql, 1) %||% NA_character_
 }
 
 
 dbGetAuthority <- function(db, taxId) {
+  conn <- db$taxonDBConnection 
   taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxId,
                 " AND class = 'authority'")
-  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
+  db_query(conn, sql, 1) %||% NA_character_
 }
 
 
 dbGetRank <- function(db, taxId) {
+  conn <- db$taxonDBConnection 
   taxId <- taxId %|na|% 0
   sql <- paste0("SELECT rank FROM nodes WHERE tax_id = ", taxId)
-  db_query(db$taxonDBcon, sql, 1) %||% NA_character_
+  db_query(conn, sql, 1) %||% NA_character_
 }
 
 
 #' @return TaxId, ParentId, ScientificName, Rank
 dbGetNode <- function(db, taxId) {
+  conn <- db$taxonDBConnection 
   taxId <- taxId %|na|% 0
   sql <- paste0("SELECT tax_id, parent_id, tax_name, rank FROM nodes JOIN names",
                 " USING ( tax_id ) WHERE tax_id = ", taxId,
                 " AND class = 'scientific name'")
-  db_query(db$taxonDBcon, sql)
+  db_query(conn, sql)
 }
 
 
