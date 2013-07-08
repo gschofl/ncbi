@@ -15,6 +15,10 @@ installed \code{ncbi} package. This is the place where they are installed
 by default by \code{\link{createTaxonDB}}.}
 }
 
+\value{
+A \code{\linkS4class{TaxonDBConnection}} or a
+\code{\linkS4class{GeneidDBConnection}}, respectively
+}
 \description{
 Create a connection to a local NCBI Taxonomy or Gene ID database
 }
