@@ -1,6 +1,6 @@
 #' @importFrom rmisc db_create db_connect db_disconnect db_query db_count
 NULL
-#' @importFrom rmisc db_bulk_insert trim compact "%has_tables%"
+#' @importFrom rmisc db_bulk_insert trim compact "%has_tables%" check_timestamp
 NULL
 #' @importFrom RCurl basicTextGatherer curlPerform curlOptions CFILE close
 NULL
@@ -189,100 +189,98 @@ CREATE INDEX Dnames on names (tax_id);
 #' 
 #' @details
 #' From the commandline:
-#' \code{R -q -e "require(ncbi); createTaxonDB('/path/to/db')"}
+#' \code{R -q -e "require(ncbi); createTaxonDB('/path/to/db');createGeneidDB('/path/to/db')"}
 #
 #' @param db_path Parent directory for SQLite database files.
-#' @param with_geneid Include mappings of Gene ID to Taxonomy ID (very large table!)
-#'
+#' 
 #' @seealso
 #' \code{\link{taxonDBConnext}}, \code{\link{geneidDBConnext}}
 #'
 #' @rdname TaxonDB
 #' @export
-createTaxonDB <- function(db_path = file.path(path.package("ncbi"), "extdata"),
-                          with_geneid = TRUE) {
+createTaxonDB <- function(db_path = file.path(path.package("ncbi"), "extdata")) {
   make_taxondb(db_path, update=FALSE)
-  if (with_geneid)
-    make_geneiddb(db_path, update=FALSE)
-  return(TRUE)
 }
 
 
 #' @rdname TaxonDB
 #' @export
-updateTaxonDB <- function(dbPath = file.path(path.package("ncbi"), "extdata"),
-                          with_geneid = TRUE) {
-  make_taxondb(dbPath, update=TRUE)
-  if (with_geneid)
-    make_geneiddb(dbPath, update=TRUE)
-  return(TRUE)
+updateTaxonDB <- function(db_path = file.path(path.package("ncbi"), "extdata")) {
+  make_taxondb(db_path, update=TRUE)
 }
 
 
-make_taxondb <- function (dbPath = file.path(path.package("ncbi"), "extdata"),
+#' @rdname TaxonDB
+#' @export
+createGeneidDB <- function(db_path = file.path(path.package("ncbi"), "extdata")) {
+  make_geneiddb(db_path, update=FALSE)
+}
+
+
+make_taxondb <- function (db_path = file.path(path.package("ncbi"), "extdata"),
                           update = FALSE)
 { 
-  dbName <- normalizePath(file.path(dbPath, "taxon.db"), mustWork=FALSE)  
+  db_name <- normalizePath(file.path(db_path, "taxon.db"), mustWork=FALSE)  
   zip <- "taxdmp.zip"
-  zipPath <- normalizePath(file.path(dbPath, zip), mustWork=FALSE)
+  zip_path <- normalizePath(file.path(db_path, zip), mustWork=FALSE)
   if (update) {
-    status <- db_fetch(dbPath, zip, check_timestamp=TRUE)
+    status <- db_fetch(db_path, zip, check_timestamp=TRUE)
     if (is.null(status))
-      return( dbName )
+      return( db_name )
   } else {
-    db_fetch(dbPath, zip, check_timestamp=FALSE)
+    db_fetch(db_path, zip, check_timestamp=FALSE)
   }
-  con <- db_create(dbName, taxon_db.sql)
+  con <- db_create(db_name, taxon_db.sql)
   on.exit(db_disconnect(con))
   assert_that(con %has_tables% c("nodes", "names"))
-  db_load(con, dbPath, "taxon")
+  db_load(con, db_path, "taxon")
 }
 
 
-make_geneiddb <- function (dbPath = file.path(path.package("ncbi"), "extdata"),
+make_geneiddb <- function (db_path = file.path(path.package("ncbi"), "extdata"),
                            update = FALSE)
 {
-  dbName <- normalizePath(file.path(dbPath, "geneid.db"), mustWork=FALSE)  
+  db_name <- normalizePath(file.path(db_path, "geneid.db"), mustWork=FALSE)  
   if (update) {
     zip <- c("gi_taxid_nucl_diff.zip","gi_taxid_prot_diff.zip")
-    return( dbName )
+    return( db_name )
     # TODO IMPLEMENT
   } else {
     zip <- c("gi_taxid_nucl.zip","gi_taxid_prot.zip")
-    zipPath <- normalizePath(file.path(dbPath, zip), mustWork=FALSE)
+    zip_path <- normalizePath(file.path(db_path, zip), mustWork=FALSE)
     
-    db_fetch(dbPath, zip, check_timestamp=TRUE)
+    db_fetch(db_path, zip, check_timestamp=TRUE)
     
     dmp <- c("gi_taxid_nucl.dmp","gi_taxid_prot.dmp","gi_index.dmp")
-    dmpPath <- normalizePath(file.path(dbPath, dmp))
-    unlink(dmpPath[file.exists(dmpPath)]) ## unlink existing dump files
+    dmp_path <- normalizePath(file.path(db_path, dmp))
+    unlink(dmp_path[file.exists(dmp_path)]) ## unlink existing dump files
     message("Extracting gi_taxid_nucl.zip ...")
-    system(paste("gunzip -c", zipPath[1], ">", dmpPath[1]))
+    system(paste("gunzip -c", zip_path[1], ">", dmp_path[1]))
     message("Extracting gi_taxid_prot.zip ...")
-    system(paste("gunzip -c", zipPath[2], ">", dmpPath[2]))
+    system(paste("gunzip -c", zip_path[2], ">", dmp_path[2]))
     message("Generating 'gi_index' ...")
-    index_gi_taxid(dmpPath[1], dmpPath[2], dmpPath[3])
+    index_gi_taxid(dmp_path[1], dmp_path[2], dmp_path[3])
   }
-  con <- db_create(dbName, geneid_db.sql)
+  con <- db_create(db_name, geneid_db.sql)
   on.exit(db_disconnect(con))
-  success <- db_load(con, dbPath, "geneid")
+  success <- db_load(con, db_path, "geneid")
   if (success) {
     message("Successfully loaded ", db_count(con, "genes"), " rows into 'genes' table")
   } else {
     message("Error: ", success)
   }
   
-  return( dbName )
+  return( db_name )
 }
 
 
-db_fetch <- function(dbPath, zip, check_timestamp = FALSE, verbose = FALSE) {
+db_fetch <- function(db_path, zip, check_timestamp = FALSE, verbose = FALSE) {
   
-  if (!file.exists(dbPath)) {
-    dir.create(dbPath, recursive=TRUE)
+  if (!file.exists(db_path)) {
+    dir.create(db_path, recursive=TRUE)
   }
   
-  datafiles <- normalizePath(file.path(dbPath, zip), mustWork=FALSE)
+  datafiles <- normalizePath(file.path(db_path, zip), mustWork=FALSE)
   for (file in datafiles)
     status <- db_update( file, check_timestamp, verbose )
   
@@ -290,45 +288,38 @@ db_fetch <- function(dbPath, zip, check_timestamp = FALSE, verbose = FALSE) {
 }
 
 
-db_update <- function (file, check_timestamp = FALSE, verbose = FALSE) {
-  ncbi_data_url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
-  url <- paste0(ncbi_data_url, "/", basename(file))
+db_update <- function (file, check = FALSE, verbose = FALSE) {
+  ncbi_base_url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
+  url <- paste0(ncbi_base_url, "/", basename(file))
   
-  if (check_timestamp && file.exists(file)) {
-    local_time <- file.info(file)$ctime
-    h <- basicTextGatherer()
-    curlPerform(url=url, nobody=TRUE, filetime=TRUE,
-                headerfunction=h$update, verbose=FALSE)
-    pt <- "Last-Modified: "
-    remote_time <- as.POSIXct(
-      strptime(base::sub(pt, "", grep(pt, strsplit(h$value(), "\r\n")[[1]], value=TRUE)),
-               format="%a, %d %b %Y %H:%M:%S GMT", tz="GMT")
-    )
-    if (remote_time < local_time) {
-      message("Local file is more recent than remote file.")
+  ## check_timestamp returns TRUE if the remote source is more recent
+  ## than the local file 
+  if (check && !check_timestamp(url, file, TRUE)) {
+    ## if check and remote source is older than the local file
+    ## do nothing
       return(NULL)
+  }
+  else {
+    opts <- curlOptions(noprogress=FALSE)
+    f <- CFILE(file, mode="wb")
+    on.exit(RCurl::close(f))
+    status <- curlPerform(url = url, .opts = opts, writedata = f@ref,
+                          verbose = verbose)
+    if (status != 0) {
+      stop("Curl error code: ", status)
     }
+    return(status)
   }
-
-  opts <- curlOptions(noprogress=FALSE)
-  f <- CFILE(file, mode="wb")
-  on.exit(RCurl::close(f))
-  status <- curlPerform(url = url, .opts = opts, writedata = f@ref,
-                        verbose = verbose)
-  if (status != 0) {
-    stop("Curl error code: ", status)
-  }
-  return(status)
 }
 
 
-db_load <- function(con, dbPath, type = "taxon") {
+db_load <- function(con, db_path, type = "taxon") {
   if (type == "taxon")
   {
-    zipfile <- normalizePath(file.path(dbPath, "taxdmp.zip"))
+    zipfile <- normalizePath(file.path(db_path, "taxdmp.zip"))
     files <- c("nodes.dmp", "names.dmp")
-    unzip(zipfile, files, exdir=dbPath)
-    dmp <- normalizePath(file.path(dbPath, c("nodes.dmp", "names.dmp")), mustWork=TRUE)
+    unzip(zipfile, files, exdir=db_path)
+    dmp <- normalizePath(file.path(db_path, c("nodes.dmp", "names.dmp")), mustWork=TRUE)
     if ( db_bulk_insert(con, "nodes", 
                         df=as.data.frame(readNodes(dmp[1]), stringsAsFactors=FALSE)) )
     {
@@ -346,10 +337,13 @@ db_load <- function(con, dbPath, type = "taxon") {
   }
   else if (type == "geneid")
   {
-    fn <- normalizePath(file.path(dbPath, "gi_index.dmp"))
+    fn <- normalizePath(file.path(db_path, "gi_index.dmp"))
     message("Loading 'gi_index'. This will take a while ...")
-    if ( length(getTaxidByGeneID(con, 1)) != 0 )
+    db <- list(geneidDBConnection = con)
+    
+    if ( length(getTaxidByGeneID(db, 1)) != 0 )
       dbSendQuery(con, "DELETE FROM genes")
+    
     rc <- try({
       conId <- con@Id
       sep <- ","
