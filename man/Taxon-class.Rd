@@ -37,7 +37,6 @@ Sub classes:
   \item \code{\link{getScientificName}}* (1 methods defined for subclasses)
   \item \code{\link{getTaxId}}* (1 methods defined for subclasses)
   \item \code{\link{is.na}}
-  \item \code{\link{shared}}
   \item \code{\link{show}} (1 methods defined for subclasses)
 }
 
