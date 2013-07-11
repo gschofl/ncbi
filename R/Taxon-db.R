@@ -1,6 +1,8 @@
-#' @importFrom rmisc db_create db_connect db_disconnect db_query db_count
+#' @importFrom rmisc db_create db_connect db_disconnect db_query db_count 
 NULL
-#' @importFrom rmisc db_bulk_insert trim compact "%has_tables%" check_timestamp
+#' @importFrom rmisc db_bulk_insert trim compact check_timestamp
+NULL
+#' @importFrom rmisc is.empty "%|na|%" "%has_tables%"
 NULL
 #' @importFrom RCurl basicTextGatherer curlPerform curlOptions CFILE close
 NULL
@@ -293,7 +295,7 @@ db_update <- function (file, check = FALSE, verbose = FALSE) {
   url <- paste0(ncbi_base_url, "/", basename(file))
   
   ## check_timestamp returns TRUE if the remote source is more recent
-  ## than the local file 
+  ## than the local file or the local file does not exist.
   if (check && !check_timestamp(url, file, TRUE)) {
     ## if check and remote source is older than the local file
     ## do nothing

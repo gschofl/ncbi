@@ -26,7 +26,6 @@ Super classes:
 
 \section{Generics with methods for TaxonList}{
 \itemize{
-  \item \code{\link{coerce<-}}
   \item \code{\link{getAuthority}}
   \item \code{\link{getByRank}}
   \item \code{\link{getLineage}}
