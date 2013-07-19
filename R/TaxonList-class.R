@@ -69,11 +69,11 @@ setMethod("getByRank", "LineageList", function(x, rank, value = NULL) {
 })
 
 
-setMethod("getTaxId", "TaxonList", function (x, use.names = FALSE) {
+setMethod("getTaxID", "TaxonList", function (x, use.names = FALSE) {
   if (use.names)
-    setNames(vapply(x, getTaxId, character(1)), nm=getScientificName(x))
+    setNames(vapply(x, getTaxID, character(1)), nm=getScientificName(x))
   else 
-    vapply(x, getTaxId, character(1))
+    vapply(x, getTaxID, character(1))
 })
 
 
@@ -87,11 +87,11 @@ setMethod("getRank", "TaxonList", function(x) {
 })
 
 
-setMethod("getParentTaxId", "TaxonList", function(x) {
+setMethod("getParentTaxID", "TaxonList", function(x) {
   if (!is(x[[1]], 'Taxon_full'))
     x <- new_taxon(taxid, shared(x), full = TRUE)
   
-  vapply(x, getParentTaxId, character(1))
+  vapply(x, getParentTaxID, character(1))
 })
 
 

@@ -30,10 +30,10 @@ Super classes:
   \item \code{\link{getByRank}}
   \item \code{\link{getLineage}}
   \item \code{\link{getOtherName}}
-  \item \code{\link{getParentTaxId}}
+  \item \code{\link{getParentTaxID}}
   \item \code{\link{getRank}}
   \item \code{\link{getScientificName}}
-  \item \code{\link{getTaxId}}
+  \item \code{\link{getTaxID}}
   \item \code{\link{is.na}}
   \item \code{\link{show}}
   \item \code{\link{table}}
