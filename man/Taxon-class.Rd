@@ -32,11 +32,12 @@ Sub classes:
   \item \code{\link{getByRank}}* (2 methods defined for subclasses)
   \item \code{\link{getLineage}}* (1 methods defined for subclasses)
   \item \code{\link{getOtherName}}* (1 methods defined for subclasses)
-  \item \code{\link{getParentTaxId}}* (1 methods defined for subclasses)
+  \item \code{\link{getParentTaxID}}* (1 methods defined for subclasses)
   \item \code{\link{getRank}}* (1 methods defined for subclasses)
   \item \code{\link{getScientificName}}* (1 methods defined for subclasses)
-  \item \code{\link{getTaxId}}* (1 methods defined for subclasses)
+  \item \code{\link{getTaxID}}* (1 methods defined for subclasses)
   \item \code{\link{is.na}}
+  \item \code{\link{shared}}
   \item \code{\link{show}} (1 methods defined for subclasses)
 }
 
@@ -63,10 +64,10 @@ Super classes:
   \item \code{\link{getByRank}}* (2 methods defined for subclasses)
   \item \code{\link{getLineage}}* (1 methods defined for subclasses)
   \item \code{\link{getOtherName}}* (1 methods defined for subclasses)
-  \item \code{\link{getParentTaxId}}* (1 methods defined for subclasses)
+  \item \code{\link{getParentTaxID}}* (1 methods defined for subclasses)
   \item \code{\link{getRank}}
   \item \code{\link{getScientificName}}
-  \item \code{\link{getTaxId}}
+  \item \code{\link{getTaxID}}
   \item \code{\link{show}}* (1 methods defined for subclasses)
 }
 
@@ -106,7 +107,7 @@ Super classes:
   \item \code{\link{getByRank}}
   \item \code{\link{getLineage}}
   \item \code{\link{getOtherName}}
-  \item \code{\link{getParentTaxId}}
+  \item \code{\link{getParentTaxID}}
 }
 
 }

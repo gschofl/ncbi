@@ -1,24 +1,24 @@
 % Built by roxygen3 0.1
-\name{getTaxId}
+\name{getTaxID}
 \alias{getAuthority}
 \alias{getLineage}
 \alias{getOtherName}
-\alias{getParentTaxId}
+\alias{getParentTaxID}
 \alias{getRank}
 \alias{getScientificName}
-\alias{getTaxId}
+\alias{getTaxID}
 \title{Taxon accessors
 
 Access the slots of \linkS4class{Taxon} or \linkS4class{TaxonList}
 instances.}
 \usage{
-  getTaxId(x, ...)
+  getTaxID(x, ...)
 
   getScientificName(x, ...)
 
   getRank(x, ...)
 
-  getParentTaxId(x, ...)
+  getParentTaxID(x, ...)
 
   getOtherName(x, ...)
 
@@ -32,7 +32,7 @@ instances.}
   \item{...}{Further arguments passed on to methods.}
 }
 
-\section{Method signatures for generic getTaxId}{
+\section{Method signatures for generic getTaxID}{
 \itemize{
   \item \linkS4class{Taxon_minimal}
   \item \linkS4class{TaxonList}
@@ -56,7 +56,7 @@ instances.}
 
 }
 
-\section{Method signatures for generic getParentTaxId}{
+\section{Method signatures for generic getParentTaxID}{
 \itemize{
   \item \linkS4class{Taxon_full}
   \item \linkS4class{TaxonList}

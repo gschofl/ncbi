@@ -29,7 +29,7 @@ containing the NCBI taxonomy organised in two tables:
 }
 
 \sQuote{\bold{GeneidDBConnection}}: A connection to an SQLite database
-linking NCBI Gene IDs to TaxIds.
+linking NCBI Gene IDs to Taxids.
 }
 \section{Class hierarchy for TaxonDBConnection}{
 Super classes:

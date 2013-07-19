@@ -61,7 +61,7 @@ NULL
 #' }
 #' 
 #' \sQuote{\bold{GeneidDBConnection}}: A connection to an SQLite database
-#' linking NCBI Gene IDs to TaxIds.
+#' linking NCBI Gene IDs to Taxids.
 #' 
 #' 
 #' @seealso
@@ -361,18 +361,18 @@ db_load <- function(con, db_path, type = "taxon") {
 }
 
 
-dbGetTaxon <- function(db, taxId) {
-  node <- dbGetNode(db, taxId)
+dbGetTaxon <- function(db, taxid) {
+  node <- dbGetNode(db, taxid)
   new_Taxon_full(
     shared = db,
     TaxId = node[["tax_id"]] %||% NA_character_,
     ScientificName = node[["tax_name"]] %||% NA_character_,
     Rank = node[["rank"]] %||% NA_character_,
     ParentTaxId = node[["parent_id"]] %||% NA_character_,
-    OtherName = dbGetOtherName(db, taxId),
-    Authority = dbGetAuthority(db, taxId),
-    TypeMaterial = dbGetTypeMaterial(db, taxId),
-    Lineage = dbGetLineage(db, taxId)
+    OtherName = dbGetOtherName(db, taxid),
+    Authority = dbGetAuthority(db, taxid),
+    TypeMaterial = dbGetTypeMaterial(db, taxid),
+    Lineage = dbGetLineage(db, taxid)
   )
 }
 
@@ -386,11 +386,11 @@ dbGetTaxonByGeneID <- function(db, geneid) {
 }
 
 
-dbGetTaxonMinimal <- function(db, taxId) {
+dbGetTaxonMinimal <- function(db, taxid) {
   conn <- db$taxonDBConnection
-  taxId <- taxId %|na|% 0
+  taxid <- taxid %|na|% 0
   sql <- paste0("SELECT tax_id, tax_name, rank FROM nodes JOIN names USING ( tax_id ) ",
-                "WHERE tax_id = ", taxId, " AND class = 'scientific name'") 
+                "WHERE tax_id = ", taxid, " AND class = 'scientific name'") 
   data <- db_query(conn, sql)
   new_Taxon_minimal(
     shared = db,
@@ -417,27 +417,27 @@ getTaxidByGeneID <- function(db, geneid) {
 }
 
 
-dbGetParentTaxId <- function(db, taxId) {
+dbGetParentTaxId <- function(db, taxid) {
   conn <- db$taxonDBConnection 
-  taxId <- taxId %|na|% 0
-  sql <- paste0("SELECT parent_id FROM nodes WHERE tax_id = ", taxId)
+  taxid <- taxid %|na|% 0
+  sql <- paste0("SELECT parent_id FROM nodes WHERE tax_id = ", taxid)
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 
-dbGetScientificName <- function(db, taxId) {
+dbGetScientificName <- function(db, taxid) {
   conn <- db$taxonDBConnection 
-  taxId <- taxId %|na|% 0
-  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxId,
+  taxid <- taxid %|na|% 0
+  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxid,
                 " AND class = 'scientific name'")
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 
-dbGetOtherName <- function(db, taxId) {
+dbGetOtherName <- function(db, taxid) {
   conn <- db$taxonDBConnection 
-  taxId <- taxId %|na|% 0
-  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxId,
+  taxid <- taxid %|na|% 0
+  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxid,
                 " AND class != 'scientific name' AND class != 'type material'",
                 " AND class != 'authority'")
   data <- db_query(conn, sql)
@@ -445,54 +445,54 @@ dbGetOtherName <- function(db, taxId) {
 }
 
 
-dbGetTypeMaterial <- function(db, taxId) {
+dbGetTypeMaterial <- function(db, taxid) {
   conn <- db$taxonDBConnection 
-  taxId <- taxId %|na|% 0
-  sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxId,
+  taxid <- taxid %|na|% 0
+  sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxid,
                 " AND class = 'type material'")
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 
-dbGetAuthority <- function(db, taxId) {
+dbGetAuthority <- function(db, taxid) {
   conn <- db$taxonDBConnection 
-  taxId <- taxId %|na|% 0
-  sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxId,
+  taxid <- taxid %|na|% 0
+  sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxid,
                 " AND class = 'authority'")
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 
-dbGetRank <- function(db, taxId) {
+dbGetRank <- function(db, taxid) {
   conn <- db$taxonDBConnection 
-  taxId <- taxId %|na|% 0
-  sql <- paste0("SELECT rank FROM nodes WHERE tax_id = ", taxId)
+  taxid <- taxid %|na|% 0
+  sql <- paste0("SELECT rank FROM nodes WHERE tax_id = ", taxid)
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 
 #' @return TaxId, ParentId, ScientificName, Rank
-dbGetNode <- function(db, taxId) {
+dbGetNode <- function(db, taxid) {
   conn <- db$taxonDBConnection 
-  taxId <- taxId %|na|% 0
+  taxid <- taxid %|na|% 0
   sql <- paste0("SELECT tax_id, parent_id, tax_name, rank FROM nodes JOIN names",
-                " USING ( tax_id ) WHERE tax_id = ", taxId,
+                " USING ( tax_id ) WHERE tax_id = ", taxid,
                 " AND class = 'scientific name'")
   db_query(conn, sql)
 }
 
 
-dbGetLineage <- function(db, taxId) {
-   Lineage( (function (db, taxId) {
-    node <- dbGetNode(db, taxId)
-    parentId <- node[["parent_id"]]
+dbGetLineage <- function(db, taxid) {
+   Lineage( (function (db, taxid) {
+    node <- dbGetNode(db, taxid)
+    parentid <- node[["parent_id"]]
     lineage <- cbind(tax_id=node[["tax_id"]],
                      tax_name=node[["tax_name"]],
                      rank=node[["rank"]])
-    if (length(parentId) > 0 && parentId != taxId)
-      lineage <- rbind(Recall(db, parentId), lineage)
+    if (length(parentid) > 0 && parentid != taxid)
+      lineage <- rbind(Recall(db, parentid), lineage)
     lineage
-  })(db, taxId)[-1, , drop = FALSE], shared = db)
+  })(db, taxid)[-1, , drop = FALSE], shared = db)
 }
 
 

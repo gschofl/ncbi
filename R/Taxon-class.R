@@ -46,8 +46,8 @@ setMethod("shared", "Taxon", function(x, value = NULL) {
 
 .valid_TaxonMinimal <- function (object) {
   errors <- character()
-  if (!all(grepl("^\\d+$", getTaxId(object))) &&
-        !all(is.na(getTaxId(object)))) {
+  if (!all(grepl("^\\d+$", getTaxID(object))) &&
+        !all(is.na(getTaxID(object)))) {
     msg <- "TaxIds must contain only digits or NA"
     errors <- c(errors, msg)
   }
@@ -91,8 +91,8 @@ new_Taxon_minimal <-
 #' @rdname Taxon-accessors
 #' @export
 #' @genericMethods
-setGeneric("getTaxId", function(x, ...) standardGeneric("getTaxId"))
-setMethod("getTaxId", "Taxon_minimal", function (x, use.names = TRUE) {
+setGeneric("getTaxID", function(x, ...) standardGeneric("getTaxID"))
+setMethod("getTaxID", "Taxon_minimal", function (x, use.names = TRUE) {
   if (use.names)
     setNames(x@TaxId, nm=getScientificName(x))
   else
@@ -115,7 +115,7 @@ setMethod("getRank", "Taxon_minimal", function(x) x@Rank)
 
 
 setMethod("is.na", "Taxon", function (x) {
-  is.na(getTaxId(x)) && is.na(getScientificName(x)) && is.na(getRank(x))
+  is.na(getTaxID(x)) && is.na(getScientificName(x)) && is.na(getRank(x))
 })
 
 
@@ -124,7 +124,7 @@ setMethod("is.na", "Taxon", function (x) {
 
 .valid_Lineage <- function (object) {
   errors <- character()
-  n <- length(getTaxId(object, use.names = FALSE))
+  n <- length(getTaxID(object, use.names = FALSE))
   lengths <- c(length(getScientificName(object)), length(getRank(object)))
   
   if (any(lengths != n)) {
@@ -160,7 +160,7 @@ Lineage <- function (..., shared = new.env(parent=emptyenv())) {
     if (all(vapply(listData, is, "Taxon", FUN.VALUE=logical(1)))) {
       new_Lineage(
         shared = shared,
-        TaxId = vapply(listData, getTaxId, character(1)),
+        TaxId = vapply(listData, getTaxID, character(1)),
         ScientificName = vapply(listData, getScientificName, character(1)),
         Rank = vapply(listData, getRank, character(1))
       )
@@ -211,7 +211,7 @@ setMethod("[", "Lineage",
 }
 setMethod("show", "Lineage",
           function (object) {
-            lo <- length(getTaxId(object))
+            lo <- length(getTaxID(object))
             showme <- sprintf("A %s of length %s\n%s", sQuote(class(object)), lo,
                               .show_Lineage(object))
             cat(showme, sep="")
@@ -287,7 +287,7 @@ new_Taxon_full <-
 
 
 .show_Taxon <- function (x, width = getOption("width"), ellipsis = "...") {
-  ellipsize(sprintf("%s (%s; %s)", getTaxId(x, FALSE), getScientificName(x),
+  ellipsize(sprintf("%s (%s; %s)", getTaxID(x, FALSE), getScientificName(x),
                     getRank(x)), width = width, ellipsis = ellipsis)
 }
 setMethod("show", "Taxon",
@@ -308,8 +308,8 @@ setMethod("show", "Taxon",
 #' @rdname Taxon-accessors
 #' @export
 #' @genericMethods
-setGeneric("getParentTaxId", function (x, ...) standardGeneric("getParentTaxId"))
-setMethod("getParentTaxId", "Taxon_full", function(x) x@ParentTaxId)
+setGeneric("getParentTaxID", function (x, ...) standardGeneric("getParentTaxID"))
+setMethod("getParentTaxID", "Taxon_full", function(x) x@ParentTaxId)
 
 
 #' @rdname Taxon-accessors
