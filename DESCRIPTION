@@ -1,7 +1,7 @@
 Package: ncbi
 Type: Package
 Title: Retrieve data from NCBI.
-Version: 0.1.2
+Version: 0.1.3
 Date: 2012-11-13
 Authors@R: person("Gerhard", "Schöfl", role=c("aut","cre"),
     email="gschofl@yahoo.de")
@@ -28,6 +28,7 @@ Imports:
     utils,
     XML
 Collate:
+    '00datacache.R'
     'utils.R'
     'uilist.R'
     'pubmed.R'
@@ -39,3 +40,4 @@ Collate:
     'TaxonList-class.R'
     'Taxon-db.R'
     'ncbi.R'
+    'zzz.R'

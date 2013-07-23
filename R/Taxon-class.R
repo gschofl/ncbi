@@ -1,15 +1,6 @@
 #' @include utils.R
 NULL
 
-## valid rank designations on NCBI
-.ranks  <- c("root","superkingdom","kingdom","subkingdom","superphylum",
-             "phylum","subphylum","superclass","class","subclass","infraclass",
-             "superorder","order","suborder","parvorder","infraorder",
-             "superfamily","family","subfamily","tribe","subtribe","genus",
-             "subgenus","species group","species subgroup","species","subspecies",
-             "varietas","forma","no rank")
-
-
 # Class definition - Taxon -----------------------------------------------
 
 #' Taxon-classes
@@ -168,9 +159,9 @@ Lineage <- function (..., shared = new.env(parent=emptyenv())) {
     else if (all(colnames(listData) %in% c("tax_id", "tax_name", "rank"))) {
       new_Lineage(
         shared = shared,
-        TaxId = listData[, "tax_id"] %||% NA_character_,
-        ScientificName = listData[, "tax_name"] %||% NA_character_,
-        Rank = listData[, "rank"] %||% NA_character_
+        TaxId = listData[, 'tax_id'] %||% NA_character_,
+        ScientificName = listData[, 'tax_name'] %||% NA_character_,
+        Rank = listData[, 'rank'] %||% NA_character_
       )
     }
     else {
@@ -384,12 +375,16 @@ taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
 #' @param shared Shared environment containing a connection to taxon.db
 #' and (optionally) geneid.db
 #' @param full Taxon_minimal or Taxon_full
+#' @param cache Cache lineage data in memory to speed up multiple queries.
 #' @keywords internal
-new_taxon <- function(taxid, shared, full = TRUE) {
+new_taxon <- function(taxid, shared, full = TRUE, cache = TRUE) {
   assert_that(!is.null(shared$taxonDBConnection))
+  if (!is.character(taxid)) {
+    taxid <- as.character(taxid)
+  }
   
   if (full)
-    tx <- lapply(taxid, dbGetTaxon, db = shared)
+    tx <- lapply(taxid, dbGetTaxon, db = shared, cache = cache)
   else
     tx <- lapply(taxid, dbGetTaxonMinimal, db = shared)
   
@@ -404,10 +399,10 @@ new_taxon <- function(taxid, shared, full = TRUE) {
 #' @param taxon_db A \code{\linkS4class{taxonDBConnection}}.
 #' @param full if \code{FALSE} a minimal taxonomic description is extracted
 #' (TaxId, ScientificName, Rank).
-#'
+#' @param cache Cache lineage data in memory to speed up multiple queries.
 #' @rdname taxon-constructors
 #' @export
-taxonDB <- function (taxid, taxon_db = NULL, full = TRUE) {
+taxonDB <- function (taxid, taxon_db = NULL, full = TRUE, cache = TRUE) {
   if (missing(taxid)) {
     return( new_Taxon_full() )
   }
@@ -417,7 +412,7 @@ taxonDB <- function (taxid, taxon_db = NULL, full = TRUE) {
   assert_that(is(taxon_db, "TaxonDBConnection"))
   shared <- new.env(parent=emptyenv())
   shared$taxonDBConnection <- taxon_db
-  new_taxon(taxid, shared, full = full)
+  new_taxon(taxid, shared, full = full, cache = cache)
 }
 
 
@@ -425,15 +420,21 @@ taxonDB <- function (taxid, taxon_db = NULL, full = TRUE) {
 #' @param shared Shared environment containing a connection to taxon.db
 #' and (optionally) geneid.db
 #' @param full Taxon_minimal or Taxon_full
+#' @param cache Cache lineage data in memory to speed up multiple queries.
 #' @keywords internal
-new_taxon_by_geneid <- function(geneid, shared, full=TRUE) {
+new_taxon_by_geneid <- function(geneid, shared, full = TRUE, cache = TRUE) {
   assert_that(!is.null(shared$taxonDBConnection))
   assert_that(!is.null(shared$geneidDBConnection))
+  
+  if (!is.character(geneid)) {
+    geneid <- as.character(geneid)
+  }
+  
   if (length(getTaxidByGeneID(shared, 2)) == 0)
     stop("'genes' table is empty. Run 'createTaxonDB()' setting 'with_geneid = TRUE'")
   
   if (full)
-    tx <- lapply(geneid, dbGetTaxonByGeneID, db=shared)
+    tx <- lapply(geneid, dbGetTaxonByGeneID, db=shared, cache=cache)
   else
     tx <- lapply(geneid, dbGetTaxonMinimalByGeneID, db=shared)
   
@@ -466,7 +467,8 @@ new_taxon_by_geneid <- function(geneid, shared, full=TRUE) {
 #'
 #' @rdname taxon-constructors
 #' @export
-taxonByGeneID <- function (geneid, geneid_db = NULL, taxon_db = NULL, full=TRUE) {
+taxonByGeneID <- function (geneid, geneid_db = NULL, taxon_db = NULL,
+                           full = TRUE, cache = TRUE) {
   if (missing(geneid)) {
     return( new_Taxon_full() )
   }
@@ -481,7 +483,34 @@ taxonByGeneID <- function (geneid, geneid_db = NULL, taxon_db = NULL, full=TRUE)
   shared <- new.env(parent=emptyenv())
   shared$taxonDBConnection <- taxon_db
   shared$geneidDBConnection <- geneid_db
-  new_taxon_by_geneid(geneid, shared, full = full)
+  new_taxon_by_geneid(geneid, shared, full = full, cache = cache)
+}
+
+
+#' Clear the lineage cache
+#' 
+#' @export
+clear_cache <- function () {
+  rm(list=ls(.lineage.cache), pos=.lineage.cache)
+}
+
+
+#' Show contents of the lineage cache
+#' 
+#' @export
+show_cache <- function () {
+  id <- ls(.lineage.cache)
+  if (length(id) > 0) {
+    pid <- lapply(id, function (i) {
+      setNames(as.data.frame(get(i, .lineage.cache)),
+               c('pid', 'name', 'rank'))
+    })
+    res <- rBind(pid)
+    row.names(res) <-  paste0(id, blanks(max(nchar(id)) - nchar(id)), ' ->  ')
+    return(res)
+  }
+
+  message("Cache is empty.", appendLF=TRUE)
 }
 
 
