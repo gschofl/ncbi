@@ -2,7 +2,7 @@
 NULL
 #' @importFrom rmisc db_bulk_insert trim compact check_timestamp
 NULL
-#' @importFrom rmisc is.empty "%|na|%" "%has_tables%"
+#' @importFrom rmisc is.empty "%|na|%" "%has_tables%" rBind
 NULL
 #' @importFrom RCurl basicTextGatherer curlPerform curlOptions CFILE close
 NULL
@@ -159,33 +159,6 @@ geneidDBConnect <- function (db_path = NULL) {
   new_GeneidDBConnection(conn)
 }
 
-
-geneid_db.sql <- '
-CREATE TABLE genes (
-  tax_id     INT UNSIGNED NOT NULL DEFAULT 0
-);'
-
-taxon_db.sql <- '
-CREATE TABLE nodes (
-tax_id        CHAR(10) NOT NULL UNIQUE,
-parent_id     CHAR(10) NOT NULL,
-rank          VARCHAR(50) DEFAULT NULL,
-embl_code     CHAR(2) DEFAULT NULL,              
-division_id   CHAR(2) NOT NULL,
-PRIMARY KEY (tax_id)
-);
-
-CREATE TABLE names (
-tax_id        CHAR(10) NOT NULL,
-tax_name      VARCHAR(200) NOT NULL,
-unique_name   VARCHAR(100) DEFAULT NULL,
-class         VARCHAR(50) NOT NULL DEFAULT \'\',
-FOREIGN KEY (tax_id) REFERENCES nodes (tax_id)
-);
-
-CREATE INDEX Fnodes ON nodes (tax_id);
-CREATE INDEX Dnames on names (tax_id);
-'
 
 #' Create a local install of the NCBI Taxonomy database.
 #' 
@@ -361,31 +334,32 @@ db_load <- function(con, db_path, type = "taxon") {
 }
 
 
-dbGetTaxon <- function(db, taxid) {
+##
+dbGetTaxon <- function(db, taxid, cache = TRUE) {
   node <- dbGetNode(db, taxid)
   new_Taxon_full(
     shared = db,
-    TaxId = node[["tax_id"]] %||% NA_character_,
-    ScientificName = node[["tax_name"]] %||% NA_character_,
-    Rank = node[["rank"]] %||% NA_character_,
-    ParentTaxId = node[["parent_id"]] %||% NA_character_,
+    TaxId = node$tax_id %||% NA_character_,
+    ScientificName = node$tax_name %||% NA_character_,
+    Rank = node$rank %||% NA_character_,
+    ParentTaxId = node$parent_id %||% NA_character_,
     OtherName = dbGetOtherName(db, taxid),
     Authority = dbGetAuthority(db, taxid),
     TypeMaterial = dbGetTypeMaterial(db, taxid),
-    Lineage = dbGetLineage(db, taxid)
+    Lineage = dbGetLineage(db, taxid, cache)
   )
 }
 
-
-dbGetTaxonByGeneID <- function(db, geneid) {
-  taxid <- getTaxidByGeneID(db, geneid)
+##
+dbGetTaxonByGeneID <- function(db, geneid, cache=TRUE) {
+  taxid <- as.character(getTaxidByGeneID(db, geneid))
   if (length(taxid) == 0 || taxid == 0)
     new_Taxon_full(shared = db)
   else
-    dbGetTaxon(db, taxid)
+    dbGetTaxon(db, taxid, cache)
 }
 
-
+##
 dbGetTaxonMinimal <- function(db, taxid) {
   conn <- db$taxonDBConnection
   taxid <- taxid %|na|% 0
@@ -394,12 +368,12 @@ dbGetTaxonMinimal <- function(db, taxid) {
   data <- db_query(conn, sql)
   new_Taxon_minimal(
     shared = db,
-    TaxId = data[["tax_id"]] %||% NA_character_,
-    ScientificName = data[["tax_name"]] %||% NA_character_,
-    Rank = data[["rank"]] %||% NA_character_)
+    TaxId = data$tax_id %||% NA_character_,
+    ScientificName = data$tax_name %||% NA_character_,
+    Rank = data$rank %||% NA_character_)
 }
 
-
+##
 dbGetTaxonMinimalByGeneID <- function(db, geneid) {
   taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0)
@@ -408,7 +382,7 @@ dbGetTaxonMinimalByGeneID <- function(db, geneid) {
     dbGetTaxonMinimal(db, taxid)
 }
 
-
+##
 getTaxidByGeneID <- function(db, geneid) {
   conn <- db$geneidDBConnection 
   geneid <- geneid %|na|% 0
@@ -416,7 +390,7 @@ getTaxidByGeneID <- function(db, geneid) {
   db_query(conn, sql, 1)
 }
 
-
+##
 dbGetParentTaxId <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
@@ -424,7 +398,7 @@ dbGetParentTaxId <- function(db, taxid) {
   db_query(conn, sql, 1) %||% NA_character_
 }
 
-
+##
 dbGetScientificName <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
@@ -433,7 +407,7 @@ dbGetScientificName <- function(db, taxid) {
   db_query(conn, sql, 1) %||% NA_character_
 }
 
-
+##
 dbGetOtherName <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
@@ -441,10 +415,10 @@ dbGetOtherName <- function(db, taxid) {
                 " AND class != 'scientific name' AND class != 'type material'",
                 " AND class != 'authority'")
   data <- db_query(conn, sql)
-  setNames(data[["tax_name"]], nm=camelise(data[["class"]])) %||% NA_character_
+  setNames(data$tax_name, nm=camelise(data$class)) %||% NA_character_
 }
 
-
+##
 dbGetTypeMaterial <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
@@ -453,7 +427,7 @@ dbGetTypeMaterial <- function(db, taxid) {
   db_query(conn, sql, 1) %||% NA_character_
 }
 
-
+##
 dbGetAuthority <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
@@ -462,7 +436,7 @@ dbGetAuthority <- function(db, taxid) {
   db_query(conn, sql, 1) %||% NA_character_
 }
 
-
+##
 dbGetRank <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
@@ -471,7 +445,7 @@ dbGetRank <- function(db, taxid) {
 }
 
 
-#' @return TaxId, ParentId, ScientificName, Rank
+##' @return TaxId, ParentId, ScientificName, Rank
 dbGetNode <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
@@ -481,18 +455,117 @@ dbGetNode <- function(db, taxid) {
   db_query(conn, sql)
 }
 
+##
+dbGetLineage <- function (db, taxid, cache = TRUE) {
+  if (cache) {
+    #print(taxid)
+    .get_cached_lineage(db, taxid)
+  } else {
+    .get_lineage(db, taxid)
+  }
+}
 
-dbGetLineage <- function(db, taxid) {
-   Lineage( (function (db, taxid) {
-    node <- dbGetNode(db, taxid)
-    parentid <- node[["parent_id"]]
-    lineage <- cbind(tax_id=node[["tax_id"]],
-                     tax_name=node[["tax_name"]],
-                     rank=node[["rank"]])
-    if (length(parentid) > 0 && parentid != taxid)
-      lineage <- rbind(Recall(db, parentid), lineage)
-    lineage
-  })(db, taxid)[-1, , drop = FALSE], shared = db)
+
+.get_cached_lineage <- function (db, id) {
+  if (!exists(id, .lineage.cache)) {
+    lin <- .lineage_to_cache(db, id)
+  } else {
+    lin <- rbind(.lineage_from_cache(id),
+                 dbGetNode(db, id)[, c('tax_id', 'tax_name', 'rank')])
+  }
+  Lineage( lin[-1L, ], shared = db )
+}
+
+
+.lineage_to_cache <- function(db, id) {
+  
+  verbose <- getOption("verbose")
+  ## pid : parental taxid
+  ##  id : taxid
+  ## cid : child taxid
+  ## define id as the leave of a lineage
+  leaf <- id
+  lin_list   <- vector('list', 50L)
+  lin_fields <- c('tax_id', 'tax_name', 'rank')
+  i          <- 1
+
+  ## fetch the current node, split off the pid, and store in 'lin_list'
+  node <- dbGetNode(db, id)
+  lin_list[[i]] <- node[, lin_fields]
+  pid <- node$parent_id
+  
+  while (length(pid) > 0 && id != pid) {
+    cid <- id
+    id <- pid
+    
+    ## fetch the node and store it in 'lin_list'
+    node <- dbGetNode(db, id)    
+    i <- i + 1
+    lin_list[[i]] <- node[, lin_fields]
+    #print(i)
+    
+    ## we don't want to cache all the leaf nodes so we start caching only
+    ## for taxids a level below the leaf.
+    if (cid != leaf) {
+      if (verbose)
+        cat("Caching lineage:", cid, "->", id, "\n")
+      
+      assign(cid, node[, lin_fields], .lineage.cache)
+    }
+    
+    ## if the current parental id is cached drop into the cache and get the
+    ## rest of the lineage.
+    if (exists(pid, .lineage.cache)) {
+      return( rbind(.lineage_from_cache(pid), rBind(rev(compact(lin_list)))) )
+    }
+     
+    ##  split off a new pid
+    pid <- node$parent_id
+  }
+  
+  ## finally assign root node to root id 
+  assign(id, node[, lin_fields], .lineage.cache)
+  rBind(rev(compact(lin_list)))
+}
+
+
+.lineage_from_cache <- function (id) {
+  verbose <- getOption("verbose")
+  if (verbose)
+    cat("Getting cached lineage:", id, "\n")
+  
+  lin_list <- vector('list', 50)
+  node <- get(id, .lineage.cache)
+  pid <- node$tax_id
+  i <- 1
+  while (length(pid) > 0 && id != pid) {
+    lin_list[[i]] <- node
+    node <- get(pid, .lineage.cache)
+    id <- pid
+    pid <- node$tax_id
+    i <- i + 1
+    #print(i)
+  }
+  lin_list <- rev(compact(lin_list))
+  if (length(lin_list) > 0) {
+    rBind( lin_list )
+  } else {
+    lin_list
+  }
+}
+
+
+.get_lineage <- function(db, id) {
+  Lineage( (function (db, id) {
+    node <- dbGetNode(db, id)
+    pid <- node$parent_id
+    lin <- cbind(tax_id = node$tax_id,
+                 tax_name = node$tax_name,
+                 rank = node$rank)
+    if (length(pid) > 0 && pid != id)
+      lin <- rbind(Recall(db, pid), lin)
+    lin
+  })(db, id)[-1, , drop = FALSE], shared = db)
 }
 
 
