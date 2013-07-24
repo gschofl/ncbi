@@ -487,7 +487,7 @@ taxonByGeneID <- function (geneid, geneid_db = NULL, taxon_db = NULL,
 }
 
 
-#' Clear the lineage cache
+#' Clear the contents of the lineage cache
 #' 
 #' @export
 clear_cache <- function () {
