@@ -375,16 +375,15 @@ taxon <- function (taxid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
 #' @param shared Shared environment containing a connection to taxon.db
 #' and (optionally) geneid.db
 #' @param full Taxon_minimal or Taxon_full
-#' @param cache Cache lineage data in memory to speed up multiple queries.
 #' @keywords internal
-new_taxon <- function(taxid, shared, full = TRUE, cache = TRUE) {
+new_taxon <- function(taxid, shared, full = TRUE) {
   assert_that(!is.null(shared$taxonDBConnection))
   if (!is.character(taxid)) {
     taxid <- as.character(taxid)
   }
   
   if (full)
-    tx <- lapply(taxid, dbGetTaxon, db = shared, cache = cache)
+    tx <- lapply(taxid, dbGetTaxon, db = shared)
   else
     tx <- lapply(taxid, dbGetTaxonMinimal, db = shared)
   
@@ -399,10 +398,9 @@ new_taxon <- function(taxid, shared, full = TRUE, cache = TRUE) {
 #' @param taxon_db A \code{\linkS4class{taxonDBConnection}}.
 #' @param full if \code{FALSE} a minimal taxonomic description is extracted
 #' (TaxId, ScientificName, Rank).
-#' @param cache Cache lineage data in memory to speed up multiple queries.
 #' @rdname taxon-constructors
 #' @export
-taxonDB <- function (taxid, taxon_db = NULL, full = TRUE, cache = TRUE) {
+taxonDB <- function (taxid, taxon_db = NULL, full = TRUE) {
   if (missing(taxid)) {
     return( new_Taxon_full() )
   }
@@ -412,7 +410,7 @@ taxonDB <- function (taxid, taxon_db = NULL, full = TRUE, cache = TRUE) {
   assert_that(is(taxon_db, "TaxonDBConnection"))
   shared <- new.env(parent=emptyenv())
   shared$taxonDBConnection <- taxon_db
-  new_taxon(taxid, shared, full = full, cache = cache)
+  new_taxon(taxid, shared, full = full)
 }
 
 
@@ -420,9 +418,8 @@ taxonDB <- function (taxid, taxon_db = NULL, full = TRUE, cache = TRUE) {
 #' @param shared Shared environment containing a connection to taxon.db
 #' and (optionally) geneid.db
 #' @param full Taxon_minimal or Taxon_full
-#' @param cache Cache lineage data in memory to speed up multiple queries.
 #' @keywords internal
-new_taxon_by_geneid <- function(geneid, shared, full = TRUE, cache = TRUE) {
+new_taxon_by_geneid <- function(geneid, shared, full = TRUE) {
   assert_that(!is.null(shared$taxonDBConnection))
   assert_that(!is.null(shared$geneidDBConnection))
   
@@ -434,7 +431,7 @@ new_taxon_by_geneid <- function(geneid, shared, full = TRUE, cache = TRUE) {
     stop("'genes' table is empty. Run 'createTaxonDB()' setting 'with_geneid = TRUE'")
   
   if (full)
-    tx <- lapply(geneid, dbGetTaxonByGeneID, db=shared, cache=cache)
+    tx <- lapply(geneid, dbGetTaxonByGeneID, db=shared)
   else
     tx <- lapply(geneid, dbGetTaxonMinimalByGeneID, db=shared)
   
@@ -468,7 +465,7 @@ new_taxon_by_geneid <- function(geneid, shared, full = TRUE, cache = TRUE) {
 #' @rdname taxon-constructors
 #' @export
 taxonByGeneID <- function (geneid, geneid_db = NULL, taxon_db = NULL,
-                           full = TRUE, cache = TRUE) {
+                           full = TRUE) {
   if (missing(geneid)) {
     return( new_Taxon_full() )
   }
@@ -483,7 +480,7 @@ taxonByGeneID <- function (geneid, geneid_db = NULL, taxon_db = NULL,
   shared <- new.env(parent=emptyenv())
   shared$taxonDBConnection <- taxon_db
   shared$geneidDBConnection <- geneid_db
-  new_taxon_by_geneid(geneid, shared, full = full, cache = cache)
+  new_taxon_by_geneid(geneid, shared, full = full)
 }
 
 

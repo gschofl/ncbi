@@ -19,6 +19,7 @@ Imports:
     Biostrings,
     DBI,
     IRanges,
+    memoise,
     methods,
     RCurl,
     Rentrez,

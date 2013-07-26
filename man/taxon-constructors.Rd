@@ -8,11 +8,10 @@
   taxon(taxid, rettype = NULL, retmax = 25, parse = TRUE,
     ...)
 
-  taxonDB(taxid, taxon_db = NULL, full = TRUE,
-    cache = TRUE)
+  taxonDB(taxid, taxon_db = NULL, full = TRUE)
 
   taxonByGeneID(geneid, geneid_db = NULL, taxon_db = NULL,
-    full = TRUE, cache = TRUE)
+    full = TRUE)
 }
 \arguments{
   \item{taxid}{\sQuote{taxids} or a valid NCBI search term.}
@@ -33,8 +32,6 @@ query.}
 
   \item{full}{if \code{FALSE} a minimal taxonomic description is extracted
 (TaxId, ScientificName, Rank).}
-
-  \item{cache}{Cache lineage data in memory to speed up multiple queries.}
 
   \item{geneid}{A vector of valid NCBI Gene Identifiers.}
 
