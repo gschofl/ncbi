@@ -491,7 +491,7 @@ taxonByGeneID <- function (geneid, geneid_db = NULL, taxon_db = NULL,
 #' 
 #' @export
 clear_cache <- function () {
-  rm(list=ls(.lineage.cache), pos=.lineage.cache)
+  .taxcache$rm()
 }
 
 
@@ -499,14 +499,14 @@ clear_cache <- function () {
 #' 
 #' @export
 show_cache <- function () {
-  id <- ls(.lineage.cache)
-  if (length(id) > 0) {
-    pid <- lapply(id, function (i) {
-      setNames(as.data.frame(get(i, .lineage.cache)),
+  keys <- .taxcache$ls()
+  if (length(keys) > 0) {
+    pid <- lapply(keys, function (k) {
+      setNames(as.data.frame(.taxcache$get(k)),
                c('pid', 'name', 'rank'))
     })
     res <- rBind(pid)
-    row.names(res) <-  paste0(id, blanks(max(nchar(id)) - nchar(id)), ' ->  ')
+    row.names(res) <-  paste0(keys, blanks(max(nchar(keys)) - nchar(keys)), ' ->  ')
     return(res)
   }
 

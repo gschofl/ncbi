@@ -1,6 +1,8 @@
+#' @importFrom rmisc new_cache
+NULL
+
 ## register environment for caching taxon nodes
-## not exported
-.lineage.cache <- new.env(hash=TRUE, parent=emptyenv())
+.taxcache <- new_cache()
 
 ## register valid rank designations on NCBI
 ## not exported

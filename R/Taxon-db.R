@@ -467,7 +467,7 @@ dbGetLineage <- function (db, taxid, cache = TRUE) {
 
 
 .get_cached_lineage <- function (db, id) {
-  if (!exists(id, .lineage.cache)) {
+  if (!.taxcache$exists(id)) {
     lin <- .lineage_to_cache(db, id)
   } else {
     lin <- rbind(.lineage_from_cache(id),
@@ -507,11 +507,11 @@ dbGetLineage <- function (db, taxid, cache = TRUE) {
         cat("Caching lineage:", cid, "->", id, "\n")
       
       ## cache the current node
-      assign(cid, node[, lin_fields], .lineage.cache)
+      .taxcache$set(cid, node[, lin_fields])
       
       ## if the current parental id is cached drop into the cache and get the
       ## rest of the lineage.
-      if (exists(pid, .lineage.cache)) {
+      if (.taxcache$exists(pid)) {
         return( rbind(.lineage_from_cache(pid), rBind(rev(compact(lin_list)))) )
       }
       
@@ -519,8 +519,8 @@ dbGetLineage <- function (db, taxid, cache = TRUE) {
       pid <- node$parent_id
     }
     
-    ## finally assign root node to root id 
-    assign(id, node[, lin_fields], .lineage.cache)
+    ## finally assign root node to root id
+    .taxcache$set(id, node[, lin_fields])
     rBind(rev(compact(lin_list)))
   }
   else
@@ -535,11 +535,11 @@ dbGetLineage <- function (db, taxid, cache = TRUE) {
   
   lin_list <- vector('list', 50)
   i        <- 1
-  node     <- get(id, .lineage.cache)
+  node     <- .taxcache$get(id)
   pid      <- node$tax_id
   while (id != pid) {
     lin_list[[i]] <- node
-    node <- get(pid, .lineage.cache)
+    node <- .taxcache$get(pid)
     id <- pid
     pid <- node$tax_id
     i <- i + 1
