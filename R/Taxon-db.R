@@ -13,6 +13,9 @@ NULL
 #' @importClassesFrom RSQLite dbObjectId  SQLiteObject  SQLiteConnection
 NULL
 #' @importClassesFrom DBI DBIObject DBIConnection
+NULL
+#' @importFrom memoise memoise
+NULL
 
 .valid_TaxonDBConnection <- function (object) {
   errors <- character()
@@ -335,7 +338,7 @@ db_load <- function(con, db_path, type = "taxon") {
 
 
 ##
-dbGetTaxon <- function(db, taxid, cache = TRUE) {
+dbGetTaxon <- function(db, taxid) {
   node <- dbGetNode(db, taxid)
   new_Taxon_full(
     shared = db,
@@ -346,21 +349,21 @@ dbGetTaxon <- function(db, taxid, cache = TRUE) {
     OtherName = dbGetOtherName(db, taxid),
     Authority = dbGetAuthority(db, taxid),
     TypeMaterial = dbGetTypeMaterial(db, taxid),
-    Lineage = dbGetLineage(db, taxid, cache)
+    Lineage = dbGetLineage(db, taxid)
   )
 }
 
 ##
-dbGetTaxonByGeneID <- function(db, geneid, cache=TRUE) {
+dbGetTaxonByGeneID <- function(db, geneid) {
   taxid <- as.character(getTaxidByGeneID(db, geneid))
   if (length(taxid) == 0 || taxid == 0)
     new_Taxon_full(shared = db)
   else
-    dbGetTaxon(db, taxid, cache)
+    dbGetTaxon(db, taxid)
 }
 
 ##
-dbGetTaxonMinimal <- function(db, taxid) {
+dbGetTaxonMinimal <- memoise(function (db, taxid) {
   conn <- db$taxonDBConnection
   taxid <- taxid %|na|% 0
   sql <- paste0("SELECT tax_id, tax_name, rank FROM nodes JOIN names USING ( tax_id ) ",
@@ -371,16 +374,16 @@ dbGetTaxonMinimal <- function(db, taxid) {
     TaxId = data$tax_id %||% NA_character_,
     ScientificName = data$tax_name %||% NA_character_,
     Rank = data$rank %||% NA_character_)
-}
+})
 
 ##
-dbGetTaxonMinimalByGeneID <- function(db, geneid) {
+dbGetTaxonMinimalByGeneID <- memoise(function(db, geneid) {
   taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0)
     new_Taxon_minimal(shared = db)
   else
     dbGetTaxonMinimal(db, taxid)
-}
+})
 
 ##
 getTaxidByGeneID <- function(db, geneid) {
@@ -446,35 +449,25 @@ dbGetRank <- function(db, taxid) {
 
 
 ##' @return TaxId, ParentId, ScientificName, Rank
-dbGetNode <- function(db, taxid) {
+dbGetNode <- memoise(function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
   sql <- paste0("SELECT tax_id, parent_id, tax_name, rank FROM nodes JOIN names",
                 " USING ( tax_id ) WHERE tax_id = ", taxid,
                 " AND class = 'scientific name'")
   db_query(conn, sql)
-}
+})
 
 ##
-dbGetLineage <- function (db, taxid, cache = TRUE) {
-  if (cache) {
-    #print(taxid)
-    .get_cached_lineage(db, taxid)
+dbGetLineage <- memoise(function (db, taxid) {
+  if (!.taxcache$exists(taxid)) {
+    lin <- .lineage_to_cache(db, taxid)
   } else {
-    .get_lineage(db, taxid)
-  }
-}
-
-
-.get_cached_lineage <- function (db, id) {
-  if (!.taxcache$exists(id)) {
-    lin <- .lineage_to_cache(db, id)
-  } else {
-    lin <- rbind(.lineage_from_cache(id),
-                 dbGetNode(db, id)[, c('tax_id', 'tax_name', 'rank')])
+    lin <- rbind(.lineage_from_cache(taxid),
+                 dbGetNode(db, taxid)[, c('tax_id', 'tax_name', 'rank')])
   }
   Lineage( lin[-1L, ], shared = db )
-}
+})
 
 
 .lineage_to_cache <- function(db, id) {
@@ -550,20 +543,6 @@ dbGetLineage <- function (db, taxid, cache = TRUE) {
     rBind( lin_list )
   else
     lin_list
-}
-
-
-.get_lineage <- function(db, id) {
-  Lineage( (function (db, id) {
-    node <- dbGetNode(db, id)
-    pid <- node$parent_id
-    lin <- cbind(tax_id = node$tax_id,
-                 tax_name = node$tax_name,
-                 rank = node$rank)
-    if (length(pid) > 0 && pid != id)
-      lin <- rbind(Recall(db, pid), lin)
-    lin
-  })(db, id)[-1, , drop = FALSE], shared = db)
 }
 
 
