@@ -17,18 +17,22 @@ NULL
 #' @export
 #' @classHierarchy
 #' @classMethods 
-setClass("Taxon", contains = "VIRTUAL",
+setClass("Taxon",
+         contains = "VIRTUAL",
          slots = c(shared = "environment"),
          prototype = prototype(shared = new.env(parent=emptyenv())))
 
+
 ## extract the shared database environment from objects
 #' @importFrom rmisc shared
-setMethod("shared", "Taxon", function(x, value = NULL) {
-  if (is.null(value))
+setMethod("shared", "Taxon", function (x, value = NULL) {
+  if (is.null(value)) {
     x@shared
-  else
+  }
+  else {
     tryCatch(get(value, envir=x@shared, inherits=FALSE),
              error = function (e) NULL)
+  }
 })
 
 
@@ -38,22 +42,17 @@ setMethod("shared", "Taxon", function(x, value = NULL) {
 .valid_TaxonMinimal <- function (object) {
   errors <- character()
   if (!all(grepl("^\\d+$", getTaxID(object))) &&
-        !all(is.na(getTaxID(object)))) {
+      !all(is.na(getTaxID(object)))) {
     msg <- "TaxIds must contain only digits or NA"
     errors <- c(errors, msg)
   }
-  
   if (!all(getRank(object) %in% .ranks) &&
-        !all(is.na(getRank(object)))) {
+      !all(is.na(getRank(object)))) {
     msg <- paste0("Invalid rank designation ",
                   sQuote(getRank(object)[!getRank(object)%in%.ranks]))
     errors <- c(errors, msg) 
   }
-  
-  if (length(errors) == 0) 
-    TRUE
-  else
-    errors
+  if (length(errors) == 0) { TRUE } else { errors }
 }
 
 
@@ -62,7 +61,8 @@ setMethod("shared", "Taxon", function(x, value = NULL) {
 #' @classHierarchy
 #' @classMethods
 new_Taxon_minimal <-
-  setClass("Taxon_minimal", contains = "Taxon",
+  setClass("Taxon_minimal",
+           contains = "Taxon",
            slots = c(TaxId = "character",
                      ScientificName = "character",
                      Rank = "character"),
@@ -82,27 +82,29 @@ new_Taxon_minimal <-
 #' @rdname Taxon-accessors
 #' @export
 #' @genericMethods
-setGeneric("getTaxID", function(x, ...) standardGeneric("getTaxID"))
+setGeneric("getTaxID", function (x, ...) standardGeneric("getTaxID"))
 setMethod("getTaxID", "Taxon_minimal", function (x, use.names = TRUE) {
-  if (use.names)
-    setNames(x@TaxId, nm=getScientificName(x))
-  else
+  if (use.names) {
+    setNames(x@TaxId, getScientificName(x))
+  }
+  else {
     x@TaxId
+  }
 })
 
 
 #' @rdname Taxon-accessors
 #' @export
 #' @genericMethods
-setGeneric("getScientificName", function(x, ...) standardGeneric("getScientificName"))
+setGeneric("getScientificName", function (x, ...) standardGeneric("getScientificName"))
 setMethod("getScientificName", "Taxon_minimal", function (x)  x@ScientificName )
 
 
 #' @rdname Taxon-accessors
 #' @export
 #' @genericMethods
-setGeneric("getRank", function(x, ...) standardGeneric("getRank"))
-setMethod("getRank", "Taxon_minimal", function(x) x@Rank)
+setGeneric("getRank", function (x, ...) standardGeneric("getRank"))
+setMethod("getRank", "Taxon_minimal", function (x) x@Rank)
 
 
 setMethod("is.na", "Taxon", function (x) {
@@ -117,18 +119,13 @@ setMethod("is.na", "Taxon", function (x) {
   errors <- character()
   n <- length(getTaxID(object, use.names = FALSE))
   lengths <- c(length(getScientificName(object)), length(getRank(object)))
-  
   if (any(lengths != n)) {
     msg <- paste0("Inconsistent lengths: TaxId = ", n, 
                   ", ScientificName = ", lengths[1], 
                   ", Rank = ", lengths[2])
     errors <- c(errors, msg)
   }
-  
-  if (length(errors) == 0) 
-    TRUE
-  else
-    errors
+  if (length(errors) == 0) { TRUE } else { errors }
 }
 
 

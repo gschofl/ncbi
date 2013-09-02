@@ -3,14 +3,16 @@ NULL
 
 #' @autoImports
 ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
-                            parse = TRUE, ...) {
-  
+                            parse = TRUE, ...)
+{  
   if (is(gi, "esearch")) {
-    if (database(gi) %ni% c('nuccore', 'nucest','nucgss', 'protein', 'popset',
-                            'nucleotide'))
+    .dbs <- c('nuccore', 'nucest','nucgss', 'protein', 'popset', 'nucleotide')
+    if (database(gi) %ni% .dbs) {
       stop("Database ", sQuote(database(gi)), " not supported")
-    if (!has_webenv(gi))
+    }
+    if (!has_webenv(gi)) {
       gi <- idList(gi)
+    }
   }
   
   args <- getArgs(gi, db, rettype, retmax, ...)
@@ -23,7 +25,8 @@ ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
            gbwithparts = parseGenBank(response),
            acc = parseAcc(response),
            response)
-  } else {
+  }
+  else {
     response
   }
 }
@@ -38,16 +41,15 @@ ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
 #'
 #' @export
 #' @autoImports
-parseGenBank <- function(gb) {
-  
+parseGenBank <- function (gb) {
   ## see if gb is a valid file path
   if (tryCatch(file.exists(gb), error=function(e) FALSE)) {
-    return( gbRecord(gb) )
+    return(gbRecord(gb))
+  }
   ## or if it's an efetch instance
-  } else if (is(gb, "efetch")) {
+  else if (is(gb, "efetch")) {
     gb <- content(gb)
   }
-  
   ## don't try to parse XML
   if (is(gb, "XMLInternalDocument")) {
     return(gb)
@@ -66,8 +68,7 @@ parseGenBank <- function(gb) {
 #'
 #' @export
 #' @autoImports
-parseTSeqSet <- function(tSeqSet = response) {
-  
+parseTSeqSet <- function (tSeqSet) {
   if (is(tSeqSet, "efetch")) {
     tSeqSet <- content(tSeqSet)
   }
@@ -110,11 +111,13 @@ parseTSeqSet <- function(tSeqSet = response) {
   })
   
   if (length(seqs) == 1) {
-    return( seqs[[1]] )
-  } else if (length(base::unique(vapply(seqs, class, character(1)))) == 1) {
-    return( do.call(c, seqs) )
-  } else {
-    return( seqs )
+    return(seqs[[1]])
+  }
+  else if (length(base::unique(vapply(seqs, class, character(1)))) == 1) {
+    return(do.call("c", seqs))
+  }
+  else {
+    return(seqs)
   }
 }
 
@@ -140,8 +143,8 @@ parseTSeqSet <- function(tSeqSet = response) {
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname protein
 #' @export
-#' @importFrom rmisc Curry
-protein <- Curry(ncbi_sequences, db="protein")
+#' @importFrom rmisc Partial
+protein <- Partial(ncbi_sequences, db="protein")
 
 
 #' Retrieve sequences and annotations from the Nucleotide database
@@ -166,7 +169,7 @@ protein <- Curry(ncbi_sequences, db="protein")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname nucleotide
 #' @export
-nucleotide <- Curry(ncbi_sequences, db="nuccore")
+nucleotide <- Partial(ncbi_sequences, db="nuccore")
 
 
 #' Retrieve sequences and annotations from the GSS database
@@ -190,7 +193,7 @@ nucleotide <- Curry(ncbi_sequences, db="nuccore")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname GSS
 #' @export
-GSS <- Curry(ncbi_sequences, db="nucgss")
+GSS <- Partial(ncbi_sequences, db="nucgss")
 
 
 #' Retrieve sequences and annotations from the EST database
@@ -214,6 +217,6 @@ GSS <- Curry(ncbi_sequences, db="nucgss")
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname EST
 #' @export
-EST <- Curry(ncbi_sequences, db="nucest")
+EST <- Partial(ncbi_sequences, db="nucest")
 
 
