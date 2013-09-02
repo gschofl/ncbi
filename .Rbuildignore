@@ -1,2 +1,9 @@
-^.*\.Rproj$
 ^\.Rproj\.user$
+^.*\.Rproj$
+cache/
+data/
+doc/
+playground/
+scratch\.[rR]
+^README\.*
+^readme\.*
