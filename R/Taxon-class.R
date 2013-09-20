@@ -63,11 +63,11 @@ new_Taxon_minimal <-
   setClass("Taxon_minimal",
            contains="Taxon",
            slots=c(TaxId="character",
-                     ScientificName="character",
-                     Rank="character"),
+                   ScientificName="character",
+                   Rank="character"),
            prototype=prototype(TaxId=NA_character_,
-                                 ScientificName=NA_character_,
-                                 Rank=NA_character_),
+                               ScientificName=NA_character_,
+                               Rank=NA_character_),
            validity=.valid_TaxonMinimal)
 
 
@@ -137,7 +137,7 @@ new_Lineage <-
 
 Lineage <- function(..., shared=new.env(parent=emptyenv())) {
   listData <- list(...)
-  if (all_empty(listData)) {
+  if (length(listData) == 0) {
     new_Lineage(shared=shared)
   } else {
     if (length(listData) == 1L && ( is.list(listData[[1L]]) || is.matrix(listData[[1L]] ))) 
@@ -335,23 +335,17 @@ setMethod("getByRank", "Taxon_full", function(x, rank, value=NULL) {
 #'  \linkS4class{taxon} or \linkS4class{TaxonList} instance.
 #' @rdname taxon-constructors
 #' @export
-#' @autoImports
 taxon <- function(taxid, rettype=NULL, retmax=25, parse=TRUE, ...) {
   if (missing(taxid)) {
-    return( new_Taxon_full() )
+    return(new_Taxon_full())
   }
-  
-  if (is(taxid, "esearch")) {
-    if (database(taxid) != 'taxonomy')
-      stop("Database ", sQuote(database(taxid)), " not supported")
-    if (!has_webenv(taxid))
-      taxid <- idList(taxid)
+  if (is(taxid, "esearch") && database(taxid) != 'taxonomy') {
+    stop("Database ", sQuote(database(taxid)), " not supported")
   }
-  
-  args <- getArgs(id=taxid, db="taxonomy", rettype, retmax, ...)
-  response <- fetch_records(args, 500)
+  args <- get_args(taxid, "taxonomy", rettype, retmax, ...)
+  response <- content(do.call("efetch", args))
   if (parse) {
-    switch(args$rettype %|null|% "xml",
+    switch(args$rettype %||% "xml",
            xml=parseTaxon(response),
            uilist=parseUilist(response),
            response)
@@ -506,10 +500,10 @@ show_cache <- function() {
 # Parser -----------------------------------------------------------------
 
 
+#' @keywords internal
 #' @export
-#' @autoImports
+#' @importFrom reutils xname
 parseTaxon <- function(taxaSet=response) {
-  
   if (is(taxaSet, "efetch")) {
     taxaSet <- content(taxaSet)
   }
@@ -517,12 +511,12 @@ parseTaxon <- function(taxaSet=response) {
   if (!is(taxaSet, "XMLInternalDocument")) {
     return(taxaSet)
   }
-  taxaSet <- getNodeSet(xmlRoot(taxaSet), '//TaxaSet/Taxon')
-  if (all_empty(taxaSet)) {
+  taxaSet <- xset(taxaSet, '//TaxaSet/Taxon')
+  if (length(taxaSet) == 0) {
     stop("No 'TaxaSet' provided")
   }
   
-  tx <- base::lapply(taxaSet, function(taxon) {
+  tx <- lapply(taxaSet, function(taxon) {
     # taxon <- xmlDoc(taxaSet[[1]])
     taxon <- xmlDoc(taxon)
     taxMin <- new_Taxon_minimal(
@@ -539,7 +533,7 @@ parseTaxon <- function(taxaSet=response) {
     Authority <-  dispName[classCDE == "authority"] %||% NA_character_
     TypeMaterial <- dispName[classCDE == "type material"] %||% NA_character_
     Lineage <- Lineage(
-      base::lapply(getNodeSet(taxon, "//LineageEx/Taxon"), function(l) {
+      lapply(xset(taxon, "//LineageEx/Taxon"), function(l) {
         l <- xmlDoc(l)
         new_Taxon_minimal(
           TaxId=xvalue(l, '/Taxon/TaxId'),

@@ -1,33 +1,33 @@
 % Built by roxygen3 0.1
-\name{author}
-\alias{abstract}
-\alias{author}
+\name{getAuthor}
 \alias{browsePubmed}
-\alias{cites}
-\alias{doi}
-\alias{issue}
-\alias{journal}
-\alias{pmid}
-\alias{title}
+\alias{getAbstract}
+\alias{getAuthor}
+\alias{getCites}
+\alias{getDoi}
+\alias{getIssue}
+\alias{getJournal}
+\alias{getPmid}
+\alias{getTitle}
 \title{PubMed accessors
 
 Access the various slots of \code{\link[utils]{bibentry}} instances.}
 \usage{
-  author(x, ...)
+  getAuthor(x, ...)
 
-  title(x, ...)
+  getTitle(x, ...)
 
-  abstract(x, ...)
+  getAbstract(x, ...)
 
-  journal(x, ...)
+  getJournal(x, ...)
 
-  issue(x, ...)
+  getIssue(x, ...)
 
-  pmid(x, ...)
+  getPmid(x, ...)
 
-  doi(x, ...)
+  getDoi(x, ...)
 
-  cites(x, ...)
+  getCites(x, ...)
 
   browsePubmed(x, ...)
 }
@@ -37,56 +37,56 @@ Access the various slots of \code{\link[utils]{bibentry}} instances.}
   \item{...}{Further arguments passed on to methods.}
 }
 
-\section{Method signatures for generic author}{
+\section{Method signatures for generic getAuthor}{
 \itemize{
   \item \linkS4class{pubmed}
 }
 
 }
 
-\section{Method signatures for generic title}{
+\section{Method signatures for generic getTitle}{
 \itemize{
   \item \linkS4class{pubmed}
 }
 
 }
 
-\section{Method signatures for generic abstract}{
+\section{Method signatures for generic getAbstract}{
 \itemize{
   \item \linkS4class{pubmed}
 }
 
 }
 
-\section{Method signatures for generic journal}{
+\section{Method signatures for generic getJournal}{
 \itemize{
   \item \linkS4class{pubmed}
 }
 
 }
 
-\section{Method signatures for generic issue}{
+\section{Method signatures for generic getIssue}{
 \itemize{
   \item \linkS4class{pubmed}
 }
 
 }
 
-\section{Method signatures for generic pmid}{
+\section{Method signatures for generic getPmid}{
 \itemize{
   \item \linkS4class{pubmed}
 }
 
 }
 
-\section{Method signatures for generic doi}{
+\section{Method signatures for generic getDoi}{
 \itemize{
   \item \linkS4class{pubmed}
 }
 
 }
 
-\section{Method signatures for generic cites}{
+\section{Method signatures for generic getCites}{
 \itemize{
   \item \linkS4class{pubmed}
 }

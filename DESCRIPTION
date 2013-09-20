@@ -15,19 +15,21 @@ LinkingTo: Rcpp
 Imports:
     assertthat,
     BiocGenerics,
-    biofiles,
     Biostrings,
     DBI,
     IRanges,
     memoise,
     methods,
     RCurl,
-    Rentrez,
+    reutils,
     rmisc,
     RSQLite,
     stats,
     utils,
     XML
+Suggests:
+    biofiles,
+    testthats
 Collate:
     '00datacache.R'
     'utils.R'

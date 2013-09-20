@@ -1,30 +1,28 @@
 #' @include utils.R
 NULL
+#' @importFrom XML xmlDoc free
+NULL
+#' @importFrom Biostrings AAStringSet DNAStringSet
+NULL
+#' @importFrom IRanges DataFrame "elementMetadata<-"
+NULL
 
-#' @autoImports
-ncbi_sequences <- function(gi, db, rettype="fasta", retmax=100,
-                           parse=TRUE, ...) {  
-  if (is(gi, "esearch")) {
-    .dbs <- c('nuccore', 'nucest','nucgss', 'protein', 'popset', 'nucleotide')
-    if (database(gi) %ni% .dbs) {
-      stop("Database ", sQuote(database(gi)), " not supported")
-    }
-    if (!has_webenv(gi)) {
-      gi <- idList(gi)
-    }
+
+ncbi_sequences <- function(gi, db, rettype="fasta", retmax=100, parse=TRUE, ...) {
+  .dbs <- c('nuccore', 'nucest','nucgss', 'protein', 'popset', 'nucleotide')
+  if (is(gi, "esearch") && database(gi) %ni% .dbs) {
+    stop("Database ", sQuote(database(gi)), " is not yet supported")
   }
-  
-  args <- getArgs(gi, db, rettype, retmax, ...)
-  response <- fetch_records(args, 500)
+  args <- get_args(gi, db, rettype, retmax, ...)
+  response <- content(do.call("efetch", args))
   if (parse) {
-    switch(args$rettype %|null|% "asn.1",
+    switch(args$rettype %||% "asn.1",
            fasta=parseTSeqSet(response),
            gb=parseGenBank(response),
            gp=parseGenBank(response),
            gbwithparts=parseGenBank(response),
            acc=parseAcc(response),
-           response
-    )
+           response)
   } else {
     response
   }
@@ -39,8 +37,8 @@ ncbi_sequences <- function(gi, db, rettype="fasta", retmax=100,
 #' @return A \linkS4class{gbRecord} instance.
 #'
 #' @export
-#' @autoImports
 parseGenBank <- function(gb) {
+  stopifnot(require(biofiles))
   ## see if gb is a valid file path
   if (tryCatch(file.exists(gb), error=function(e) FALSE)) {
     return(gbRecord(gb))
@@ -66,7 +64,6 @@ parseGenBank <- function(gb) {
 #' in the \code{elementMetadata} slot.
 #'
 #' @export
-#' @autoImports
 parseTSeqSet <- function(tSeqSet) {
   if (is(tSeqSet, "efetch")) {
     tSeqSet <- content(tSeqSet)
@@ -75,31 +72,29 @@ parseTSeqSet <- function(tSeqSet) {
   if (!is(tSeqSet, "XMLInternalDocument")) {
     return(tSeqSet)
   }
-  tSeqSet <- getNodeSet(xmlRoot(tSeqSet), '//TSeqSet/TSeq')
-  if (all_empty(tSeqSet)) {
+  tSeqSet <- xset(tSeqSet, '/TSeqSet/TSeq')
+  if (length(tSeqSet) == 0) {
     stop("No 'tSeqSet' provided")
   }
   
-  seqs <- base::lapply(tSeqSet, function(seq) {
-    # seq <- xmlRoot(xmlDoc(tSeqSet[[1]]))
-    seq       <- xmlRoot(xmlDoc(seq))
-    seqtype   <- xattr(seq, '//TSeq_seqtype', "value")
-    gi        <- xvalue(seq, '//TSeq_gi') # optional
-    accver    <- xvalue(seq, '//TSeq_accver') # optional
-    sid       <- xvalue(seq, '//TSeq_sid') # optional
-    local     <- xvalue(seq, '//TSeq_local') # optional
-    taxid     <- xvalue(seq, '//TSeq_taxid') # optional
-    orgname   <- xvalue(seq, '//TSeq_orgname') # optional
-    defline   <- xvalue(seq, '//TSeq_defline')
-    length    <- xvalue(seq, '//TSeq_length', as="numeric")
+  seqs <- lapply(tSeqSet, function(seq) {
+    seq       <- xmlDoc(seq)
+    seqtype   <- xattr(seq, '/TSeq/TSeq_seqtype', 'value')
+    gi        <- xvalue(seq, '/TSeq/TSeq_gi') # optional
+    accver    <- xvalue(seq, '/TSeq/TSeq_accver') # optional
+    sid       <- xvalue(seq, '/TSeq/TSeq_sid') # optional
+    local     <- xvalue(seq, '/TSeq/TSeq_local') # optional
+    taxid     <- xvalue(seq, '/TSeq/TSeq_taxid') # optional
+    orgname   <- xvalue(seq, '/TSeq/TSeq_orgname') # optional
+    defline   <- xvalue(seq, '/TSeq/TSeq_defline')
+    length    <- xvalue(seq, '/TSeq/TSeq_length', as="numeric")
     sequence  <- switch(seqtype,
-                        protein=AAStringSet(xvalue(seq, '//TSeq_sequence')),
-                        nucleotide=DNAStringSet(xvalue(seq, '//TSeq_sequence')))
-    
+                        protein=AAStringSet(xvalue(seq, '/TSeq/TSeq_sequence')),
+                        nucleotide=DNAStringSet(xvalue(seq, '/TSeq/TSeq_sequence')))
     ## construct a defline
-    df_gi_db  <- base::ifelse(is.na(gi), '', 'gi|')
+    df_gi_db  <- ifelse(is.na(gi), '', 'gi|')
     df_gi     <- gi %|NA|% ''
-    df_acc_db <- base::ifelse(is.na(accver), '|', '|gb|')
+    df_acc_db <- ifelse(is.na(accver), '|', '|gb|')
     df_acc    <- accver %|NA|% sid
     names(sequence) <- paste0(df_gi_db, df_gi, df_acc_db, df_acc, ' ', defline)
     elementMetadata(sequence) <- DataFrame(gi=gi, accver=accver, sid=sid,
@@ -111,7 +106,7 @@ parseTSeqSet <- function(tSeqSet) {
   
   if (length(seqs) == 1) {
     return(seqs[[1]])
-  } else if (length(base::unique(vapply(seqs, class, character(1)))) == 1) {
+  } else if (length(unique(vapply(seqs, class, ""))) == 1) {
     return(do.call("c", seqs))
   } else {
     return(seqs)
@@ -140,7 +135,6 @@ parseTSeqSet <- function(tSeqSet) {
 #' @return A \linkS4class{gbRecord} or an \linkS4class{XStringSet} instance.
 #' @rdname protein
 #' @export
-#' @importFrom rmisc Partial
 protein <- Partial(ncbi_sequences, db="protein")
 
 
