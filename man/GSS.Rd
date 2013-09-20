@@ -3,8 +3,7 @@
 \alias{GSS}
 \title{Retrieve sequences and annotations from the GSS database}
 \usage{
-  GSS(gi, rettype = "fasta", retmax = 25, parse = TRUE,
-    ...)
+  GSS(gi, rettype="fasta", retmax=25, parse=TRUE, ...)
 }
 \arguments{
   \item{gi}{\sQuote{GI}s or a valid NCBI search term.}

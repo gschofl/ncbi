@@ -3,10 +3,17 @@
 \name{ncbi}
 \alias{ncbi}
 \alias{ncbi-package}
-\title{Retrieve data from NCBI.}
+\title{Retrieve and parse data from NCBI databases.}
 \description{
-Important functions:
+This package provides an R interface to retrieve data from the following NCBI
+databases: \emph{nucleotide}, \emph{protein}, \emph{pubmed}, \emph{taxonomy},
+\emph{nucgss}, and \emph{nucest}.
+}
+\section{Important functions}{
+
+
   \itemize{
+  
     \item \code{\link{taxon}}: Retrieve taxonomy records remotely from NCBI's
     \emph{Taxonomy} database.
     \item \code{\link{craeateTaxonDB}}: Install NCBI's \emph{Taxonomy}
@@ -26,9 +33,12 @@ Important functions:
     \item \code{\link{GSS}}: Retrieve records from the
     \emph{nucgss} database.   
     \item \code{\link{EST}}: Retrieve records from the
-    \emph{nucest} database.        
+    \emph{nucest} database.
+          
   }
 }
+
 \author{
 Gerhard Schöfl \email{gschofl@yahoo.de}
 }
+\keyword{package}

@@ -9,7 +9,7 @@
   TaxonList(..., shared = new.env(parent = emptyenv()))
 }
 \description{
-\dQuote{\bold{TaxonList}} and \dQuote{\bold{LineageList}
+\dQuote{\bold{TaxonList}} and \dQuote{\bold{LineageList}}
 are lists of \linkS4class{Taxon} and \linkS4class{Lineage}
 objects, respectively.
 }
@@ -19,7 +19,6 @@ Super classes:
   \item \linkS4class{Collection}
   \item \linkS4class{list}
   \item \linkS4class{vector}
-  \item \linkS4class{vectorORfactor}
 }
 
 }
@@ -47,7 +46,6 @@ Super classes:
   \item \linkS4class{Collection}
   \item \linkS4class{list}
   \item \linkS4class{vector}
-  \item \linkS4class{vectorORfactor}
 }
 
 }

@@ -4,15 +4,15 @@ NULL
 setOldClass("bibentry")
 
 setClass("doi", 
-         representation(doi = "character"),
-         prototype(doi = NA_character_))
+         representation(doi="character"),
+         prototype(doi=NA_character_))
 
 setClass("pubmed",
-         representation(pmid = "character",
-                        doi = "doi",
-                        cites = "list",
-                        date = "list",
-                        ref = "bibentry"))
+         representation(pmid="character",
+                        doi="doi",
+                        cites="list",
+                        date="list",
+                        ref="bibentry"))
 
 
 #' Retrieve records from the PubMed database.
@@ -35,7 +35,7 @@ setClass("pubmed",
 #' parsed a (list of) \linkS4class{pubmed} instance(s).
 #' @rdname pubmed
 #' @export
-pubmed <- function(pmid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
+pubmed <- function(pmid, rettype=NULL, retmax=25, parse=TRUE, ...) {
   
   if (is(pmid, "esearch")) {
     if (database(pmid) != 'pubmed')
@@ -48,8 +48,8 @@ pubmed <- function(pmid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
   response <- fetch_records(args, 500)
   if (parse) {
     switch(args$rettype %|null|% "xml",
-           xml = parsePubmed(response),
-           uilist = parseUilist(response),
+           xml=parsePubmed(response),
+           uilist=parseUilist(response),
            response)
   } else {
     response
@@ -60,7 +60,7 @@ pubmed <- function(pmid, rettype = NULL, retmax = 25, parse = TRUE, ...) {
 #' @rdname pubmed
 #' @export
 #' @autoImports
-parsePubmed <- function (pmArticleSet = response) {
+parsePubmed <- function(pmArticleSet=response) {
   
   if (is(pmArticleSet, "efetch")) {
     pmArticleSet <- content(pmArticleSet)
@@ -76,22 +76,22 @@ parsePubmed <- function (pmArticleSet = response) {
   }
   
   # art <- pmArtSet[[1]]
-  reff <- base::lapply(pmArtSet, function (art) {
+  reff <- base::lapply(pmArtSet, function(art) {
     art <- xmlDoc(art)
     pmid <- xvalue(art, '//MedlineCitation/PMID')
     if (!is.na(xvalue(art, '//ELocationID[@EIdType="doi"]'))) {
       doi <- new("doi",
-               doi=xvalue(art, '//ELocationID[@EIdType="doi"]'))
+                 doi=xvalue(art, '//ELocationID[@EIdType="doi"]'))
     } else {
       doi <- new("doi",
-               doi=xvalue(art, '//ArticleId[@IdType="doi"]'))
+                 doi=xvalue(art, '//ArticleId[@IdType="doi"]'))
     }
     
     dateCreated <- as.POSIXlt(xvalue(art, '//MedlineCitation/DateCreated', NA),
                               format="%Y%m%d")
     
     cites <- xvalue(art, '//CommentsCorrections[ @RefType="Cites"]/PMID', NA)
-  
+    
     # bibentry
     author <- {
       lastName <- xvalue(art, '//AuthorList//LastName')
@@ -108,38 +108,38 @@ parsePubmed <- function (pmArticleSet = response) {
       }
     }
     article <- list(
-      title = xvalue(art, '//ArticleTitle', ''),
-      abstract = abstract,
-      doi = xvalue(art, '//ArticleIdList/ArticleId[@IdType="doi"]', ''),
-      pii = xvalue(art, '//ArticleIdList/ArticleId[@IdType="pii"]', ''),
-      pmid = xvalue(art, '//ArticleIdList/ArticleId[@IdType="pubmed"]', ''),
-      pmc = xvalue(art, '//ArticleIdList/ArticleId[@IdType="pmc"]', '')
+      title=xvalue(art, '//ArticleTitle', ''),
+      abstract=abstract,
+      doi=xvalue(art, '//ArticleIdList/ArticleId[@IdType="doi"]', ''),
+      pii=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pii"]', ''),
+      pmid=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pubmed"]', ''),
+      pmc=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pmc"]', '')
     )
     journal <- list(
-      issn = xvalue(art, '//Journal/ISSN', ''),
-      journal = xvalue(art, '//Journal/Title', ''),
-      abbrev = xvalue(art, '//Journal/ISOAbbreviation', ''),
-      volume = xvalue(art, '//JournalIssue/Volume', ''),
-      number = xvalue(art, '//JournalIssue/Issue', ''),
-      year = {
+      issn=xvalue(art, '//Journal/ISSN', ''),
+      journal=xvalue(art, '//Journal/Title', ''),
+      abbrev=xvalue(art, '//Journal/ISOAbbreviation', ''),
+      volume=xvalue(art, '//JournalIssue/Volume', ''),
+      number=xvalue(art, '//JournalIssue/Issue', ''),
+      year={
         year <- xvalue(art, '//JournalIssue/PubDate/Year', '')
         medlineDate <- xvalue(art, '//JournalIssue/PubDate/MedlineDate', '')
         if (nzchar(year)) year else medlineDate
       },
-      month = xvalue(art, '//JournalIssue/PubDate/Month', ''),
-      pages = xvalue(art, '//Pagination/MedlinePgn', '')
+      month=xvalue(art, '//JournalIssue/PubDate/Month', ''),
+      pages=xvalue(art, '//Pagination/MedlinePgn', '')
     )
     affiliation <- list(
-      affiliation = xvalue(art, '//Affiliation', '')
+      affiliation=xvalue(art, '//Affiliation', '')
     )
     
     free(art)
     key <- paste0(author[1]$family, journal$year)
     ref <- bibentry('Article', key=key, author=author,
                     other=c(article, journal, affiliation))
-    pm <- new("pubmed", pmid = pmid, doi = doi,
-              cites = list(cites), date = list(dateCreated),
-              ref = ref)
+    pm <- new("pubmed", pmid=pmid, doi=doi,
+              cites=list(cites), date=list(dateCreated),
+              ref=ref)
     pm
   })
   

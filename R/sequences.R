@@ -2,9 +2,8 @@
 NULL
 
 #' @autoImports
-ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
-                            parse = TRUE, ...)
-{  
+ncbi_sequences <- function(gi, db, rettype="fasta", retmax=100,
+                           parse=TRUE, ...) {  
   if (is(gi, "esearch")) {
     .dbs <- c('nuccore', 'nucest','nucgss', 'protein', 'popset', 'nucleotide')
     if (database(gi) %ni% .dbs) {
@@ -19,14 +18,14 @@ ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
   response <- fetch_records(args, 500)
   if (parse) {
     switch(args$rettype %|null|% "asn.1",
-           fasta = parseTSeqSet(response),
-           gb = parseGenBank(response),
-           gp = parseGenBank(response),
-           gbwithparts = parseGenBank(response),
-           acc = parseAcc(response),
-           response)
-  }
-  else {
+           fasta=parseTSeqSet(response),
+           gb=parseGenBank(response),
+           gp=parseGenBank(response),
+           gbwithparts=parseGenBank(response),
+           acc=parseAcc(response),
+           response
+    )
+  } else {
     response
   }
 }
@@ -41,7 +40,7 @@ ncbi_sequences <- function (gi, db, rettype = "fasta", retmax = 100,
 #'
 #' @export
 #' @autoImports
-parseGenBank <- function (gb) {
+parseGenBank <- function(gb) {
   ## see if gb is a valid file path
   if (tryCatch(file.exists(gb), error=function(e) FALSE)) {
     return(gbRecord(gb))
@@ -68,7 +67,7 @@ parseGenBank <- function (gb) {
 #'
 #' @export
 #' @autoImports
-parseTSeqSet <- function (tSeqSet) {
+parseTSeqSet <- function(tSeqSet) {
   if (is(tSeqSet, "efetch")) {
     tSeqSet <- content(tSeqSet)
   }
@@ -81,7 +80,7 @@ parseTSeqSet <- function (tSeqSet) {
     stop("No 'tSeqSet' provided")
   }
   
-  seqs <- base::lapply(tSeqSet, function (seq) {
+  seqs <- base::lapply(tSeqSet, function(seq) {
     # seq <- xmlRoot(xmlDoc(tSeqSet[[1]]))
     seq       <- xmlRoot(xmlDoc(seq))
     seqtype   <- xattr(seq, '//TSeq_seqtype', "value")
@@ -103,20 +102,18 @@ parseTSeqSet <- function (tSeqSet) {
     df_acc_db <- base::ifelse(is.na(accver), '|', '|gb|')
     df_acc    <- accver %|NA|% sid
     names(sequence) <- paste0(df_gi_db, df_gi, df_acc_db, df_acc, ' ', defline)
-    elementMetadata(sequence) <- DataFrame(gi = gi, accver = accver, sid = sid,
-                                           local = local, taxid = taxid,
-                                           orgname = orgname, defline = defline,
-                                           length = length)
+    elementMetadata(sequence) <- DataFrame(gi=gi, accver=accver, sid=sid,
+                                           local=local, taxid=taxid,
+                                           orgname=orgname, defline=defline,
+                                           length=length)
     sequence
   })
   
   if (length(seqs) == 1) {
     return(seqs[[1]])
-  }
-  else if (length(base::unique(vapply(seqs, class, character(1)))) == 1) {
+  } else if (length(base::unique(vapply(seqs, class, character(1)))) == 1) {
     return(do.call("c", seqs))
-  }
-  else {
+  } else {
     return(seqs)
   }
 }
@@ -129,7 +126,7 @@ parseTSeqSet <- function (tSeqSet) {
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK44863/}{NCBI}
 #' for more information.
 #' 
-#' @usage protein(gi, rettype = "fasta", retmax = 25, parse = TRUE, ...)
+#' @usage protein(gi, rettype="fasta", retmax=25, parse=TRUE, ...)
 #' 
 #' @param gi \sQuote{GI}s or a valid NCBI search term.
 #' @param rettype Which type of data should be retrieved? \sQuote{fasta}
@@ -154,7 +151,7 @@ protein <- Partial(ncbi_sequences, db="protein")
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK44863/}{NCBI}
 #' for more information.
 #' 
-#' @usage nucleotide(gi, rettype = "fasta", retmax = 25, parse = TRUE, ...)
+#' @usage nucleotide(gi, rettype="fasta", retmax=25, parse=TRUE, ...)
 #' 
 #' @param gi \sQuote{GI}s or a valid NCBI search term.
 #' @param rettype Which type of data should be retrieved? \sQuote{fasta}
@@ -179,7 +176,7 @@ nucleotide <- Partial(ncbi_sequences, db="nuccore")
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK44863/}{NCBI}
 #' for more information.
 #' 
-#' @usage GSS(gi, rettype = "fasta", retmax = 25, parse = TRUE, ...)
+#' @usage GSS(gi, rettype="fasta", retmax=25, parse=TRUE, ...)
 #' 
 #' @param gi \sQuote{GI}s or a valid NCBI search term.
 #' @param rettype Which type of data should be retrieved? \sQuote{fasta}
@@ -203,7 +200,7 @@ GSS <- Partial(ncbi_sequences, db="nucgss")
 #' \href{http://www.ncbi.nlm.nih.gov/books/NBK44863/}{NCBI}
 #' for more information.
 #' 
-#' @usage EST(gi, rettype = "fasta", retmax = 25, parse = TRUE, ...)
+#' @usage EST(gi, rettype="fasta", retmax=25, parse=TRUE, ...)
 #' 
 #' @param gi \sQuote{GI}s or a valid NCBI search term.
 #' @param rettype Which type of data should be retrieved? \sQuote{fasta}

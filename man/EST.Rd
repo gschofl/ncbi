@@ -3,8 +3,7 @@
 \alias{EST}
 \title{Retrieve sequences and annotations from the EST database}
 \usage{
-  EST(gi, rettype = "fasta", retmax = 25, parse = TRUE,
-    ...)
+  EST(gi, rettype="fasta", retmax=25, parse=TRUE, ...)
 }
 \arguments{
   \item{gi}{\sQuote{GI}s or a valid NCBI search term.}

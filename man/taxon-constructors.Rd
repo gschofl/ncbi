@@ -49,7 +49,7 @@ Retrieve records from the NCBI Taxonomy database (locally or remote)
 If no \code{geneid_db} or \code{taxon_db} are provided the databases are
 searched in the \code{extdata} directory of the installed \code{ncbi}
 package. To create these databases in the default location, run
-\code{createTaxonDB(with_geneid = TRUE)}.
+\code{createTaxonDB(with_geneid=TRUE)}.
 
 The \bold{geneid.db} file, however, gets fairly large (currently ~6GB) and
 takes a long time to create. It might be advisable to provide a custom 

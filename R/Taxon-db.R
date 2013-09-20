@@ -8,7 +8,7 @@ NULL
 NULL
 #' @importFrom RSQLite dbSendQuery dbListTables dbListFields 
 NULL
-#' @importFrom assertthat assert_that is.string
+#' @importFrom assertthat assert_that is.string is.writeable
 NULL
 #' @importFrom memoise memoise
 NULL
@@ -17,12 +17,11 @@ NULL
 #' @importClassesFrom DBI DBIObject DBIConnection
 NULL
 
-.valid_TaxonDBConnection <- function (object) {
+.valid_TaxonDBConnection <- function(object) {
   errors <- character()
   if (!all(c("nodes", "names") %in% dbListTables(object))) {
     errors <- c(errors, "Table missing from 'TaxonDB'\n")
-  }
-  else {
+  } else {
     if (!all(c("tax_id", "parent_id", "rank", "embl_code", "division_id")
              %in% dbListFields(object, "nodes"))) {
       errors <- c(errors, "Field missing from table 'nodes'\n")
@@ -72,8 +71,8 @@ NULL
 #' @classHierarchy
 #' @classMethods 
 new_TaxonDBConnection <- setClass('TaxonDBConnection',
-                                  contains = 'SQLiteConnection',
-                                  validity = .valid_TaxonDBConnection)
+                                  contains='SQLiteConnection',
+                                  validity=.valid_TaxonDBConnection)
 
 
 #' Create a connection to a local NCBI Taxonomy or Gene ID database
@@ -92,7 +91,7 @@ new_TaxonDBConnection <- setClass('TaxonDBConnection',
 #' @importFrom assertthat is.dir
 #' @rdname taxonDBConnect
 #' @export
-taxonDBConnect <- function (db_path = NULL) {
+taxonDBConnect <- function(db_path=NULL) {
   if (is.null(db_path)) {
     db_path <- file.path(path.package("ncbi"), "extdata")
   }
@@ -115,12 +114,11 @@ taxonDBConnect <- function (db_path = NULL) {
 }
 
 
-.valid_GeneidDBConnection <- function (object) {
+.valid_GeneidDBConnection <- function(object) {
   errors <- character()
   if (!"genes" %in% dbListTables(object)) {
     errors <- c(errors, "Table missing from 'GeneidDB'\n")
-  }
-  else if (!"tax_id" %in% dbListFields(object, "genes")) {
+  } else if (!"tax_id" %in% dbListFields(object, "genes")) {
     errors <- c(errors, "Field missing from table 'genes'\n")
   }
   
@@ -130,23 +128,23 @@ taxonDBConnect <- function (db_path = NULL) {
 #' @rdname Connection-classes
 #' @export
 new_GeneidDBConnection <- setClass('GeneidDBConnection',
-                                  contains = 'SQLiteConnection',
-                                  validity = .valid_GeneidDBConnection)
+                                   contains='SQLiteConnection',
+                                   validity=.valid_GeneidDBConnection)
 
 
 #' @rdname taxonDBConnect 
 #' @export
-geneidDBConnect <- function (db_path = NULL) {
+geneidDBConnect <- function(db_path=NULL) {
   if (is.null(db_path)) {
     db_path <- file.path(path.package("ncbi"), "extdata")
   }
   errmsg <- paste0("Cannot find a local installation of the the GI_to_TaxId ",
                    "database in the directory ", sQuote(db_path),
                    "\nSpecify the exact path to the database or run the ",
-                   "command 'createTaxonDB(with_geneid = TRUE)'")
+                   "command 'createTaxonDB(with_geneid=TRUE)'")
   if (is.dir(db_path)) {
     geneid_db <- normalizePath(dir(db_path, pattern="geneid.db", full.names=TRUE),
-                              mustWork=FALSE)
+                               mustWork=FALSE)
     if (all_empty(geneid_db)) {
       stop(errmsg, call.=FALSE)
     }
@@ -162,8 +160,8 @@ geneidDBConnect <- function (db_path = NULL) {
 #' Create a local install of the NCBI Taxonomy database.
 #' 
 #' @details
-#' From the commandline:
-#' \code{R -q -e "require(ncbi); createTaxonDB('/path/to/db');createGeneidDB('/path/to/db')"}
+#' From the commandline run:
+#' \code{R -q -e "require(ncbi);createTaxonDB('/path/to/db');createGeneidDB('/path/to/db')"}
 #
 #' @param db_path Parent directory for SQLite database files.
 #' 
@@ -172,40 +170,49 @@ geneidDBConnect <- function (db_path = NULL) {
 #'
 #' @rdname TaxonDB
 #' @export
-createTaxonDB <- function(db_path = file.path(path.package("ncbi"), "extdata")) {
+createTaxonDB <- function(db_path="~/taxonomy") {
+  assert_that(file_create_if_not_exists(db_path))
   make_taxondb(db_path, update=FALSE)
 }
 
 
 #' @rdname TaxonDB
 #' @export
-updateTaxonDB <- function(db_path = file.path(path.package("ncbi"), "extdata")) {
+updateTaxonDB <- function(db_path="~/taxonomy") {
+  assert_that(is.dir(db_path), is.writeable(db_path))
   make_taxondb(db_path, update=TRUE)
 }
 
 
 #' @rdname TaxonDB
 #' @export
-createGeneidDB <- function(db_path = file.path(path.package("ncbi"), "extdata")) {
+createGeneidDB <- function(db_path="~/taxonomy") {
+  assert_that(file_create_if_not_exists(db_path))
   make_geneiddb(db_path, update=FALSE)
 }
 
 
-make_taxondb <- function (db_path = file.path(path.package("ncbi"), "extdata"),
-                          update = FALSE)
-{ 
+#' @rdname TaxonDB
+#' @export
+updateGeneidDB <- function(db_path="~/taxonomy") {
+  assert_that(is.dir(db_path), is.writeable(db_path))
+  make_geneiddb(db_path, update=TRUE)
+}
+
+
+make_taxondb <- function(db_path=file.path(path.package("ncbi"), "extdata"),
+                         update=FALSE) { 
   url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
   zipped <- "taxdump.tar.gz"
-  db_name <- normalizePath(file.path(db_path, "taxon.db"), mustWork = FALSE)
+  db_name <- normalizePath(file.path(db_path, "taxon.db"), mustWork=FALSE)
   
   if (update) {
-    status <- fetch_files(db_path, url, zipped, check = TRUE)
+    status <- fetch_files(db_path, url, zipped, check=TRUE)
     if (is.null(status)) {
       return(db_name)
     }
-  }
-  else {
-    fetch_files(db_path, url, zipped, check = FALSE)
+  } else {
+    fetch_files(db_path, url, zipped, check=FALSE)
   }
   con <- db_create(db_name, taxon_db.sql)
   on.exit(db_disconnect(con))
@@ -214,23 +221,20 @@ make_taxondb <- function (db_path = file.path(path.package("ncbi"), "extdata"),
 }
 
 
-make_geneiddb <- function (db_path = file.path(path.package("ncbi"), "extdata"),
-                           update = FALSE)
-{
+make_geneiddb <- function(db_path=file.path(path.package("ncbi"), "extdata"),
+                          update=FALSE) {
   assert_that(has_command("gunzip"))
   url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
-  db_name <- normalizePath(file.path(db_path, "geneid.db"), mustWork = FALSE)
+  db_name <- normalizePath(file.path(db_path, "geneid.db"), mustWork=FALSE)
   
   if (update) {
     zipped <- c("gi_taxid_nucl_diff.zip", "gi_taxid_prot_diff.zip")
-    message("Updating the geneid.db is not yet implemented.")
-    return(db_name)
+    .NotYetImplemented()
     # TODO IMPLEMENT
-  } 
-  else {
+  } else {
     zipped <- c("gi_taxid_nucl.dmp.gz", "gi_taxid_prot.dmp.gz")
     zipped_path <- normalizePath(file.path(db_path, zipped), mustWork=FALSE)
-    fetch_files(db_path, url, zipped, check = TRUE)
+    fetch_files(db_path, url, zipped, check=TRUE)
     
     # No dmp extension for the gi_index file, so that it doesn't get
     # clobbered when I use the same taxonomy dumps with Krona.
@@ -250,8 +254,7 @@ make_geneiddb <- function (db_path = file.path(path.package("ncbi"), "extdata"),
   success <- db_load(con, db_path, "geneid")
   if (success) {
     message("Successfully loaded ", db_count(con, "genes"), " rows into 'genes' table")
-  }
-  else {
+  } else {
     message("Error: ", success)
   }
   
@@ -270,11 +273,11 @@ make_geneiddb <- function (db_path = file.path(path.package("ncbi"), "extdata"),
 #' @param verbose be verbose
 #' @keywords internal
 #' @export
-fetch_files <- function (path, url, files, check = FALSE, verbose = FALSE) {
+fetch_files <- function(path, url, files, check=FALSE, verbose=FALSE) {
   if (!file.exists(path)) {
     dir.create(path, recursive=TRUE)
   }
-  files <- normalizePath(file.path(path, files), mustWork = FALSE)
+  files <- normalizePath(file.path(path, files), mustWork=FALSE)
   for (file in files) {
     status <- fetch_file(url, file, check, verbose)
   }
@@ -282,22 +285,21 @@ fetch_files <- function (path, url, files, check = FALSE, verbose = FALSE) {
 }
 
 
-fetch_file <- function (url, file, check = FALSE, verbose = FALSE) {
+fetch_file <- function(url, file, check=FALSE, verbose=FALSE) {
   assert_that(is.string(url))
   assert_that(is.string(file))
   url <- paste0(strip_ext(url, "/$"), "/", basename(file))
   ## check_timestamp returns TRUE if the remote source is more recent
   ## than the local file or the local file does not exist.
-  if (check && !file_compare(file, url, time = check, .message = TRUE)) {
+  if (check && !file_compare(file, url, time=check, .message=TRUE)) {
     ## if the remote source is older than the local file do nothing
-      return(NULL)
-  }
-  else {
-    opts <- curlOptions(noprogress = FALSE)
-    f <- CFILE(file, mode = "wb")
+    return(NULL)
+  } else {
+    opts <- curlOptions(noprogress=FALSE)
+    f <- CFILE(file, mode="wb")
     on.exit(RCurl::close(f))
-    status <- curlPerform(url = url, .opts = opts, writedata = f@ref,
-                          verbose = verbose)
+    status <- curlPerform(url=url, .opts=opts, writedata=f@ref,
+                          verbose=verbose)
     if (status != 0) {
       stop("Curl error code: ", status)
     }
@@ -306,7 +308,7 @@ fetch_file <- function (url, file, check = FALSE, verbose = FALSE) {
 }
 
 
-db_load <- function (con, db_path, type = "taxon") {
+db_load <- function(con, db_path, type="taxon") {
   if (type == "taxon") {
     assert_that(has_command("gunzip"), has_command("gzip"))
     zipfile <- normalizePath(file.path(db_path, "taxdump.tar.gz"))
@@ -315,14 +317,14 @@ db_load <- function (con, db_path, type = "taxon") {
     tarfile <- strip_ext(zipfile, level=1)
     untar(tarfile, files=dmpfiles, exdir=normalizePath(db_path))
     system(paste0("gzip ", tarfile))
-    dmp <- normalizePath(file.path(db_path, dmpfiles), mustWork = TRUE)
+    dmp <- normalizePath(file.path(db_path, dmpfiles), mustWork=TRUE)
     if (db_bulk_insert(con, "nodes", 
-                       as.data.frame(readNodes(dmp[1]), stringsAsFactors = FALSE))) {
+                       as.data.frame(readNodes(dmp[1]), stringsAsFactors=FALSE))) {
       message("Inserted ", db_count(con, "nodes"),
               " rows into ", sQuote("nodes"), " table.")
     }
     if (db_bulk_insert(con, "names", 
-                       as.data.frame(readNames(dmp[2]), stringsAsFactors = FALSE))) {
+                       as.data.frame(readNames(dmp[2]), stringsAsFactors=FALSE))) {
       message("Inserted ", db_count(con, "names"),
               " rows into ", sQuote("names"), " table.")
     }
@@ -332,7 +334,7 @@ db_load <- function (con, db_path, type = "taxon") {
   else if (type == "geneid") {
     fn <- normalizePath(file.path(db_path, "gi_index"))
     message("Loading 'gi_index'. This will take a while ...")
-    db <- list(geneidDBConnection = con)
+    db <- list(geneidDBConnection=con)
     if (length(getTaxidByGeneID(db, 1)) != 0) {
       dbSendQuery(con, "DELETE FROM genes")
     }
@@ -342,7 +344,7 @@ db_load <- function (con, db_path, type = "taxon") {
       eol <- "\n"
       skip <- 0L
       .Call("RS_SQLite_importFile", conId, "genes", fn, sep, eol, skip, 
-            PACKAGE = RSQLite:::.SQLitePkgName)
+            PACKAGE=RSQLite:::.SQLitePkgName)
     })
     return(rc)
   }
@@ -353,87 +355,85 @@ db_load <- function (con, db_path, type = "taxon") {
 
 
 ##
-dbGetTaxon <- function (db, taxid) {
+dbGetTaxon <- function(db, taxid) {
   node <- dbGetNode(db, taxid)
   new_Taxon_full(
-    shared = db,
-    TaxId = node$tax_id %||% NA_character_,
-    ScientificName = node$tax_name %||% NA_character_,
-    Rank = node$rank %||% NA_character_,
-    ParentTaxId = node$parent_id %||% NA_character_,
-    OtherName = dbGetOtherName(db, taxid),
-    Authority = dbGetAuthority(db, taxid),
-    TypeMaterial = dbGetTypeMaterial(db, taxid),
-    Lineage = dbGetLineage(db, taxid)
+    shared=db,
+    TaxId=node$tax_id %||% NA_character_,
+    ScientificName=node$tax_name %||% NA_character_,
+    Rank=node$rank %||% NA_character_,
+    ParentTaxId=node$parent_id %||% NA_character_,
+    OtherName=dbGetOtherName(db, taxid),
+    Authority=dbGetAuthority(db, taxid),
+    TypeMaterial=dbGetTypeMaterial(db, taxid),
+    Lineage=dbGetLineage(db, taxid)
   )
 }
 
 ##
-dbGetTaxonByGeneID <- function (db, geneid) {
+dbGetTaxonByGeneID <- function(db, geneid) {
   taxid <- as.character(getTaxidByGeneID(db, geneid))
   if (length(taxid) == 0 || taxid == 0) {
-    new_Taxon_full(shared = db)
-  }
-  else {
+    new_Taxon_full(shared=db)
+  } else {
     dbGetTaxon(db, taxid)
   }
 }
 
 ##
-dbGetTaxonMinimal <- memoise(function (db, taxid) {
+dbGetTaxonMinimal <- memoise(function(db, taxid) {
   conn <- db$taxonDBConnection
   taxid <- taxid %|na|% 0
   sql <- paste0("SELECT tax_id, tax_name, rank FROM nodes JOIN names USING ( tax_id ) ",
-                "WHERE tax_id = ", taxid, " AND class = 'scientific name'") 
+                "WHERE tax_id=", taxid, " AND class='scientific name'") 
   data <- db_query(conn, sql)
   new_Taxon_minimal(
-    shared = db,
-    TaxId = data$tax_id %||% NA_character_,
-    ScientificName = data$tax_name %||% NA_character_,
-    Rank = data$rank %||% NA_character_)
+    shared=db,
+    TaxId=data$tax_id %||% NA_character_,
+    ScientificName=data$tax_name %||% NA_character_,
+    Rank=data$rank %||% NA_character_)
 })
 
 ##
-dbGetTaxonMinimalByGeneID <- memoise(function (db, geneid) {
+dbGetTaxonMinimalByGeneID <- memoise(function(db, geneid) {
   taxid <- getTaxidByGeneID(db, geneid)
   if (length(taxid) == 0 || taxid == 0) {
-    new_Taxon_minimal(shared = db)
-  }
-  else {
+    new_Taxon_minimal(shared=db)
+  } else {
     dbGetTaxonMinimal(db, taxid)
   }
 })
 
 ##
-getTaxidByGeneID <- function (db, geneid) {
+getTaxidByGeneID <- function(db, geneid) {
   conn <- db$geneidDBConnection 
   geneid <- geneid %|na|% 0
-  sql <- paste0("SELECT tax_id FROM genes WHERE rowid = ", geneid)
+  sql <- paste0("SELECT tax_id FROM genes WHERE rowid=", geneid)
   db_query(conn, sql, 1)
 }
 
 ##
-dbGetParentTaxId <- function (db, taxid) {
+dbGetParentTaxId <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT parent_id FROM nodes WHERE tax_id = ", taxid)
+  sql <- paste0("SELECT parent_id FROM nodes WHERE tax_id=", taxid)
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 ##
-dbGetScientificName <- function (db, taxid) {
+dbGetScientificName <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxid,
-                " AND class = 'scientific name'")
+  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id=", taxid,
+                " AND class='scientific name'")
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 ##
-dbGetOtherName <- function (db, taxid) {
+dbGetOtherName <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id = ", taxid,
+  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id=", taxid,
                 " AND class != 'scientific name' AND class != 'type material'",
                 " AND class != 'authority'")
   data <- db_query(conn, sql)
@@ -441,56 +441,55 @@ dbGetOtherName <- function (db, taxid) {
 }
 
 ##
-dbGetTypeMaterial <- function (db, taxid) {
+dbGetTypeMaterial <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxid,
-                " AND class = 'type material'")
+  sql <- paste0("SELECT tax_name FROM names WHERE tax_id=", taxid,
+                " AND class='type material'")
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 ##
-dbGetAuthority <- function (db, taxid) {
+dbGetAuthority <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_name FROM names WHERE tax_id = ", taxid,
-                " AND class = 'authority'")
+  sql <- paste0("SELECT tax_name FROM names WHERE tax_id=", taxid,
+                " AND class='authority'")
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 ##
-dbGetRank <- function (db, taxid) {
+dbGetRank <- function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT rank FROM nodes WHERE tax_id = ", taxid)
+  sql <- paste0("SELECT rank FROM nodes WHERE tax_id=", taxid)
   db_query(conn, sql, 1) %||% NA_character_
 }
 
 
 ##' @return TaxId, ParentId, ScientificName, Rank
-dbGetNode <- memoise(function (db, taxid) {
+dbGetNode <- memoise(function(db, taxid) {
   conn <- db$taxonDBConnection 
   taxid <- taxid %|na|% 0
   sql <- paste0("SELECT tax_id, parent_id, tax_name, rank FROM nodes JOIN names",
-                " USING ( tax_id ) WHERE tax_id = ", taxid,
-                " AND class = 'scientific name'")
+                " USING ( tax_id ) WHERE tax_id=", taxid,
+                " AND class='scientific name'")
   db_query(conn, sql)
 })
 
 ##
-dbGetLineage <- memoise(function (db, taxid) {
+dbGetLineage <- memoise(function(db, taxid) {
   if (!.taxcache$exists(taxid)) {
     lin <- .lineage_to_cache(db, taxid)
-  }
-  else {
+  } else {
     lin <- rbind(.lineage_from_cache(taxid),
                  dbGetNode(db, taxid)[, c('tax_id', 'tax_name', 'rank')])
   }
-  Lineage( lin[-1L, ], shared = db )
+  Lineage( lin[-1L, ], shared=db )
 })
 
 
-.lineage_to_cache <- function (db, id) {
+.lineage_to_cache <- function(db, id) {
   verbose <- getOption("verbose")
   ## pid : parental taxid
   ##  id : taxid
@@ -498,7 +497,7 @@ dbGetLineage <- memoise(function (db, taxid) {
   lin_list   <- vector('list', 50L)
   lin_fields <- c('tax_id', 'tax_name', 'rank')
   i          <- 1
-
+  
   ## fetch the current node, split off the pid, and store in 'lin_list'
   node <- dbGetNode(db, id)
   lin_list[[i]] <- node[, lin_fields]
@@ -535,14 +534,13 @@ dbGetLineage <- memoise(function (db, taxid) {
     ## finally assign root node to root id
     .taxcache$set(id, node[, lin_fields])
     rBind(rev(compact(lin_list)))
-  }
-  else {
+  } else {
     lin_list[[1]]
   }
 }
 
 
-.lineage_from_cache <- function (id) {
+.lineage_from_cache <- function(id) {
   verbose <- getOption("verbose")
   if (verbose) {
     cat("Getting cached lineage:", id, "\n")
@@ -562,14 +560,14 @@ dbGetLineage <- memoise(function (db, taxid) {
   
   if (length(lin_list) > 0) {
     rBind( lin_list )
-  }
-  else {
+  } else {
     lin_list
   }
 }
 
-camelise <- function (s) {
-  cap <- function (s) {
+
+camelise <- function(s) {
+  cap <- function(s) {
     paste0(toupper(substring(s, 1, 1)), substring(s, 2), collapse="")
   }
   if (is.null(s)) {
