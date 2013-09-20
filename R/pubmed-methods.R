@@ -1,22 +1,22 @@
-setMethod("pmid", "pubmed", function(x) x@pmid)
+setMethod("getPmid", "pubmed", function(x) x@pmid)
 
-setMethod("doi", "pubmed", function(x) x@doi)
+setMethod("getDoi", "pubmed", function(x) x@doi)
 
-setMethod("cites", "pubmed", function(x) x@cites)
+setMethod("getCites", "pubmed", function(x) x@cites)
 
-setMethod("author", "pubmed", function(x) x@ref$author)
+setMethod("getAuthor", "pubmed", function(x) x@ref$author)
 
-setMethod("abstract", "pubmed", function(x) x@ref$abstract)
+setMethod("getAbstract", "pubmed", function(x) x@ref$abstract)
 
-setMethod("title", "pubmed", function(x) x@ref$title)
+setMethod("getTitle", "pubmed", function(x) x@ref$title)
 
-setMethod("issue", "pubmed", function(x) {
+setMethod("getIssue", "pubmed", function(x) {
   Map(function(v, n, y, m, p) {
     c(volume=v, number=n, year=y, month=m, pages=p)
   }, x@ref$volume, x@ref$number, x@ref$year, x@ref$month, x@ref$pages)
 })
 
-setMethod("journal", "pubmed", function(x) {
+setMethod("getJournal", "pubmed", function(x) {
   Map(function(j, a, i) {
     attr(j, "abbrev") <- a
     attr(j, "issn") <- i
@@ -38,25 +38,24 @@ setMethod("browsePubmed", "doi", function(x, browser=getOption("browser")) {
 
 
 setMethod("browsePubmed", "pubmed", function(x, browser=getOption("browser")) {
-  browsePubmed(doi(x), browser=browser)
+  browsePubmed(getDoi(x), browser=browser)
 })
 
 
 setMethod("c", "doi",  function(x, ..., recursive=FALSE) {
   args <- list(...)
-  initialize(x, doi=c(x@doi, vapply(args, function(x) x@doi, character(1))))
+  initialize(x, doi=c(x@doi, vapply(args, function(x) x@doi, "")))
 })
 
 
 setMethod("c", "pubmed", function(x, ..., recursive=FALSE) {
   args <- list(...)
-  pmid <- c(pmid(x), vapply(args, pmid, character(1)))
-  doi <- do.call(c, c(list(doi(x)), lapply(args, doi)))
-  cites <- c(cites(x), lapply(args, function(x) unlist(x@cites)))
+  pmid <- c(getPmid(x), vapply(args, getPmid, ""))
+  doi <- do.call(c, c(list(getDoi(x)), lapply(args, getDoi)))
+  cites <- c(getCites(x), lapply(args, function(x) unlist(x@cites)))
   date <- c(x@date, sapply(args, function(x) x@date))
   ref <- do.call(c, c(list(x@ref), lapply(args, function(x) x@ref)))
-  new("pubmed", pmid=pmid, doi=doi, cites=cites,
-      date=date, ref=ref)
+  new_pubmed(pmid=pmid, doi=doi, cites=cites, date=date, ref=ref)
 })
 
 setMethod("show", "pubmed",
@@ -64,7 +63,7 @@ setMethod("show", "pubmed",
             lo <- length(object@ref)
             cat(sprintf("A %s instance of length %s", sQuote(class(object)), lo))
             showme <- sprintf("\n[%s] Pmid: %s\tReferences: %s\n%s\n", seq_len(lo),
-                              pmid(object), vapply(cites(object), length, numeric(1)),
+                              getPmid(object), vapply(getCites(object), length, numeric(1)),
                               dup("-", getOption("width") - 8))
             for(i in seq_len(lo)) {
               cat(showme[i])
@@ -83,9 +82,8 @@ setMethod("show", "doi",
 
 setMethod("[", "pubmed",
           function(x, i, j, ..., drop=TRUE) {
-            initialize(x, pmid=x@pmid[i], doi=x@doi[i],
-                       cites=x@cites[i], date=x@date[i],
-                       ref=x@ref[i])
+            initialize(x, pmid=getPmid(x)[i], doi=getDoi(x)[i],
+                       cites=getCites(x)[i], date=x@date[i], ref=x@ref[i])
           })
 
 

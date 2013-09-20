@@ -13,8 +13,8 @@
   \item{pmid}{\sQuote{PMID}s or a valid NCBI search term.}
 
   \item{rettype}{Which type of data should be retrieved? Full records
-(default: \code{NULL}), \sQuote{medline}, \sQuote{uilist}, or
-\sQuote{abstract}.}
+(default: \code{NULL}), \sQuote{medline}, \sQuote{uilist},
+\sQuote{abstract}, or \sQuote{docsum}.}
 
   \item{retmax}{Maximal number of records to be retrieved (default: 25).}
 

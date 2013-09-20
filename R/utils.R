@@ -1,7 +1,53 @@
-#' @importFrom Rentrez epost esearch efetch efetch.batch count set_record_type
+#' @importFrom reutils epost esearch efetch webenv querykey database content xvalue
 NULL
-#' @importFrom assertthat on_failure<-
+#' @importFrom assertthat assert_that "on_failure<-" is.string is.writeable
 NULL
+#' @importFrom rmisc rBind
+NULL
+
+
+Partial <- function(fn, ..., .env = parent.frame()) {
+  assert_that(is.function(fn))
+  fcall <- substitute(fn(...))
+  if (!is.primitive(fn)) {
+    fcall <- match.call(fn, fcall)
+  }
+  fcall[[length(fcall) + 1]] <- quote(...)
+  args <- list("..." = quote(expr = ))
+  
+  eval(call("function", as.pairlist(args), fcall), .env)
+}
+
+
+is.empty <- function (x) {
+  is.null(x) || length(x) == 0L || (length(x) == 1L && !nzchar(x))
+}
+on_failure(is.empty) <- function(call, env) {
+  paste0(deparse(call$x), " is not empty.")
+}
+
+
+"%||%" <- function (a, b) {
+  if (is.empty(a)) force(b) else a
+}
+
+
+"%|na|%" <- function (a, b) {
+  if (is.null(a) || all(is.na(a))) force(b) else a
+}
+
+
+"%|NA|%" <- function (a, b) {
+  ifelse(is.na(a), b, a)
+}
+
+
+"%ni%" <- Negate(`%in%`)
+
+
+compact <- function (x) {
+  x[!vapply(x, is.null, logical(1), USE.NAMES=FALSE)]
+}
 
 
 file_create_if_not_exists <- function(file) {
@@ -17,41 +63,27 @@ on_failure(file_create_if_not_exists) <- function(call, env) {
 }
 
 
-getID <- function(id, db) {
-  if (has_webenv(id)) {
-    id
-  }
-  else if (is.numeric(id) || !any(is.na(suppressWarnings(as.numeric(id))))) {
-    epost(id, db)
-  }
-  else {
-    esearch(id, db, usehistory=TRUE)
+get_uids <- function(uid, db) {
+  if (has_webenv(uid)) {
+    uid
+  } else if (is.numeric(uid) || !any(is.na(suppressWarnings(as.numeric(uid))))) {
+    epost(uid, db)
+  } else {
+    esearch(uid, db, usehistory=TRUE)
   }
 }
 
 
-getArgs <- function(id, db, rettype, retmax, ...) {
+#' @importFrom reutils ncbi_retrieval_type
+get_args <- function(uid, db, rettype, retmax, ...) {
   args <- list(..., retmax=retmax)
-  rtype <- set_record_type(db, rettype, args$retmode)
+  rtype <- ncbi_retrieval_type(db, rettype, args$retmode)
   args$retmode <- NULL
-  args <- c(list(id=getID(id, db)), rtype, args)
+  args <- c(list(uid=get_uids(uid, db)), rtype, args)
   args
 }
 
 
-#' @importFrom Rentrez content
-fetch_records <- function(args, maxrec=500) {
-  if (count(args$id) > maxrec && args$retmax %||% Inf > maxrec) {
-    response <- do.call("efetch.batch", c(args, list(chunk_size=500)))
-  }
-  else {
-    response <- do.call("efetch", args)
-  }
-  content(response)
-}
-
-
-#' @importFrom rmisc xvalue
 catchEFetchError <- function(response) {
   if (is(response, "efetch")) {
     response <- content(response)
@@ -67,9 +99,9 @@ catchEFetchError <- function(response) {
   invisible(TRUE)  
 }
 
-#' @importFrom Rentrez webEnv queryKey
+
 has_webenv <- function(x) {
-  is(x, "eutil") && !is.na(webEnv(x)) && !is.na(queryKey(x))
+  is(x, "eutil") && !is.na(webenv(x)) && !is.na(querykey(x))
 }
 
 
@@ -79,8 +111,4 @@ ellipsize <- function(obj, width=getOption("width"), ellipsis="...") {
          paste0(substring(str, 1, width - nchar(ellipsis) - 1), ellipsis),
          str)
 }
-
-## vectorised %|na|%
-#' @importFrom rmisc Partial "%|%"
-"%|NA|%" <- Partial(`%|%`, filter="is.na")
 

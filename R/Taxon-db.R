@@ -1,18 +1,12 @@
+#' @include utils.R
+NULL
 #' @importFrom rmisc db_create db_connect db_disconnect db_query db_count 
 NULL
-#' @importFrom rmisc db_bulk_insert trim compact file_compare is.empty
+#' @importFrom RSQLite dbListTables dbListFields dbSendQuery
 NULL
-#' @importFrom rmisc  "%|na|%" "%has_tables%" rBind
+#' @importFrom RCurl curlOptions CFILE close curlPerform
 NULL
-#' @importFrom RCurl basicTextGatherer curlPerform curlOptions CFILE close
-NULL
-#' @importFrom RSQLite dbSendQuery dbListTables dbListFields 
-NULL
-#' @importFrom assertthat assert_that is.string is.writeable
-NULL
-#' @importFrom memoise memoise
-NULL
-#' @importClassesFrom RSQLite dbObjectId SQLiteObject  SQLiteConnection
+#' @importClassesFrom RSQLite dbObjectId SQLiteObject SQLiteConnection
 NULL
 #' @importClassesFrom DBI DBIObject DBIConnection
 NULL
@@ -102,7 +96,7 @@ taxonDBConnect <- function(db_path=NULL) {
   if (is.dir(db_path)) {
     taxon_db <- normalizePath(dir(db_path, pattern="taxon.db", full.names=TRUE),
                               mustWork=FALSE)
-    if (all_empty(taxon_db)) {
+    if (length(taxon_db) == 0) {
       stop(errmsg, call.=FALSE)
     }
   }
@@ -145,7 +139,7 @@ geneidDBConnect <- function(db_path=NULL) {
   if (is.dir(db_path)) {
     geneid_db <- normalizePath(dir(db_path, pattern="geneid.db", full.names=TRUE),
                                mustWork=FALSE)
-    if (all_empty(geneid_db)) {
+    if (length(geneid_db) == 0) {
       stop(errmsg, call.=FALSE)
     }
   }
@@ -200,6 +194,7 @@ updateGeneidDB <- function(db_path="~/taxonomy") {
 }
 
 
+#' @importFrom rmisc "%has_tables%"
 make_taxondb <- function(db_path=file.path(path.package("ncbi"), "extdata"),
                          update=FALSE) { 
   url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
@@ -221,6 +216,7 @@ make_taxondb <- function(db_path=file.path(path.package("ncbi"), "extdata"),
 }
 
 
+#' @importFrom rmisc has_command
 make_geneiddb <- function(db_path=file.path(path.package("ncbi"), "extdata"),
                           update=FALSE) {
   assert_that(has_command("gunzip"))
@@ -285,6 +281,7 @@ fetch_files <- function(path, url, files, check=FALSE, verbose=FALSE) {
 }
 
 
+#' @importFrom rmisc file_compare strip_ext
 fetch_file <- function(url, file, check=FALSE, verbose=FALSE) {
   assert_that(is.string(url))
   assert_that(is.string(file))
@@ -307,7 +304,7 @@ fetch_file <- function(url, file, check=FALSE, verbose=FALSE) {
   }
 }
 
-
+#' @importFrom rmisc db_bulk_insert
 db_load <- function(con, db_path, type="taxon") {
   if (type == "taxon") {
     assert_that(has_command("gunzip"), has_command("gzip"))
@@ -380,7 +377,8 @@ dbGetTaxonByGeneID <- function(db, geneid) {
   }
 }
 
-##
+
+#' @importFrom memoise memoise
 dbGetTaxonMinimal <- memoise(function(db, taxid) {
   conn <- db$taxonDBConnection
   taxid <- taxid %|na|% 0

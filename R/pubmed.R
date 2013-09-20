@@ -1,19 +1,28 @@
 #' @include utils.R
 NULL
+#' @importFrom reutils xattr xset
+NULL
+#' @importFrom utils person bibentry
+NULL
 
 setOldClass("bibentry")
 
-setClass("doi", 
-         representation(doi="character"),
-         prototype(doi=NA_character_))
 
-setClass("pubmed",
-         representation(pmid="character",
-                        doi="doi",
-                        cites="list",
-                        date="list",
-                        ref="bibentry"))
+new_doi <- setClass(
+  Class="doi",
+  slots=c(doi="character"),
+  prototype=prototype(doi=NA_character_)
+)
 
+
+new_pubmed <- setClass(
+  Class="pubmed",
+  slots=c(pmid="character",
+          doi="doi",
+          cites="list",
+          date="list",
+          ref="bibentry")
+)
 
 #' Retrieve records from the PubMed database.
 #'
@@ -24,8 +33,8 @@ setClass("pubmed",
 #' 
 #' @param pmid \sQuote{PMID}s or a valid NCBI search term.
 #' @param rettype Which type of data should be retrieved? Full records
-#' (default: \code{NULL}), \sQuote{medline}, \sQuote{uilist}, or
-#' \sQuote{abstract}. 
+#' (default: \code{NULL}), \sQuote{medline}, \sQuote{uilist},
+#' \sQuote{abstract}, or \sQuote{docsum}. 
 #' @param retmax Maximal number of records to be retrieved (default: 25).
 #' @param parse Should the retrieved data be parsed?
 #' @param ... Parameters passed on to the underlying \code{\link{efetch}}
@@ -36,18 +45,13 @@ setClass("pubmed",
 #' @rdname pubmed
 #' @export
 pubmed <- function(pmid, rettype=NULL, retmax=25, parse=TRUE, ...) {
-  
-  if (is(pmid, "esearch")) {
-    if (database(pmid) != 'pubmed')
-      stop("Database ", sQuote(database(pmid)), " not supported")
-    if (!has_webenv(pmid))
-      pmid <- idList(pmid)
+  if (is(pmid, "esearch") && database(pmid) != 'pubmed') {
+    stop("Database ", sQuote(database(pmid)), " not supported")
   }
-  
-  args <- getArgs(id=pmid, db="pubmed", rettype, retmax, ...)
-  response <- fetch_records(args, 500)
+  args <- get_args(uid=pmid, db="pubmed", rettype, retmax, ...)
+  response <- content(do.call("efetch", args))
   if (parse) {
-    switch(args$rettype %|null|% "xml",
+    switch(args$rettype %||% "xml",
            xml=parsePubmed(response),
            uilist=parseUilist(response),
            response)
@@ -59,9 +63,7 @@ pubmed <- function(pmid, rettype=NULL, retmax=25, parse=TRUE, ...) {
 
 #' @rdname pubmed
 #' @export
-#' @autoImports
 parsePubmed <- function(pmArticleSet=response) {
-  
   if (is(pmArticleSet, "efetch")) {
     pmArticleSet <- content(pmArticleSet)
   }
@@ -69,37 +71,31 @@ parsePubmed <- function(pmArticleSet=response) {
   if (!is(pmArticleSet, "XMLInternalDocument")) {
     return(pmArticleSet)
   }
-  pmArticleSet <- xmlRoot(pmArticleSet)
-  pmArtSet <- getNodeSet(pmArticleSet, '//PubmedArticleSet/PubmedArticle')
-  if (all_empty(pmArtSet)) {
+  pmArticleSet <- xset(pmArticleSet, '//PubmedArticleSet/PubmedArticle')
+  if (length(pmArticleSet) == 0) {
     stop("No 'PubmedArticleSet' provided")
   }
-  
-  # art <- pmArtSet[[1]]
-  reff <- base::lapply(pmArtSet, function(art) {
+  reff <- lapply(pmArticleSet, function(art) {
     art <- xmlDoc(art)
     pmid <- xvalue(art, '//MedlineCitation/PMID')
     if (!is.na(xvalue(art, '//ELocationID[@EIdType="doi"]'))) {
-      doi <- new("doi",
-                 doi=xvalue(art, '//ELocationID[@EIdType="doi"]'))
+      doi <- new_doi(doi=xvalue(art, '//ELocationID[@EIdType="doi"]'))
     } else {
-      doi <- new("doi",
-                 doi=xvalue(art, '//ArticleId[@IdType="doi"]'))
+      doi <- new_doi(doi=xvalue(art, '//ArticleId[@IdType="doi"]'))
     }
-    
-    dateCreated <- as.POSIXlt(xvalue(art, '//MedlineCitation/DateCreated', NA),
+    dateCreated <- as.POSIXlt(xvalue(art, '//MedlineCitation/DateCreated', default=NA),
                               format="%Y%m%d")
     
-    cites <- xvalue(art, '//CommentsCorrections[ @RefType="Cites"]/PMID', NA)
+    cites <- xvalue(art, '//CommentsCorrections[ @RefType="Cites"]/PMID', default=NA)
     
     # bibentry
     author <- {
       lastName <- xvalue(art, '//AuthorList//LastName')
       foreName <- xvalue(art, '//AuthorList//ForeName')
-      person(given=base::as.list(foreName), family=base::as.list(lastName))
+      person(given=as.list(foreName), family=as.list(lastName))
     }
     abstract <- {
-      abs <- xvalue(art, '//Abstract/AbstractText', '')
+      abs <- xvalue(art, '//Abstract/AbstractText', default='')
       headers <- xattr(art, '//Abstract/AbstractText', 'Label')
       if (headers == "NULL" || is.na(headers)) {
         abs
@@ -108,39 +104,35 @@ parsePubmed <- function(pmArticleSet=response) {
       }
     }
     article <- list(
-      title=xvalue(art, '//ArticleTitle', ''),
+      title=xvalue(art, '//ArticleTitle', default=''),
       abstract=abstract,
-      doi=xvalue(art, '//ArticleIdList/ArticleId[@IdType="doi"]', ''),
-      pii=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pii"]', ''),
-      pmid=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pubmed"]', ''),
-      pmc=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pmc"]', '')
+      doi=xvalue(art, '//ArticleIdList/ArticleId[@IdType="doi"]', default=''),
+      pii=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pii"]', default=''),
+      pmid=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pubmed"]', default=''),
+      pmc=xvalue(art, '//ArticleIdList/ArticleId[@IdType="pmc"]', default='')
     )
     journal <- list(
-      issn=xvalue(art, '//Journal/ISSN', ''),
-      journal=xvalue(art, '//Journal/Title', ''),
-      abbrev=xvalue(art, '//Journal/ISOAbbreviation', ''),
-      volume=xvalue(art, '//JournalIssue/Volume', ''),
-      number=xvalue(art, '//JournalIssue/Issue', ''),
+      issn=xvalue(art, '//Journal/ISSN', default=''),
+      journal=xvalue(art, '//Journal/Title', default=''),
+      abbrev=xvalue(art, '//Journal/ISOAbbreviation', default=''),
+      volume=xvalue(art, '//JournalIssue/Volume', default=''),
+      number=xvalue(art, '//JournalIssue/Issue', default=''),
       year={
-        year <- xvalue(art, '//JournalIssue/PubDate/Year', '')
-        medlineDate <- xvalue(art, '//JournalIssue/PubDate/MedlineDate', '')
+        year <- xvalue(art, '//JournalIssue/PubDate/Year', default='')
+        medlineDate <- xvalue(art, '//JournalIssue/PubDate/MedlineDate', default='')
         if (nzchar(year)) year else medlineDate
       },
-      month=xvalue(art, '//JournalIssue/PubDate/Month', ''),
-      pages=xvalue(art, '//Pagination/MedlinePgn', '')
+      month=xvalue(art, '//JournalIssue/PubDate/Month', default=''),
+      pages=xvalue(art, '//Pagination/MedlinePgn', default='')
     )
     affiliation <- list(
-      affiliation=xvalue(art, '//Affiliation', '')
+      affiliation=xvalue(art, '//Affiliation', default='')
     )
     
     free(art)
     key <- paste0(author[1]$family, journal$year)
-    ref <- bibentry('Article', key=key, author=author,
-                    other=c(article, journal, affiliation))
-    pm <- new("pubmed", pmid=pmid, doi=doi,
-              cites=list(cites), date=list(dateCreated),
-              ref=ref)
-    pm
+    ref <- bibentry('Article', key=key, author=author, other=c(article, journal, affiliation))
+    new_pubmed(pmid=pmid, doi=doi, cites=list(cites), date=list(dateCreated), ref=ref)
   })
   
   reff <- do.call(c, reff)

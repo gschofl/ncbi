@@ -8,42 +8,42 @@
 #' @rdname Pubmed-accessors
 #' @export
 #' @genericMethods
-setGeneric("author", function(x, ...) standardGeneric("author"))
+setGeneric("getAuthor", function(x, ...) standardGeneric("getAuthor"))
 
 #' @rdname Pubmed-accessors
 #' @export
 #' @genericMethods
-setGeneric("title", function(x, ...) standardGeneric("title"))
+setGeneric("getTitle", function(x, ...) standardGeneric("getTitle"))
 
 #' @rdname Pubmed-accessors
 #' @export
 #' @genericMethods
-setGeneric("abstract", function(x, ...) standardGeneric("abstract"))
+setGeneric("getAbstract", function(x, ...) standardGeneric("getAbstract"))
 
 #' @rdname Pubmed-accessors
 #' @export
 #' @genericMethods
-setGeneric("journal", function(x, ...) standardGeneric("journal"))
+setGeneric("getJournal", function(x, ...) standardGeneric("getJournal"))
 
 #' @rdname Pubmed-accessors
 #' @export
 #' @genericMethods
-setGeneric("issue", function(x, ...) standardGeneric("issue"))
+setGeneric("getIssue", function(x, ...) standardGeneric("getIssue"))
 
 #' @rdname Pubmed-accessors
 #' @export
 #' @genericMethods
-setGeneric("pmid", function(x, ...) standardGeneric("pmid"))
+setGeneric("getPmid", function(x, ...) standardGeneric("getPmid"))
 
 #' @rdname Pubmed-accessors
 #' @export
 #' @genericMethods
-setGeneric("doi", function(x, ...) standardGeneric("doi"))
+setGeneric("getDoi", function(x, ...) standardGeneric("getDoi"))
 
 #' @rdname Pubmed-accessors
 #' @export
 #' @genericMethods
-setGeneric("cites", function(x, ...) standardGeneric("cites"))
+setGeneric("getCites", function(x, ...) standardGeneric("getCites"))
 
 #' @rdname Pubmed-accessors
 #' @export
