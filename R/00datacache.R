@@ -6,7 +6,7 @@ NULL
 
 ## register valid rank designations on NCBI
 ## not exported
-.ranks  <- c("root","superkingdom","kingdom","subkingdom","superphylum",
+.ranks <- c("root","superkingdom","kingdom","subkingdom","superphylum",
              "phylum","subphylum","superclass","class","subclass","infraclass",
              "superorder","order","suborder","parvorder","infraorder",
              "superfamily","family","subfamily","tribe","subtribe","genus",

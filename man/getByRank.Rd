@@ -6,7 +6,7 @@
   getByRank(x, rank, value = NULL, ...)
 }
 \arguments{
-  \item{x}{A \code{\linkS4class{Taxon}, \code{\linkS4class{TaxonList}},
+  \item{x}{A \code{\linkS4class{Taxon}}, \code{\linkS4class{TaxonList}},
 \code{\linkS4class{Lineage}}, or \code{\linkS4class{LineageList}} object.}
 
   \item{rank}{One of the valid ranks for NCBI taxonomies (see Details).}

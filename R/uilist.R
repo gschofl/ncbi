@@ -4,15 +4,14 @@ NULL
 #' @keywords internal
 #' @export
 #' @importFrom rmisc usp
-parseUilist <- function (uilist) {
+parseUilist <- function(uilist) {
   if (is(uilist, "efetch")) {
     uilist <- content(uilist)
   }
   if (!is(uilist, "XMLInternalDocument")) {
     if (grepl("(\\d+\\n)+", uilist)) {
       return(as.numeric(usp(uilist, "\\n")))
-    }
-    else {
+    } else {
       return(uilist)
     }
   }
@@ -21,8 +20,7 @@ parseUilist <- function (uilist) {
     e <- xvalue(response, '//ERROR')
     if (!is.null(e)) {
       stop("ERROR in efetch: ", paste(e, collapse=", "))
-    }
-    else {
+    } else {
       stop("No 'uiliist' provided")
     }
   }
@@ -34,7 +32,7 @@ parseUilist <- function (uilist) {
 #' @keywords internal
 #' @export
 #' @autoImports
-parseAcc <- function (acc) {
+parseAcc <- function(acc) {
   if (is(acc, "efetch")) {
     acc <- content(acc)
   }
@@ -42,12 +40,10 @@ parseAcc <- function (acc) {
     ACC <- "([a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z0-9]+)?)"
     if (grepl(paste0("(", ACC, "\\n)+"), acc)) {
       return(as.character(usp(acc, "\\n")))
-    }
-    else {
+    } else {
       return(acc)
     }
-  }
-  else {
+  } else {
     return(acc)
   }
 }

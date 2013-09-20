@@ -1,7 +1,23 @@
 #' @importFrom Rentrez epost esearch efetch efetch.batch count set_record_type
 NULL
+#' @importFrom assertthat on_failure<-
+NULL
 
-getID <- function (id, db) {
+
+file_create_if_not_exists <- function(file) {
+  assert_that(is.string(file))
+  if (!file.exists(file)) {
+    status <- tryCatch(file.create(file), warning=function(w) FALSE)
+    return(status)
+  }
+  TRUE
+}
+on_failure(file_create_if_not_exists) <- function(call, env) {
+  paste0("The file ", deparse(call$file), " could not be created")
+}
+
+
+getID <- function(id, db) {
   if (has_webenv(id)) {
     id
   }
@@ -14,19 +30,19 @@ getID <- function (id, db) {
 }
 
 
-getArgs <- function (id, db, rettype, retmax, ...) {
-  args <- list(..., retmax = retmax)
+getArgs <- function(id, db, rettype, retmax, ...) {
+  args <- list(..., retmax=retmax)
   rtype <- set_record_type(db, rettype, args$retmode)
   args$retmode <- NULL
-  args <- c(list(id = getID(id, db)), rtype, args)
+  args <- c(list(id=getID(id, db)), rtype, args)
   args
 }
-  
+
 
 #' @importFrom Rentrez content
-fetch_records <- function (args, maxrec = 500) {
+fetch_records <- function(args, maxrec=500) {
   if (count(args$id) > maxrec && args$retmax %||% Inf > maxrec) {
-    response <- do.call("efetch.batch", c(args, list(chunk_size = 500)))
+    response <- do.call("efetch.batch", c(args, list(chunk_size=500)))
   }
   else {
     response <- do.call("efetch", args)
@@ -36,7 +52,7 @@ fetch_records <- function (args, maxrec = 500) {
 
 
 #' @importFrom rmisc xvalue
-catchEFetchError <- function (response) {
+catchEFetchError <- function(response) {
   if (is(response, "efetch")) {
     response <- content(response)
   }
@@ -52,12 +68,12 @@ catchEFetchError <- function (response) {
 }
 
 #' @importFrom Rentrez webEnv queryKey
-has_webenv <- function (x) {
+has_webenv <- function(x) {
   is(x, "eutil") && !is.na(webEnv(x)) && !is.na(queryKey(x))
 }
 
 
-ellipsize <- function(obj, width = getOption("width"), ellipsis = "...") {
+ellipsize <- function(obj, width=getOption("width"), ellipsis="...") {
   str <- encodeString(obj)
   ifelse(nchar(str) > width - 1,
          paste0(substring(str, 1, width - nchar(ellipsis) - 1), ellipsis),
@@ -66,5 +82,5 @@ ellipsize <- function(obj, width = getOption("width"), ellipsis = "...") {
 
 ## vectorised %|na|%
 #' @importFrom rmisc Partial "%|%"
-"%|NA|%" <- Partial(`%|%`, filter = "is.na")
+"%|NA|%" <- Partial(`%|%`, filter="is.na")
 

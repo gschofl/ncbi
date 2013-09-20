@@ -3,8 +3,7 @@
 \alias{protein}
 \title{Retrieve sequences and annotations from the Protein database}
 \usage{
-  protein(gi, rettype = "fasta", retmax = 25, parse = TRUE,
-    ...)
+  protein(gi, rettype="fasta", retmax=25, parse=TRUE, ...)
 }
 \arguments{
   \item{gi}{\sQuote{GI}s or a valid NCBI search term.}

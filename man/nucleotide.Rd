@@ -3,8 +3,8 @@
 \alias{nucleotide}
 \title{Retrieve sequences and annotations from the Nucleotide database}
 \usage{
-  nucleotide(gi, rettype = "fasta", retmax = 25, parse =
-    TRUE, ...)
+  nucleotide(gi, rettype="fasta", retmax=25, parse=TRUE,
+    ...)
 }
 \arguments{
   \item{gi}{\sQuote{GI}s or a valid NCBI search term.}
