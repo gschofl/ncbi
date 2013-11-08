@@ -73,8 +73,8 @@ new_Taxon_minimal <-
 
 #' @title Taxon accessors
 #' 
-#' Access the slots of \linkS4class{Taxon} or \linkS4class{TaxonList}
-#' instances.
+#' @description Access the slots of \linkS4class{Taxon} or
+#' \linkS4class{TaxonList} objects.
 #' 
 #' @param x A \linkS4class{Taxon} or \linkS4class{TaxonList}.
 #' @param ... Further arguments passed on to methods. 
@@ -135,6 +135,14 @@ new_Lineage <-
   setClass("Lineage", contains="Taxon_minimal", validity=.valid_Lineage)
 
 
+#' Construct a Lineage
+#' 
+#' @param ... \code{\linkS4class{Taxon}} objects that make up a Lineage
+#' @param shared A shared envionment containing connections to \bold{taxon.db}
+#' and \bold{geneid.db}
+#' @return A \linkS4class{Lineage}.
+#' @keywords internal
+#' @export
 Lineage <- function(..., shared=new.env(parent=emptyenv())) {
   listData <- list(...)
   if (length(listData) == 0) {
@@ -328,7 +336,7 @@ setMethod("getByRank", "Taxon_full", function(x, rank, value=NULL) {
 #' (default: \code{NULL}) or an \sQuote{uilist}. 
 #' @param retmax Maximal number of records to be retrieved (default: 25).
 #' @param parse Should the retrieved data be parsed?
-#' @param ... Parameters passed on to the underlying \code{\link{efetch}}
+#' @param ... Parameters passed on to the underlying \code{\link[reutils]{efetch}}
 #' query.
 #'
 #' @return An \linkS4class{XMLInternalDocument} or if parsed a
@@ -356,8 +364,8 @@ taxon <- function(taxid, rettype=NULL, retmax=25, parse=TRUE, ...) {
 
 
 #' @param taxid TaxId
-#' @param shared Shared environment containing a connection to taxon.db
-#' and (optionally) geneid.db
+#' @param shared Shared environment containing a connection to \bold{taxon.db}
+#' and (optionally) \bold{geneid.db}.
 #' @param full Taxon_minimal or Taxon_full
 #' @keywords internal
 new_taxon <- function(taxid, shared, full=TRUE) {
@@ -463,6 +471,7 @@ taxonByGeneID <- function(geneid, full=TRUE) {
 
 #' Clear the contents of the lineage cache
 #' 
+#' @keywords internal
 #' @export
 clear_cache <- function() {
   .taxcache$rm()
@@ -471,6 +480,7 @@ clear_cache <- function() {
 
 #' Show contents of the lineage cache
 #' 
+#' @keywords internal
 #' @export
 show_cache <- function() {
   keys <- .taxcache$ls()

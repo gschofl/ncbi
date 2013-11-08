@@ -4,17 +4,23 @@ NULL
 ## register environment for caching taxon nodes
 .taxcache <- new_cache()
 
-## register valid rank designations on NCBI
-## not exported
+## valid taxonomic rank designations used by NCBI
 .ranks <- c("root","superkingdom","kingdom","subkingdom","superphylum",
-             "phylum","subphylum","superclass","class","subclass","infraclass",
-             "superorder","order","suborder","parvorder","infraorder",
-             "superfamily","family","subfamily","tribe","subtribe","genus",
-             "subgenus","species group","species subgroup","species","subspecies",
-             "varietas","forma","no rank")
+            "phylum","subphylum","superclass","class","subclass","infraclass",
+            "superorder","order","suborder","parvorder","infraorder",
+            "superfamily","family","subfamily","tribe","subtribe","genus",
+            "subgenus","species group","species subgroup","species","subspecies",
+            "varietas","forma","no rank")
+
+#' Retrieve valid taxonomic rank designations used by NCBI
+#' 
+#' @keywords internal
+#' @export
+.ncbi_taxon_ranks <- function() {
+  .ranks
+}
 
 ## register SQL tables
-## not exported
 geneid_db.sql <- '
 CREATE TABLE genes (
   tax_id     INT UNSIGNED NOT NULL DEFAULT 0

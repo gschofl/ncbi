@@ -9,9 +9,7 @@
 \alias{getJournal}
 \alias{getPmid}
 \alias{getTitle}
-\title{PubMed accessors
-
-Access the various slots of \code{\link[utils]{bibentry}} instances.}
+\title{PubMed accessors}
 \usage{
   getAuthor(x, ...)
 
@@ -32,11 +30,15 @@ Access the various slots of \code{\link[utils]{bibentry}} instances.}
   browsePubmed(x, ...)
 }
 \arguments{
-  \item{x}{A \code{\link[utils]{bibentry}} instance.}
+  \item{x}{A \code{\linkS4class{pubmed}} object.}
 
   \item{...}{Further arguments passed on to methods.}
 }
 
+\description{
+Access the various slots of
+\code{\linkS4class{pubmed}} objects.
+}
 \section{Method signatures for generic getAuthor}{
 \itemize{
   \item \linkS4class{pubmed}

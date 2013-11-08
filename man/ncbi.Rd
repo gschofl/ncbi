@@ -13,13 +13,10 @@ databases: \emph{nucleotide}, \emph{protein}, \emph{pubmed}, \emph{taxonomy},
 
 
   \itemize{
-  
     \item \code{\link{taxon}}: Retrieve taxonomy records remotely from NCBI's
     \emph{Taxonomy} database.
-    \item \code{\link{craeateTaxonDB}}: Install NCBI's \emph{Taxonomy}
+    \item \code{\link{createTaxonDB}}: Install NCBI's \emph{Taxonomy}
     database locally.
-    \item \code{\link{taxonDBConnect}}: Connect to a local install of the
-    \emph{Taxonomy} database.
     \item \code{\link{taxonDB}}: Retrieve records from a local install of
     the \emph{Taxonomy} database.
     \item \code{\link{taxonByGeneID}}: Retrieve records from a local install of
@@ -34,8 +31,19 @@ databases: \emph{nucleotide}, \emph{protein}, \emph{pubmed}, \emph{taxonomy},
     \emph{nucgss} database.   
     \item \code{\link{EST}}: Retrieve records from the
     \emph{nucest} database.
-          
   }
+}
+
+\section{Main classes}{
+
+
+ \itemize{
+   \item \code{\linkS4class{Taxon}}: A container for data retrieved from the
+   NCBI Taxonomy database.
+   \item \code{\linkS4class{TaxonList}}: A list of Taxa.
+   \item \code{\linkS4class{taxonDBConnection}}: Connection to a local Taxonomy
+   database.
+ }
 }
 
 \section{Package options}{
@@ -53,6 +61,6 @@ databases: \emph{nucleotide}, \emph{protein}, \emph{pubmed}, \emph{taxonomy},
 }
 
 \author{
-Gerhard Schöfl \email{gschofl@yahoo.de}
+Gerhard Schoefl \email{gschofl@yahoo.de}
 }
 \keyword{package}

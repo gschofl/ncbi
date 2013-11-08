@@ -8,3 +8,4 @@
 \description{
 Clear the contents of the lineage cache
 }
+\keyword{internal}

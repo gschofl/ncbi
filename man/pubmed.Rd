@@ -26,7 +26,7 @@ query.}
 
 \value{
 An \linkS4class{XMLInternalDocument}, a character vector, or if
-parsed a (list of) \linkS4class{pubmed} instance(s).
+parsed a (list of) \linkS4class{pubmed} objects.
 }
 \description{
 Retrieve records from the PubMed database.

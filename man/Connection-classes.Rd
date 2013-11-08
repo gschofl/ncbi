@@ -47,3 +47,4 @@ Super classes:
 The constructors \code{\link{taxonDBConnect}}, \code{\link{geneidDBConnect}}.
 }
 \keyword{classes}
+\keyword{internal}

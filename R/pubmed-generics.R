@@ -1,9 +1,10 @@
 
 #' @title PubMed accessors
 #' 
-#' Access the various slots of \code{\link[utils]{bibentry}} instances.
+#' @description Access the various slots of
+#' \code{\linkS4class{pubmed}} objects.
 #' 
-#' @param x A \code{\link[utils]{bibentry}} instance.
+#' @param x A \code{\linkS4class{pubmed}} object.
 #' @param ... Further arguments passed on to methods. 
 #' @rdname Pubmed-accessors
 #' @export

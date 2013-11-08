@@ -7,10 +7,7 @@
 \alias{getRank}
 \alias{getScientificName}
 \alias{getTaxID}
-\title{Taxon accessors
-
-Access the slots of \linkS4class{Taxon} or \linkS4class{TaxonList}
-instances.}
+\title{Taxon accessors}
 \usage{
   getTaxID(x, ...)
 
@@ -32,6 +29,10 @@ instances.}
   \item{...}{Further arguments passed on to methods.}
 }
 
+\description{
+Access the slots of \linkS4class{Taxon} or
+\linkS4class{TaxonList} objects.
+}
 \section{Method signatures for generic getTaxID}{
 \itemize{
   \item \linkS4class{Taxon_minimal}

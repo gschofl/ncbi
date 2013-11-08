@@ -22,7 +22,7 @@
 
   \item{parse}{Should the retrieved data be parsed?}
 
-  \item{...}{Parameters passed on to the underlying \code{\link{efetch}}
+  \item{...}{Parameters passed on to the underlying \code{\link[reutils]{efetch}}
 query.}
 
   \item{taxid}{A vector of valid NCBI Taxonomy Identifiers.}
