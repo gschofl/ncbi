@@ -71,10 +71,10 @@ new_TaxonDBConnection <- setClass('TaxonDBConnection',
 
 #' Create a connection to a local NCBI Taxonomy or Gene ID database
 #' 
-#' @param db_path Path to the taxonomy or gene ID database. If \code{NULL} the
-#' databases are looked for in the \code{extdata} directory of the
-#' installed \code{ncbi} package. This is the place where they are installed
-#' by default by \code{\link{createTaxonDB}}.
+#' @param db_path Path to the directory holding the local taxonomy and
+#' gene ID database. This path can be permanently configured by setting
+#' the option \code{ncbi.taxonomy.path}. Run the command
+#' \code{\link{createTaxonDB}} to create a new taxonomy database.
 #'
 #' @return A \code{\linkS4class{TaxonDBConnection}} or a
 #' \code{\linkS4class{GeneidDBConnection}}, respectively
@@ -82,30 +82,22 @@ new_TaxonDBConnection <- setClass('TaxonDBConnection',
 #' @seealso
 #' \code{\link{taxonDB}}, \code{\link{taxonByGeneID}}, 
 #'
-#' @importFrom assertthat is.dir
 #' @rdname taxonDBConnect
 #' @export
-taxonDBConnect <- function(db_path=NULL) {
-  if (is.null(db_path)) {
-    db_path <- file.path(path.package("ncbi"), "extdata")
-  }
+taxonDBConnect <- memoise(function(db_path=getOption("ncbi.taxonomy.path")) {
+  db_path <- ncbi.taxonomy.path(db_path)
   errmsg <- paste0("Cannot find a local installation of the the NCBI ",
-                   "Taxonomy database in the directory ", sQuote(db_path),
-                   "\nSpecify the exact path to the database or run the ",
+                   "Taxonomy database 'taxon.db' in the directory ", sQuote(db_path),
+                   "\nSpecify the correct path of the database directory or run the ",
                    "command 'createTaxonDB()'")
-  if (is.dir(db_path)) {
-    taxon_db <- normalizePath(dir(db_path, pattern="taxon.db", full.names=TRUE),
-                              mustWork=FALSE)
-    if (length(taxon_db) == 0) {
-      stop(errmsg, call.=FALSE)
-    }
-  }
-  else {
-    taxon_db <- normalizePath(db_path, mustWork=TRUE)
+  taxon_db <- normalizePath(dir(db_path, pattern="taxon.db", full.names=TRUE),
+                            mustWork=FALSE)
+  if (length(taxon_db) == 0) {
+    stop(errmsg, call.=FALSE)
   }
   conn <- db_connect(taxon_db)
   new_TaxonDBConnection(conn)
-}
+})
 
 
 .valid_GeneidDBConnection <- function(object) {
@@ -128,75 +120,68 @@ new_GeneidDBConnection <- setClass('GeneidDBConnection',
 
 #' @rdname taxonDBConnect 
 #' @export
-geneidDBConnect <- function(db_path=NULL) {
-  if (is.null(db_path)) {
-    db_path <- file.path(path.package("ncbi"), "extdata")
-  }
+geneidDBConnect <- memoise(function(db_path=getOption("ncbi.taxonomy.path")) {
+  db_path <- ncbi.taxonomy.path(db_path)
   errmsg <- paste0("Cannot find a local installation of the the GI_to_TaxId ",
-                   "database in the directory ", sQuote(db_path),
-                   "\nSpecify the exact path to the database or run the ",
-                   "command 'createTaxonDB(with_geneid=TRUE)'")
-  if (is.dir(db_path)) {
-    geneid_db <- normalizePath(dir(db_path, pattern="geneid.db", full.names=TRUE),
-                               mustWork=FALSE)
-    if (length(geneid_db) == 0) {
-      stop(errmsg, call.=FALSE)
-    }
-  }
-  else {
-    geneid_db <- normalizePath(db_path, mustWork=TRUE)
+                   "database 'geneid.db' in the directory ", sQuote(db_path),
+                   "\nSpecify the correct path of the database directory or run the ",
+                   "command 'createGeneidDB()'")
+  geneid_db <- normalizePath(dir(db_path, pattern="geneid.db", full.names=TRUE),
+                             mustWork=FALSE)
+  if (length(geneid_db) == 0) {
+    stop(errmsg, call.=FALSE)
   }
   conn <- db_connect(geneid_db)
   new_GeneidDBConnection(conn)
-}
+})
 
 
 #' Create a local install of the NCBI Taxonomy database.
 #' 
 #' @details
 #' From the commandline run:
-#' \code{R -q -e "require(ncbi);createTaxonDB('/path/to/db');createGeneidDB('/path/to/db')"}
+#' \code{R -q -e "require(ncbi);createTaxonDB();createGeneidDB()"}
+#' 
+#' This will install two SQLite databases "taxon.db" and "geneid.db"
+#' in "$HOME/local/db/taxonomy/". To override the default installation
+#' directory set the option \code{ncbi.taxonomy.path} in your .Rprofile.
 #
 #' @param db_path Parent directory for SQLite database files.
 #' 
 #' @seealso
-#' \code{\link{taxonDBConnext}}, \code{\link{geneidDBConnext}}
+#' \code{\link{taxonDBConnect}}, \code{\link{geneidDBConnect}}
 #'
 #' @rdname TaxonDB
 #' @export
-createTaxonDB <- function(db_path="~/taxonomy") {
-  assert_that(file_create_if_not_exists(db_path))
-  make_taxondb(db_path, update=FALSE)
+createTaxonDB <- function(db_path=getOption("ncbi.taxonomy.path")) {
+  make_taxondb(ncbi.taxonomy.path(db_path), update=FALSE)
 }
 
 
 #' @rdname TaxonDB
 #' @export
-updateTaxonDB <- function(db_path="~/taxonomy") {
-  assert_that(is.dir(db_path), is.writeable(db_path))
-  make_taxondb(db_path, update=TRUE)
+updateTaxonDB <- function(db_path=getOption("ncbi.taxonomy.path")) {
+  make_taxondb(ncbi.taxonomy.path(db_path), update=TRUE)
 }
 
 
 #' @rdname TaxonDB
 #' @export
-createGeneidDB <- function(db_path="~/taxonomy") {
-  assert_that(file_create_if_not_exists(db_path))
-  make_geneiddb(db_path, update=FALSE)
+createGeneidDB <- function(db_path=getOption("ncbi.taxonomy.path")) {
+  make_geneiddb(ncbi.taxonomy.path(db_path), update=FALSE)
 }
 
 
 #' @rdname TaxonDB
 #' @export
-updateGeneidDB <- function(db_path="~/taxonomy") {
-  assert_that(is.dir(db_path), is.writeable(db_path))
-  make_geneiddb(db_path, update=TRUE)
+updateGeneidDB <- function(db_path=getOption("ncbi.taxonomy.path")) {
+  make_geneiddb(ncbi.taxonomy.path(db_path), update=TRUE)
 }
+
 
 
 #' @importFrom rmisc "%has_tables%"
-make_taxondb <- function(db_path=file.path(path.package("ncbi"), "extdata"),
-                         update=FALSE) { 
+make_taxondb <- function(db_path, update=FALSE) {
   url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
   zipped <- "taxdump.tar.gz"
   db_name <- normalizePath(file.path(db_path, "taxon.db"), mustWork=FALSE)
@@ -217,8 +202,7 @@ make_taxondb <- function(db_path=file.path(path.package("ncbi"), "extdata"),
 
 
 #' @importFrom rmisc has_command
-make_geneiddb <- function(db_path=file.path(path.package("ncbi"), "extdata"),
-                          update=FALSE) {
+make_geneiddb <- function(db_path, update=FALSE) {
   assert_that(has_command("gunzip"))
   url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
   db_name <- normalizePath(file.path(db_path, "geneid.db"), mustWork=FALSE)
@@ -352,7 +336,7 @@ db_load <- function(con, db_path, type="taxon") {
 
 
 ##
-dbGetTaxon <- function(db, taxid) {
+dbGetTaxon <- memoise(function(db, taxid) {
   node <- dbGetNode(db, taxid)
   new_Taxon_full(
     shared=db,
@@ -365,17 +349,17 @@ dbGetTaxon <- function(db, taxid) {
     TypeMaterial=dbGetTypeMaterial(db, taxid),
     Lineage=dbGetLineage(db, taxid)
   )
-}
+})
 
 ##
-dbGetTaxonByGeneID <- function(db, geneid) {
+dbGetTaxonByGeneID <- memoise(function(db, geneid) {
   taxid <- as.character(getTaxidByGeneID(db, geneid))
   if (length(taxid) == 0 || taxid == 0) {
     new_Taxon_full(shared=db)
   } else {
     dbGetTaxon(db, taxid)
   }
-}
+})
 
 
 #' @importFrom memoise memoise

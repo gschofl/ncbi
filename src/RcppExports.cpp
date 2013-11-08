@@ -11,9 +11,9 @@ RcppExport SEXP ncbi_index_gi_taxid(SEXP nucfileSEXP, SEXP protfileSEXP, SEXP ou
 BEGIN_RCPP
     {
         Rcpp::RNGScope __rngScope;
-        std::string nucfile = Rcpp::as<std::string >(nucfileSEXP);
-        std::string protfile = Rcpp::as<std::string >(protfileSEXP);
-        std::string outfile = Rcpp::as<std::string >(outfileSEXP);
+        Rcpp::traits::input_parameter< const std::string& >::type nucfile(nucfileSEXP );
+        Rcpp::traits::input_parameter< const std::string& >::type protfile(protfileSEXP );
+        Rcpp::traits::input_parameter< const std::string& >::type outfile(outfileSEXP );
         index_gi_taxid(nucfile, protfile, outfile);
     }
     return R_NilValue;
@@ -25,9 +25,9 @@ RcppExport SEXP ncbi_merge_gi_taxid(SEXP nucfileSEXP, SEXP protfileSEXP, SEXP ou
 BEGIN_RCPP
     {
         Rcpp::RNGScope __rngScope;
-        std::string nucfile = Rcpp::as<std::string >(nucfileSEXP);
-        std::string protfile = Rcpp::as<std::string >(protfileSEXP);
-        std::string outfile = Rcpp::as<std::string >(outfileSEXP);
+        Rcpp::traits::input_parameter< const std::string& >::type nucfile(nucfileSEXP );
+        Rcpp::traits::input_parameter< const std::string& >::type protfile(protfileSEXP );
+        Rcpp::traits::input_parameter< const std::string& >::type outfile(outfileSEXP );
         merge_gi_taxid(nucfile, protfile, outfile);
     }
     return R_NilValue;
@@ -40,7 +40,7 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        std::string filename = Rcpp::as<std::string >(filenameSEXP);
+        Rcpp::traits::input_parameter< const std::string& >::type filename(filenameSEXP );
         Rcpp::List __result = readNodes(filename);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -55,7 +55,7 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        std::string filename = Rcpp::as<std::string >(filenameSEXP);
+        Rcpp::traits::input_parameter< const std::string& >::type filename(filenameSEXP );
         Rcpp::List __result = readNames(filename);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
@@ -70,7 +70,7 @@ BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        std::string filename = Rcpp::as<std::string >(filenameSEXP);
+        Rcpp::traits::input_parameter< const std::string& >::type filename(filenameSEXP );
         Rcpp::List __result = readMerged(filename);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }

@@ -1,6 +1,6 @@
 #' @importFrom reutils epost esearch efetch webenv querykey database content xvalue
 NULL
-#' @importFrom assertthat assert_that "on_failure<-" is.string is.writeable
+#' @importFrom assertthat assert_that "on_failure<-" is.string is.writeable is.dir
 NULL
 #' @importFrom rmisc rBind
 NULL
@@ -49,19 +49,39 @@ compact <- function (x) {
   x[!vapply(x, is.null, logical(1), USE.NAMES=FALSE)]
 }
 
-
-file_create_if_not_exists <- function(file) {
-  assert_that(is.string(file))
-  if (!file.exists(file)) {
-    status <- tryCatch(file.create(file), warning=function(w) FALSE)
-    return(status)
+create_if_not_exists <- function(path, type="dir") {
+  type <- match.arg(type, c("dir", "file"))
+  assert_that(is.string(path))
+  if (!file.exists(path)) {
+    success <- tryCatch(
+      switch(type, dir=dir.create(path), file=file.create(path)),
+      warning = function(w) FALSE
+    )
+    return(success)
   }
   TRUE
 }
-on_failure(file_create_if_not_exists) <- function(call, env) {
-  paste0("The file ", deparse(call$file), " could not be created")
+on_failure(create_if_not_exists) <- function(call, env) {
+  paste0("The file/directory ", deparse(call$path), " could not be created")
 }
 
+ncbi.taxonomy.path <- function(taxonomy.path = getOption("ncbi.taxonomy.path")) {
+  msg <- paste0("No path to the taxonomy database provided. ",
+                "Configure a path permanently by setting the",
+                "option \"ncbi.taxonomy.path\" in your .Rprofile.")
+  if (is.null(taxonomy.path)) {
+    stop(msg, call.=FALSE)
+  }
+  if (is.null(getOption("ncbi.taxonomy.path"))) {
+    options(ncbi.taxonomy.path = taxonomy.path)
+  }
+  assert_that(
+    create_if_not_exists(taxonomy.path, "dir"),
+    is.dir(taxonomy.path),
+    is.readable(taxonomy.path)
+  )
+  invisible(taxonomy.path)
+}
 
 get_uids <- function(uid, db) {
   if (has_webenv(uid)) {

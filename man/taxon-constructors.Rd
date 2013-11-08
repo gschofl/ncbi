@@ -8,10 +8,9 @@
   taxon(taxid, rettype = NULL, retmax = 25, parse = TRUE,
     ...)
 
-  taxonDB(taxid, taxon_db = NULL, full = TRUE)
+  taxonDB(taxid, full = TRUE)
 
-  taxonByGeneID(geneid, geneid_db = NULL, taxon_db = NULL,
-    full = TRUE)
+  taxonByGeneID(geneid, full = TRUE)
 }
 \arguments{
   \item{taxid}{\sQuote{taxids} or a valid NCBI search term.}
@@ -28,14 +27,10 @@ query.}
 
   \item{taxid}{A vector of valid NCBI Taxonomy Identifiers.}
 
-  \item{taxon_db}{A \code{\linkS4class{taxonDBConnection}}.}
-
   \item{full}{if \code{FALSE} a minimal taxonomic description is extracted
 (TaxId, ScientificName, Rank).}
 
   \item{geneid}{A vector of valid NCBI Gene Identifiers.}
-
-  \item{geneid_db}{A \code{\linkS4class{geneidDBConnection}}.}
 }
 
 \value{
@@ -46,14 +41,20 @@ An \linkS4class{XMLInternalDocument} or if parsed a
 Retrieve records from the NCBI Taxonomy database (locally or remote)
 }
 \details{
-If no \code{geneid_db} or \code{taxon_db} are provided the databases are
-searched in the \code{extdata} directory of the installed \code{ncbi}
-package. To create these databases in the default location, run
-\code{createTaxonDB(with_geneid=TRUE)}.
+\code{taxonDB} and \code{taxonByGeneID} require a local installation
+of the NCBI taxonomy database and a database providing the GI to TaxId
+mapping. These databases are created using \code{\link{createTaxonDB}} and
+\code{\link{createGeneidDB}}, respectively, and kept up to date with
+\code{\link{updateTaxonDB}} and \code{\link{updateGeneidDB}}.
 
-The \bold{geneid.db} file, however, gets fairly large (currently ~6GB) and
-takes a long time to create. It might be advisable to provide a custom 
-install path when creating these databases.
+The install path for these custom databases \bold{taxon.db} and
+\bold{geneid.db} is specified by setting the global option
+\code{ncbi.taxonomy.path}. Currently, it defaults to "$HOME/local/db/taxonomy/".
+The default path can be overridden permanently by setting this option
+in the .Rprofile file.
+
+Note that the \bold{geneid.db} file can get fairly large (currently ~6GB) and
+takes a long time to create.
 
 See the documentation at 
 \href{http://www.ncbi.nlm.nih.gov/books/NBK21100/}{NCBI}

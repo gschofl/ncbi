@@ -38,6 +38,20 @@ databases: \emph{nucleotide}, \emph{protein}, \emph{pubmed}, \emph{taxonomy},
   }
 }
 
+\section{Package options}{
+
+
+\emph{ncbi} uses the following \code{\link{options}} to configure behaviour:
+
+\itemize{
+  \item \code{ncbi.taxonomy.path}: Path to a local installation of the NCBI
+  taxonomy database and (optionally) a GI_to_TaxId database. Defaults to
+  "$HOME/local/db/taxonomy/". You can override the default by setting this
+  option in your .Rprofile file. Run\code{\link{createTaxonDB}} and
+  \code{\link{createGeneidDB}} to install these databases.
+}
+}
+
 \author{
 Gerhard Schöfl \email{gschofl@yahoo.de}
 }
