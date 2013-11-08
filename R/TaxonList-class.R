@@ -36,7 +36,21 @@ setClass("LineageList", contains="Collection",
 
 ## Constructors
 #' @importFrom rmisc collectionConstructor
+#' @title  Construct a list of Taxa or Lineages
+#' 
+#' @usage TaxonList(..., shared = new.env(parent = emptyenv()))
+#' @param ... \code{\linkS4class{Taxon}} objects.
+#' @param shared A shared envionment containing connections to \bold{taxon.db}
+#' and (optionally) \bold{geneid.db}
+#' @return A \linkS4class{TaxonList} or a \linkS4class{LineageList}.
+#' @rdname TaxonList
+#' @keywords internal
+#' @export
 TaxonList <- collectionConstructor('TaxonList')
+#' @usage LineageList(..., shared = new.env(parent = emptyenv()))
+#' @rdname TaxonList
+#' @keywords internal
+#' @export
 LineageList <- collectionConstructor('LineageList')
 
 ## show methods

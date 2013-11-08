@@ -61,6 +61,7 @@ NULL
 #'  The constructors \code{\link{taxonDBConnect}}, \code{\link{geneidDBConnect}}.  
 #'
 #' @rdname Connection-classes
+#' @keywords internal classes
 #' @export
 #' @classHierarchy
 #' @classMethods 
@@ -69,20 +70,28 @@ new_TaxonDBConnection <- setClass('TaxonDBConnection',
                                   validity=.valid_TaxonDBConnection)
 
 
-#' Create a connection to a local NCBI Taxonomy or Gene ID database
+#' Create connections to a local NCBI Taxonomy or GeneID database
 #' 
-#' @param db_path Path to the directory holding the local taxonomy and
-#' gene ID database. This path can be permanently configured by setting
-#' the option \code{ncbi.taxonomy.path}. Run the command
-#' \code{\link{createTaxonDB}} to create a new taxonomy database.
+#' These functions are not typically invoked by the user. The path
+#' to the taxonomy and GeneID databases is specified rather by
+#' setting the global option \code{ncbi.taxonomy.path}.
+#' 
+#' Run the code{\link{createTaxonDB}} and ode{\link{createGeneidDB}} to
+#' install the taxonomy and geneid databases locally.
+#' 
+#' @usage taxonDBConnect(db_path=getOption("ncbi.taxonomy.path")
+#' @param db_path Path to the directory containing the local taxonomy and
+#' GeneID databases. This path cshould be configured by setting
+#' the option \code{ncbi.taxonomy.path}.
 #'
 #' @return A \code{\linkS4class{TaxonDBConnection}} or a
-#' \code{\linkS4class{GeneidDBConnection}}, respectively
+#' \code{\linkS4class{GeneidDBConnection}}, respectively.
 #'    
 #' @seealso
 #' \code{\link{taxonDB}}, \code{\link{taxonByGeneID}}, 
 #'
 #' @rdname taxonDBConnect
+#' @keywords internal
 #' @export
 taxonDBConnect <- memoise(function(db_path=getOption("ncbi.taxonomy.path")) {
   db_path <- ncbi.taxonomy.path(db_path)
@@ -112,13 +121,18 @@ taxonDBConnect <- memoise(function(db_path=getOption("ncbi.taxonomy.path")) {
 }
 
 #' @rdname Connection-classes
+#' @keywords internal classes
 #' @export
-new_GeneidDBConnection <- setClass('GeneidDBConnection',
-                                   contains='SQLiteConnection',
-                                   validity=.valid_GeneidDBConnection)
+new_GeneidDBConnection <- 
+  setClass('GeneidDBConnection',
+           contains='SQLiteConnection',
+           validity=.valid_GeneidDBConnection
+  )
 
 
-#' @rdname taxonDBConnect 
+#' @usage geneidDBConnect(db_path=getOption("ncbi.taxonomy.path")
+#' @rdname taxonDBConnect
+#' @keywords internal
 #' @export
 geneidDBConnect <- memoise(function(db_path=getOption("ncbi.taxonomy.path")) {
   db_path <- ncbi.taxonomy.path(db_path)
@@ -187,7 +201,7 @@ make_taxondb <- function(db_path, update=FALSE) {
   db_name <- normalizePath(file.path(db_path, "taxon.db"), mustWork=FALSE)
   
   if (update) {
-    status <- fetch_files(db_path, url, zipped, check=TRUE)
+    status <- fetch_files(path=db_path, url, files=zipped, check=TRUE)
     if (is.null(status)) {
       return(db_name)
     }

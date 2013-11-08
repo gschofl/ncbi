@@ -5,7 +5,6 @@ NULL
 #' @importFrom rmisc rBind
 NULL
 
-
 Partial <- function(fn, ..., .env = parent.frame()) {
   assert_that(is.function(fn))
   fcall <- substitute(fn(...))
@@ -18,35 +17,34 @@ Partial <- function(fn, ..., .env = parent.frame()) {
   eval(call("function", as.pairlist(args), fcall), .env)
 }
 
-
-is.empty <- function (x) {
+is.empty <- function(x) {
   is.null(x) || length(x) == 0L || (length(x) == 1L && !nzchar(x))
 }
 on_failure(is.empty) <- function(call, env) {
   paste0(deparse(call$x), " is not empty.")
 }
 
-
-"%||%" <- function (a, b) {
+"%||%" <- function(a, b) {
   if (is.empty(a)) force(b) else a
 }
 
-
-"%|na|%" <- function (a, b) {
+"%|na|%" <- function(a, b) {
   if (is.null(a) || all(is.na(a))) force(b) else a
 }
 
+## Vectorized default operators
+"%|%" <- function(a, b) ifelse(nzchar(a), a, b)
 
-"%|NA|%" <- function (a, b) {
-  ifelse(is.na(a), b, a)
-}
-
+"%|NA|%" <- function(a, b) ifelse(is.na(a), b, a)
 
 "%ni%" <- Negate(`%in%`)
 
+compact <- function(x) {
+  x[!vapply(x, is.empty, FALSE, USE.NAMES=FALSE)]
+}
 
-compact <- function (x) {
-  x[!vapply(x, is.null, logical(1), USE.NAMES=FALSE)]
+compactChar <- function(x) {
+  x[vapply(x, nzchar, FALSE, USE.NAMES=FALSE)]
 }
 
 create_if_not_exists <- function(path, type="dir") {

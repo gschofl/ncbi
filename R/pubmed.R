@@ -7,14 +7,44 @@ NULL
 
 setOldClass("bibentry")
 
-
+#' doi-class
+#'
+#' A Digital Object Identifier.
+#'
+#' @section Slots:
+#' 
+#' \describe{
+#'    \item{\code{doi}:}{A character vector.}
+#' }
+#'    
+#' @keywords internal classes
+#' @export
+#' @classHierarchy
+#' @classMethods 
 new_doi <- setClass(
   Class="doi",
   slots=c(doi="character"),
   prototype=prototype(doi=NA_character_)
 )
 
-
+#' pubmed-class
+#'
+#' \dQuote{\bold{pubmed}} is a class that provides a container for records
+#' retrieved from the PubMed database.
+#' @section Slots:
+#' \describe{
+#'    \item{\code{pmid}:}{\code{character}; A PubMed Identifier.}
+#'    \item{\code{doi}:}{\code{\linkS4class{doi}}; A Digital
+#'    Object Identifier.}
+#'    \item{\code{cites}:}{\code{list}.}
+#'    \item{\code{date}:}{\code{list}.}
+#'    \item{\code{ref}:}{\code{\link[utils]{bibentry}}; A bibliografic entry}
+#' }
+#'  
+#' @keywords internal classes
+#' @export
+#' @classHierarchy
+#' @classMethods 
 new_pubmed <- setClass(
   Class="pubmed",
   slots=c(pmid="character",
@@ -41,7 +71,7 @@ new_pubmed <- setClass(
 #' query.
 #'
 #' @return An \linkS4class{XMLInternalDocument}, a character vector, or if
-#' parsed a (list of) \linkS4class{pubmed} instance(s).
+#' parsed a (list of) \linkS4class{pubmed} objects.
 #' @rdname pubmed
 #' @export
 pubmed <- function(pmid, rettype=NULL, retmax=25, parse=TRUE, ...) {
