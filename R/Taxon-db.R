@@ -13,6 +13,9 @@ NULL
 
 .valid_TaxonDBConnection <- function(object) {
   errors <- character()
+  if (length(dbListTables(object)) == 0L) {
+    return("No tables in 'TaxonDB'")
+  }
   if (!all(c("nodes", "names") %in% dbListTables(object))) {
     errors <- c(errors, "Table missing from 'TaxonDB'\n")
   } else {
@@ -25,7 +28,6 @@ NULL
       errors <- c(errors, "Field missing from table 'names'\n")
     }
   }
-  
   if (length(errors) == 0L) { TRUE } else { errors }
 }
 
@@ -111,6 +113,9 @@ taxonDBConnect <- memoise(function(db_path=getOption("ncbi.taxonomy.path")) {
 
 .valid_GeneidDBConnection <- function(object) {
   errors <- character()
+  if (length(dbListTables(object)) == 0L) {
+    return("No tables in 'GeneidDB'")
+  }
   if (!"genes" %in% dbListTables(object)) {
     errors <- c(errors, "Table missing from 'GeneidDB'\n")
   } else if (!"tax_id" %in% dbListFields(object, "genes")) {
