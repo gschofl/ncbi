@@ -1,53 +1,53 @@
 
-#' @title PubMed accessors
+#' @title Access pubmed objects
 #' 
 #' @description Access the various slots of
 #' \code{\linkS4class{pubmed}} objects.
 #' 
 #' @param x A \code{\linkS4class{pubmed}} object.
 #' @param ... Further arguments passed on to methods. 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getAuthor", function(x, ...) standardGeneric("getAuthor"))
 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getTitle", function(x, ...) standardGeneric("getTitle"))
 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getAbstract", function(x, ...) standardGeneric("getAbstract"))
 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getJournal", function(x, ...) standardGeneric("getJournal"))
 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getIssue", function(x, ...) standardGeneric("getIssue"))
 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getPmid", function(x, ...) standardGeneric("getPmid"))
 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getDoi", function(x, ...) standardGeneric("getDoi"))
 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getCites", function(x, ...) standardGeneric("getCites"))
 
-#' @rdname Pubmed-accessors
+#' @rdname pubmed-methods
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("browsePubmed", function(x, ...) standardGeneric("browsePubmed"))
 

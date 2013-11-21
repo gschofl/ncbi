@@ -1,4 +1,3 @@
-% Built by roxygen3 0.1
 \name{show_cache}
 \alias{show_cache}
 \title{Show contents of the lineage cache}
@@ -6,6 +5,7 @@
   show_cache()
 }
 \description{
-Show contents of the lineage cache
+  Show contents of the lineage cache
 }
 \keyword{internal}
+

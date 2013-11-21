@@ -9,9 +9,9 @@ parseUilist <- function(uilist) {
   }
   if (!is(uilist, "XMLInternalDocument")) {
     if (grepl("(\\d+\\n)+", uilist)) {
-      return( as.numeric(unlist(strsplit(uilist, "\\n"))) )
+      return(as.numeric(usp(uilist, "\\n")))
     } else {
-      return( uilist )
+      return(uilist)
     }
   }
   id <- xvalue(uilist, '//Id')
@@ -36,7 +36,7 @@ parseAcc <- function(acc) {
   if (!is(acc, "XMLInternalDocument")) {
     ACC <- "([a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z0-9]+)?)"
     if (grepl(paste0("(", ACC, "\\n)+"), acc)) {
-      as.character(unlist(strsplit(acc, "\\n")))
+      as.character(usp(acc, "\\n"))
     } else {
       acc
     }
