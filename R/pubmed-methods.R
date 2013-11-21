@@ -40,7 +40,7 @@ setMethod("getJournal", "pubmed", function(x) {
   }, j=x@ref$journal, a=x@ref$abbrev, i=x@ref$issn)
 })
 
-#' @rdname doi-methods
+#' @rdname pubmed-methods
 #' @aliases browsePubmed,doi-method
 setMethod("browsePubmed", "doi", function(x, browser=getOption("browser")) {
   if (all(is.na(x@doi))) {
@@ -120,14 +120,4 @@ setMethod("[", "doi",
           function(x, i, j, ..., drop=TRUE) {
             initialize(x, doi=x@doi[i])
           })
-
-
-
-
-
-
-
-
-
-
 

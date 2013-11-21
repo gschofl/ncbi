@@ -1,7 +1,7 @@
 Package: ncbi
 Type: Package
 Title: Retrieve data from NCBI.
-Version: 0.1.3
+Version: 0.1.4
 Date: 2012-11-13
 Authors@R: person("Gerhard", "Schöfl", role=c("aut","cre"),
     email="gschofl@yahoo.de")
@@ -22,7 +22,6 @@ Imports:
     methods,
     RCurl,
     reutils,
-    rmisc,
     RSQLite,
     stats,
     utils,
@@ -33,6 +32,9 @@ Suggests:
 Collate:
     '00datacache.R'
     'utils.R'
+    'ncbi-utils.R'
+    'sqlite-db.R'
+    'collection.R'
     'uilist.R'
     'pubmed.R'
     'pubmed-generics.R'

@@ -1,7 +1,5 @@
 #' @include utils.R
-NULL
 #' @importFrom reutils xattr xset
-NULL
 #' @importFrom utils person bibentry
 NULL
 
@@ -12,15 +10,13 @@ setOldClass("bibentry")
 #' A Digital Object Identifier.
 #'
 #' @section Slots:
-#' 
 #' \describe{
 #'    \item{\code{doi}:}{A character vector.}
 #' }
 #'    
 #' @keywords internal classes
-#' @export
-#' @classHierarchy
-#' @classMethods 
+#' @name doi-class
+#' @rdname doi-class
 new_doi <- setClass(
   Class="doi",
   slots=c(doi="character"),
@@ -42,9 +38,8 @@ new_doi <- setClass(
 #' }
 #'  
 #' @keywords internal classes
-#' @export
-#' @classHierarchy
-#' @classMethods 
+#' @name pubmed-class
+#' @rdname pubmed-class
 new_pubmed <- setClass(
   Class="pubmed",
   slots=c(pmid="character",

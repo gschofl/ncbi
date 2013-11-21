@@ -5,6 +5,23 @@
 
 using namespace Rcpp;
 
+// bind_list
+List bind_list(List& L, int n_col, std::vector<std::string> col_classes);
+RcppExport SEXP ncbi_bind_list(SEXP LSEXP, SEXP n_colSEXP, SEXP col_classesSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< List& >::type L(LSEXP );
+        Rcpp::traits::input_parameter< int >::type n_col(n_colSEXP );
+        Rcpp::traits::input_parameter< std::vector<std::string> >::type col_classes(col_classesSEXP );
+        List __result = bind_list(L, n_col, col_classes);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
+}
 // index_gi_taxid
 void index_gi_taxid(const std::string& nucfile, const std::string& protfile, const std::string& outfile);
 RcppExport SEXP ncbi_index_gi_taxid(SEXP nucfileSEXP, SEXP protfileSEXP, SEXP outfileSEXP) {

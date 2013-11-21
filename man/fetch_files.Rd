@@ -1,4 +1,3 @@
-% Built by roxygen3 0.1
 \name{fetch_files}
 \alias{fetch_files}
 \title{Fetch files from a remote location conditional on a difference in
@@ -15,13 +14,13 @@ timestamp or content-length.}
   \item{files}{File names.}
 
   \item{check}{if \code{TRUE}, fetch the file only if the
-remote file is newer than the local version.}
+  remote file is newer than the local version.}
 
   \item{verbose}{be verbose}
 }
-
 \description{
-Fetch files from a remote location conditional on a difference in
-timestamp or content-length.
+  Fetch files from a remote location conditional on a
+  difference in timestamp or content-length.
 }
 \keyword{internal}
+

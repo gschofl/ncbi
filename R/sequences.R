@@ -1,9 +1,6 @@
 #' @include utils.R
-NULL
 #' @importFrom XML xmlDoc free
-NULL
 #' @importFrom Biostrings AAStringSet DNAStringSet
-NULL
 #' @importFrom IRanges DataFrame "elementMetadata<-"
 NULL
 
@@ -35,7 +32,6 @@ ncbi_sequences <- function(gi, db, rettype="fasta", retmax=100, parse=TRUE, ...)
 #' containing a GenBank flatfile, or a file path to a GenBank file.
 #' 
 #' @return A \linkS4class{gbRecord} instance.
-#'
 #' @export
 parseGenBank <- function(gb) {
   stopifnot(require(biofiles))
@@ -62,7 +58,6 @@ parseGenBank <- function(gb) {
 #' 
 #' @return An \linkS4class{XStringSet} instance with additional innformation
 #' in the \code{elementMetadata} slot.
-#'
 #' @export
 parseTSeqSet <- function(tSeqSet) {
   if (is(tSeqSet, "efetch")) {

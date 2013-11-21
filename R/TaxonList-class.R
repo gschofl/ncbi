@@ -1,5 +1,7 @@
 #' @include Taxon-class.R
-#' @importFrom rmisc as.list
+#' @include collection.R
+NULL
+#' @importFrom BiocGenerics table
 NULL
 
 
@@ -7,7 +9,6 @@ NULL
 
 
 ## Validators
-#' @importFrom rmisc collectionValidator
 .valid_TaxonList <- collectionValidator('TaxonList')
 .valid_LineageList <- collectionValidator('LineageList')
 
@@ -17,25 +18,21 @@ NULL
 #' are lists of \linkS4class{Taxon} and \linkS4class{Lineage}
 #' objects, respectively.
 #' 
-#' @importClassesFrom rmisc Collection
 #' @rdname TaxonList
-#' @export
-#' @classHierarchy
-#' @classMethods
+#' @name TaxonList-class
+#' @exportClass TaxonList
 setClass("TaxonList", contains="Collection",
          prototype=prototype(elementType="Taxon"),
          validity=.valid_TaxonList)
 
 #' @rdname TaxonList
-#' @export
-#' @classHierarchy
-#' @classMethods
+#' @name LineageList-class
+#' @exportClass LineageList
 setClass("LineageList", contains="Collection",
          prototype=prototype(elementType="Taxon"),
          validity=.valid_LineageList)
 
 ## Constructors
-#' @importFrom rmisc collectionConstructor
 #' @title  Construct a list of Taxa or Lineages
 #' 
 #' @usage TaxonList(..., shared = new.env(parent = emptyenv()))
@@ -54,7 +51,6 @@ TaxonList <- collectionConstructor('TaxonList')
 LineageList <- collectionConstructor('LineageList')
 
 ## show methods
-#' @importFrom rmisc collectionShower
 .show_TaxonList <- collectionShower(.show_Taxon, numOfElements=12, linesPerElement=NULL)
 setMethod("show", "TaxonList", function(object) {
   .show_TaxonList(object)
@@ -69,16 +65,14 @@ setMethod("show", "LineageList", function(object) {
 # Accessors --------------------------------------------------------------
 
 
-setMethod("getByRank", "LineageList", function(x, rank, value=NULL) {
+setMethod("getByRank", "LineageList", function(x, rank, value=NULL, ...) {
   rank <- match.arg(rank, ncbi:::.ranks)
   i <- vapply(x, function(x) which(getRank(x) == rank) %||% NA_integer_, integer(1))
-  
   if (!is.null(value)) {
     value <- match.arg(value, c("TaxId", "ScientificName"))
-    unlist(Map(`[`, x=x, i=i, value=value))
-  }
-  else {
-    taxids <- unlist(Map(`[`, x=x, i=i, value='TaxId'))
+    unlist(mapply(FUN=`[`, x=x, i=i, value=value, SIMPLIFY=FALSE, USE.NAMES=FALSE))
+  } else {
+    taxids <- unlist(mapply(FUN=`[`, x=x, i=i, value='TaxId', SIMPLIFY=FALSE, USE.NAMES=FALSE))
     new_taxon(taxids, shared(x))
   }
 })
@@ -127,7 +121,7 @@ setMethod("getAuthority", "TaxonList", function(x) {
 })
 
 
-setMethod("getLineage", "TaxonList", function(x) {
+setMethod("getLineage", "TaxonList", function(x, ...) {
   if (!is(x[[1]], 'Taxon_full')) {
     x <- new_taxon(taxid, shared(x), full=TRUE)
   }
@@ -135,15 +129,13 @@ setMethod("getLineage", "TaxonList", function(x) {
 })
 
 
-setMethod("getByRank", "TaxonList", function(x, rank, value=NULL) {
+setMethod("getByRank", "TaxonList", function(x, rank, value=NULL, ...) {
   if (!is(x[[1]], 'Taxon_full')) {
     x <- new_taxon(taxid, shared(x), full=TRUE)
   }
-  getByRank(getLineage(x), rank=rank, value=value)
+  getByRank(getLineage(x, ...), rank=rank, value=value, ...)
 })
 
-
-#' @importFrom BiocGenerics table
 #' @export
 setGeneric("table")
 setMethod("table", "TaxonList", 

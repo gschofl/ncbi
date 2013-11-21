@@ -1,35 +1,10 @@
 #' @include utils.R
-NULL
-#' @importFrom rmisc db_create db_connect db_disconnect db_query db_count 
-NULL
+#' @include sqlite-db.R
+#' @include Taxon-class.R
 #' @importFrom RSQLite dbListTables dbListFields dbSendQuery
-NULL
 #' @importFrom RCurl curlOptions CFILE close curlPerform
+#' @importFrom memoise memoise
 NULL
-#' @importClassesFrom RSQLite dbObjectId SQLiteObject SQLiteConnection
-NULL
-#' @importClassesFrom DBI DBIObject DBIConnection
-NULL
-
-.valid_TaxonDBConnection <- function(object) {
-  errors <- character()
-  if (length(dbListTables(object)) == 0L) {
-    return("No tables in 'TaxonDB'")
-  }
-  if (!all(c("nodes", "names") %in% dbListTables(object))) {
-    errors <- c(errors, "Table missing from 'TaxonDB'\n")
-  } else {
-    if (!all(c("tax_id", "parent_id", "rank", "embl_code", "division_id")
-             %in% dbListFields(object, "nodes"))) {
-      errors <- c(errors, "Field missing from table 'nodes'\n")
-    }
-    if (!all(c("tax_id", "tax_name", "unique_name", "class")
-             %in% dbListFields(object, "names"))) {
-      errors <- c(errors, "Field missing from table 'names'\n")
-    }
-  }
-  if (length(errors) == 0L) { TRUE } else { errors }
-}
 
 #' Database Connections
 #' 
@@ -58,19 +33,43 @@ NULL
 #' \sQuote{\bold{GeneidDBConnection}}: A connection to an SQLite database
 #' linking NCBI Gene IDs to Taxids.
 #' 
-#' 
 #' @seealso
-#'  The constructors \code{\link{taxonDBConnect}}, \code{\link{geneidDBConnect}}.  
-#'
-#' @rdname Connection-classes
+#'  The constructors \code{\link{taxonDBConnect}}, \code{\link{geneidDBConnect}}. 
+#'  
 #' @keywords internal classes
-#' @export
-#' @classHierarchy
-#' @classMethods 
-new_TaxonDBConnection <- setClass('TaxonDBConnection',
-                                  contains='SQLiteConnection',
-                                  validity=.valid_TaxonDBConnection)
+#' @rdname Connection-classes
+#' @name TaxonDBConnection-class
+#' @exportClass TaxonDBConnection
+new_TaxonDBConnection <- setRefClass(
+  Class='TaxonDBConnection',
+  contains='sqliteDB',
+  methods=list(
+    initialize=function(con, ...) {
+      callSuper(con, ...)
+    })
+)
 
+
+setValidity('TaxonDBConnection', function(object) {
+  errors <- character()
+  if (length(db_list_tables(object)) == 0L) {
+    return("No tables in 'TaxonDB'")
+  }
+  if (!all(c("nodes", "names") %in% db_list_tables(object))) {
+    errors <- c(errors, "Table missing from 'TaxonDB'\n")
+  } else {
+    if (!all(c("tax_id", "parent_id", "rank", "embl_code", "division_id")
+             %in% dbListFields(conn(object), "nodes"))) {
+      errors <- c(errors, "Field missing from table 'nodes'\n")
+    }
+    if (!all(c("tax_id", "tax_name", "unique_name", "class")
+             %in% dbListFields(conn(object), "names"))) {
+      errors <- c(errors, "Field missing from table 'names'\n")
+    }
+  }
+  if (length(errors) == 0L) { TRUE } else { errors }
+})
+            
 
 #' Create connections to a local NCBI Taxonomy or GeneID database
 #' 
@@ -90,7 +89,7 @@ new_TaxonDBConnection <- setClass('TaxonDBConnection',
 #' \code{\linkS4class{GeneidDBConnection}}, respectively.
 #'    
 #' @seealso
-#' \code{\link{taxonDB}}, \code{\link{taxonByGeneID}}, 
+#' \code{\link{taxonDB}}, \code{\link{taxonByGeneID}}
 #'
 #' @rdname taxonDBConnect
 #' @keywords internal
@@ -106,34 +105,40 @@ taxonDBConnect <- memoise(function(db_path=getOption("ncbi.taxonomy.path")) {
   if (length(taxon_db) == 0) {
     stop(errmsg, call.=FALSE)
   }
-  conn <- db_connect(taxon_db)
-  new_TaxonDBConnection(conn)
+  db <- new_TaxonDBConnection(con=db_connect(taxon_db))
+  validObject(db)
+  db
 })
 
 
-.valid_GeneidDBConnection <- function(object) {
+#' @keywords internal classes
+#' @rdname Connection-classes
+#' @name GeneidDBConnection-class
+#' @exportClass GeneidDBConnection
+new_GeneidDBConnection <- setRefClass(
+  Class='GeneidDBConnection',
+  contains='sqliteDB',
+  methods=list(
+    initialize=function(con, ...) {
+      callSuper(con, ...)
+    })
+)
+
+
+setValidity('GeneidDBConnection', function(object) {
   errors <- character()
-  if (length(dbListTables(object)) == 0L) {
+  if (length(db_list_tables(object)) == 0L) {
     return("No tables in 'GeneidDB'")
   }
-  if (!"genes" %in% dbListTables(object)) {
+  if (!"genes" %in% db_list_tables(object)) {
     errors <- c(errors, "Table missing from 'GeneidDB'\n")
-  } else if (!"tax_id" %in% dbListFields(object, "genes")) {
+  } else if (!"tax_id" %in% dbListFields(conn(object), "genes")) {
     errors <- c(errors, "Field missing from table 'genes'\n")
   }
   
   if (length(errors) == 0L) { TRUE } else { errors }
-}
-
-#' @rdname Connection-classes
-#' @keywords internal classes
-#' @export
-new_GeneidDBConnection <- 
-  setClass('GeneidDBConnection',
-           contains='SQLiteConnection',
-           validity=.valid_GeneidDBConnection
-  )
-
+})
+  
 
 #' @usage geneidDBConnect(db_path=getOption("ncbi.taxonomy.path")
 #' @rdname taxonDBConnect
@@ -150,8 +155,9 @@ geneidDBConnect <- memoise(function(db_path=getOption("ncbi.taxonomy.path")) {
   if (length(geneid_db) == 0) {
     stop(errmsg, call.=FALSE)
   }
-  conn <- db_connect(geneid_db)
-  new_GeneidDBConnection(conn)
+  db <- new_GeneidDBConnection(con = db_connect(geneid_db))
+  validObject(db)
+  db
 })
 
 
@@ -197,9 +203,7 @@ updateGeneidDB <- function(db_path=getOption("ncbi.taxonomy.path")) {
   make_geneiddb(ncbi.taxonomy.path(db_path), update=TRUE)
 }
 
-
-
-#' @importFrom rmisc "%has_tables%"
+##
 make_taxondb <- function(db_path, update=FALSE) {
   url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
   zipped <- "taxdump.tar.gz"
@@ -213,14 +217,16 @@ make_taxondb <- function(db_path, update=FALSE) {
   } else {
     fetch_files(db_path, url, zipped, check=FALSE)
   }
+  if (file.exists(db_name)) {
+    unlink(db_name)
+  }
   con <- db_create(db_name, taxon_db.sql)
   on.exit(db_disconnect(con))
   assert_that(con %has_tables% c("nodes", "names"))
   db_load(con, db_path, "taxon")
 }
 
-
-#' @importFrom rmisc has_command
+##
 make_geneiddb <- function(db_path, update=FALSE) {
   assert_that(has_command("gunzip"))
   url <- 'ftp://ftp.ncbi.nih.gov/pub/taxonomy'
@@ -248,6 +254,9 @@ make_geneiddb <- function(db_path, update=FALSE) {
     message("Generating 'gi_index' ...")
     index_gi_taxid(dmp_path[1], dmp_path[2], dmp_path[3])
   }
+  if (file.exists(db_name)) {
+    unlink(db_name)
+  }
   con <- db_create(db_name, geneid_db.sql)
   on.exit(db_disconnect(con))
   success <- db_load(con, db_path, "geneid")
@@ -259,7 +268,6 @@ make_geneiddb <- function(db_path, update=FALSE) {
   
   db_name
 }
-
 
 #' Fetch files from a remote location conditional on a difference in
 #' timestamp or content-length.
@@ -283,8 +291,7 @@ fetch_files <- function(path, url, files, check=FALSE, verbose=FALSE) {
   invisible(status)
 }
 
-
-#' @importFrom rmisc file_compare strip_ext
+##
 fetch_file <- function(url, file, check=FALSE, verbose=FALSE) {
   assert_that(is.string(url))
   assert_that(is.string(file))
@@ -307,7 +314,7 @@ fetch_file <- function(url, file, check=FALSE, verbose=FALSE) {
   }
 }
 
-#' @importFrom rmisc db_bulk_insert
+##
 db_load <- function(con, db_path, type="taxon") {
   if (type == "taxon") {
     assert_that(has_command("gunzip"), has_command("gzip"))
@@ -353,41 +360,48 @@ db_load <- function(con, db_path, type="taxon") {
   }
 }
 
-
 ##
-dbGetTaxon <- memoise(function(db, taxid) {
-  node <- dbGetNode(db, taxid)
+db_get_taxon <- memoise(function(db, taxid, ...) {
+  dots <- list(...)
+  log <- dots$log
+  reduced <- dots$reduced
+  node <- db_get_node(db, taxid, log = log)
+  if (isTRUE(reduced)) {
+    on <- au <- tm <- NA_character_
+  } else {
+    on   <- db_get_other_name(db, taxid, log = log)
+    au   <- db_get_authority(db, taxid, log = log)
+    tm   <- db_get_type_material(db, taxid, log = log)
+  }
+  lin  <- db_get_lineage(db, taxid, log = log)
   new_Taxon_full(
     shared=db,
     TaxId=node$tax_id %||% NA_character_,
     ScientificName=node$tax_name %||% NA_character_,
     Rank=node$rank %||% NA_character_,
     ParentTaxId=node$parent_id %||% NA_character_,
-    OtherName=dbGetOtherName(db, taxid),
-    Authority=dbGetAuthority(db, taxid),
-    TypeMaterial=dbGetTypeMaterial(db, taxid),
-    Lineage=dbGetLineage(db, taxid)
+    OtherName=on, Authority=au, TypeMaterial=tm,
+    Lineage=lin
   )
 })
 
 ##
-dbGetTaxonByGeneID <- memoise(function(db, geneid) {
-  taxid <- as.character(getTaxidByGeneID(db, geneid))
+db_get_taxon_by_geneid <- memoise(function(db, geneid, ...) {
+  taxid <- as.character(db_get_taxid_by_geneid(db, geneid, ...))
   if (length(taxid) == 0 || taxid == 0) {
     new_Taxon_full(shared=db)
   } else {
-    dbGetTaxon(db, taxid)
+    db_get_taxon(db = db, taxid = taxid, ...)
   }
 })
 
-
-#' @importFrom memoise memoise
-dbGetTaxonMinimal <- memoise(function(db, taxid) {
-  conn <- db$taxonDBConnection
+##
+db_get_taxon_minimal <- memoise(function(db, taxid, ...) {
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_id, tax_name, rank FROM nodes JOIN names USING ( tax_id ) ",
-                "WHERE tax_id=", taxid, " AND class='scientific name'") 
-  data <- db_query(conn, sql)
+  log <- list(...)$log
+  stmt <- paste0("select tax_id, tax_name, rank from nodes join names using (tax_id) ",
+                "where tax_id=", taxid, " and class='scientific name'") 
+  data <- .db_query(conn(db$taxonDBConnection), stmt, NA, log = log)
   new_Taxon_minimal(
     shared=db,
     TaxId=data$tax_id %||% NA_character_,
@@ -396,101 +410,98 @@ dbGetTaxonMinimal <- memoise(function(db, taxid) {
 })
 
 ##
-dbGetTaxonMinimalByGeneID <- memoise(function(db, geneid) {
-  taxid <- getTaxidByGeneID(db, geneid)
+db_get_taxon_minimal_by_geneid <- memoise(function(db, geneid, ...) {
+  taxid <- db_get_taxid_by_geneid(db, geneid, ...)
   if (length(taxid) == 0 || taxid == 0) {
     new_Taxon_minimal(shared=db)
   } else {
-    dbGetTaxonMinimal(db, taxid)
+    db_get_taxon_minimal(db = db, taxid = taxid, ...)
   }
 })
 
 ##
-getTaxidByGeneID <- function(db, geneid) {
-  conn <- db$geneidDBConnection 
+db_get_taxid_by_geneid <- function(db, geneid, ...) {
   geneid <- geneid %|na|% 0
-  sql <- paste0("SELECT tax_id FROM genes WHERE rowid=", geneid)
-  db_query(conn, sql, 1)
+  log <- list(...)$log
+  stmt <- paste0("select tax_id from genes where rowid=", geneid)
+  .db_query(conn(db$geneidDBConnection), stmt, 1, log = log)
 }
 
 ##
-dbGetParentTaxId <- function(db, taxid) {
-  conn <- db$taxonDBConnection 
+db_get_parent_taxid <- function(db, taxid, ...) { 
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT parent_id FROM nodes WHERE tax_id=", taxid)
-  db_query(conn, sql, 1) %||% NA_character_
+  log <- list(...)$log
+  stmt <- paste0("select parent_id from nodes where tax_id=", taxid)
+  .db_query(conn(db$taxonDBConnection), stmt, 1, log = log) %||% NA_character_
 }
 
 ##
-dbGetScientificName <- function(db, taxid) {
-  conn <- db$taxonDBConnection 
+db_get_scientific_name <- function(db, taxid, ...) {
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id=", taxid,
-                " AND class='scientific name'")
-  db_query(conn, sql, 1) %||% NA_character_
+  log <- list(...)$log
+  stmt <- paste0("select tax_name, class from names where tax_id=", taxid,
+                " and class='scientific name'")
+  .db_query(conn(db$taxonDBConnection), stmt, 1, log = log) %||% NA_character_
 }
 
 ##
-dbGetOtherName <- function(db, taxid) {
-  conn <- db$taxonDBConnection 
+db_get_rank <- function(db, taxid, ...) {
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_name, class FROM names WHERE tax_id=", taxid,
-                " AND class != 'scientific name' AND class != 'type material'",
-                " AND class != 'authority'")
-  data <- db_query(conn, sql)
+  log <- list(...)$log
+  stmt <- paste0("select rank from nodes where tax_id=", taxid)
+  .db_query(conn(db$taxonDBConnection), sql, 1, log = log) %||% NA_character_
+}
+
+##
+db_get_other_name <- function(db, taxid, ...) {
+  taxid <- taxid %|na|% 0
+  log <- list(...)$log
+  stmt <- paste0("select tax_name, class from names where tax_id=", taxid,
+                 " and class != 'scientific name' and class != 'type material'",
+                 " and class != 'authority'")
+  data <- .db_query(conn(db$taxonDBConnection), stmt, NA, log = log)
   setNames(data$tax_name, camelise(data$class)) %||% NA_character_
 }
 
-##
-dbGetTypeMaterial <- function(db, taxid) {
-  conn <- db$taxonDBConnection 
+## 
+db_get_type_material <- function(db, taxid, ...) {
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_name FROM names WHERE tax_id=", taxid,
-                " AND class='type material'")
-  db_query(conn, sql, 1) %||% NA_character_
+  log <- list(...)$log
+  stmt <- paste0("select tax_name from names where tax_id=", taxid, " and class='type material'")
+  .db_query(conn(db$taxonDBConnection), stmt, 1, log = log) %||% NA_character_
 }
 
 ##
-dbGetAuthority <- function(db, taxid) {
-  conn <- db$taxonDBConnection 
+db_get_authority <- function(db, taxid, ...) {
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_name FROM names WHERE tax_id=", taxid,
-                " AND class='authority'")
-  db_query(conn, sql, 1) %||% NA_character_
+  log <- list(...)$log
+  stmt <- paste0("select tax_name from names where tax_id=", taxid, " and class='authority'")
+  .db_query(conn(db$taxonDBConnection), stmt, 1, log = log) %||% NA_character_
 }
 
 ##
-dbGetRank <- function(db, taxid) {
-  conn <- db$taxonDBConnection 
+db_get_node <- function(db, taxid, ...) {
   taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT rank FROM nodes WHERE tax_id=", taxid)
-  db_query(conn, sql, 1) %||% NA_character_
+  log <- list(...)$log
+  stmt <- paste0("select tax_id, parent_id, tax_name, rank from nodes join names ",
+                 "using (tax_id) where tax_id=", taxid, " and class='scientific name'")
+  .db_query(conn(db$taxonDBConnection), stmt, NA, log = log)
 }
 
-
-##' @return TaxId, ParentId, ScientificName, Rank
-dbGetNode <- memoise(function(db, taxid) {
-  conn <- db$taxonDBConnection 
-  taxid <- taxid %|na|% 0
-  sql <- paste0("SELECT tax_id, parent_id, tax_name, rank FROM nodes JOIN names",
-                " USING ( tax_id ) WHERE tax_id=", taxid,
-                " AND class='scientific name'")
-  db_query(conn, sql)
-})
-
 ##
-dbGetLineage <- memoise(function(db, taxid) {
+db_get_lineage <- memoise(function(db, taxid, ...) {
+  log <- list(...)$log
   if (!.taxcache$exists(taxid)) {
-    lin <- .lineage_to_cache(db, taxid)
+    lin <- .lineage_to_cache(db, taxid, log)
   } else {
-    lin <- rbind(.lineage_from_cache(taxid),
-                 dbGetNode(db, taxid)[, c('tax_id', 'tax_name', 'rank')])
+    node <- db_get_node(db, taxid, log = log)
+    lin <- rbind(.lineage_from_cache(taxid), node[, c('tax_id', 'tax_name', 'rank')])
   }
-  Lineage( lin[-1L, ], shared=db )
+  Lineage(lin[-1L, ], shared=db)
 })
 
-
-.lineage_to_cache <- function(db, id) {
+##
+.lineage_to_cache <- function(db, id, log = NULL) {
   verbose <- getOption("verbose")
   ## pid : parental taxid
   ##  id : taxid
@@ -500,7 +511,7 @@ dbGetLineage <- memoise(function(db, taxid) {
   i          <- 1
   
   ## fetch the current node, split off the pid, and store in 'lin_list'
-  node <- dbGetNode(db, id)
+  node <- db_get_node(db, id, log = log)
   lin_list[[i]] <- node[, lin_fields]
   pid <- node$parent_id
   
@@ -512,7 +523,7 @@ dbGetLineage <- memoise(function(db, taxid) {
       id <- pid
       
       ## fetch the node and store it in 'lin_list'
-      node <- dbGetNode(db, id)    
+      node <- db_get_node(db, id, log = log)    
       i <- i + 1
       lin_list[[i]] <- node[, lin_fields]
       if (verbose) {
@@ -540,7 +551,7 @@ dbGetLineage <- memoise(function(db, taxid) {
   }
 }
 
-
+##
 .lineage_from_cache <- function(id) {
   verbose <- getOption("verbose")
   if (verbose) {
@@ -566,7 +577,7 @@ dbGetLineage <- memoise(function(db, taxid) {
   }
 }
 
-
+##
 camelise <- function(s) {
   cap <- function(s) {
     paste0(toupper(substring(s, 1, 1)), substring(s, 2), collapse="")

@@ -1,4 +1,3 @@
-% Built by roxygen3 0.1
 \name{parseGenBank}
 \alias{parseGenBank}
 \title{Parse GenBank flatfiles}
@@ -6,13 +5,14 @@
   parseGenBank(gb)
 }
 \arguments{
-  \item{gb}{An \linkS4class{efetch} instance, a character vector
-containing a GenBank flatfile, or a file path to a GenBank file.}
+  \item{gb}{An \linkS4class{efetch} instance, a character
+  vector containing a GenBank flatfile, or a file path to a
+  GenBank file.}
 }
-
 \value{
-A \linkS4class{gbRecord} instance.
+  A \linkS4class{gbRecord} instance.
 }
 \description{
-Parse GenBank flatfiles
+  Parse GenBank flatfiles
 }
+

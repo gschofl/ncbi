@@ -12,11 +12,12 @@ NULL
 #' and \emph{Rank}, and by class \dQuote{\bold{Taxon_full}}, with the additional
 #' slots \emph{ParentTaxId}, \emph{OtherName}, \emph{Authority},
 #' \emph{TypeMaterial}, and \emph{Lineage}.
+#' 
+#' @seealso \code{\linkS4class{TaxonList}}
 #'  
+#' @name Taxon-class
 #' @rdname Taxon-class
-#' @export
-#' @classHierarchy
-#' @classMethods 
+#' @exportClass Taxon
 setClass("Taxon",
          contains="VIRTUAL",
          slots=c(shared="environment"),
@@ -24,7 +25,6 @@ setClass("Taxon",
 
 
 ## extract the shared database environment from objects
-#' @importFrom rmisc shared
 setMethod("shared", "Taxon", function(x, value=NULL) {
   if (is.null(value)) {
     x@shared
@@ -55,10 +55,9 @@ setMethod("shared", "Taxon", function(x, value=NULL) {
 }
 
 
+#' @name Taxon_minimal-class
 #' @rdname Taxon-class
-#' @export
-#' @classHierarchy
-#' @classMethods
+#' @exportClass Taxon
 new_Taxon_minimal <-
   setClass("Taxon_minimal",
            contains="Taxon",
@@ -80,7 +79,7 @@ new_Taxon_minimal <-
 #' @param ... Further arguments passed on to methods. 
 #' @rdname Taxon-accessors
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getTaxID", function(x, ...) standardGeneric("getTaxID"))
 setMethod("getTaxID", "Taxon_minimal", function(x, use.names=TRUE) {
   if (use.names) {
@@ -93,14 +92,14 @@ setMethod("getTaxID", "Taxon_minimal", function(x, use.names=TRUE) {
 
 #' @rdname Taxon-accessors
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getScientificName", function(x, ...) standardGeneric("getScientificName"))
 setMethod("getScientificName", "Taxon_minimal", function(x)  x@ScientificName )
 
 
 #' @rdname Taxon-accessors
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getRank", function(x, ...) standardGeneric("getRank"))
 setMethod("getRank", "Taxon_minimal", function(x) x@Rank)
 
@@ -127,10 +126,9 @@ setMethod("is.na", "Taxon", function(x) {
 }
 
 
+#' @name Lineage-class
 #' @rdname Taxon-class
-#' @export
-#' @classHierarchy
-#' @classMethods 
+#' @exportClass Lineage
 new_Lineage <-
   setClass("Lineage", contains="Taxon_minimal", validity=.valid_Lineage)
 
@@ -227,9 +225,9 @@ setMethod("show", "Lineage",
 #'
 #' @rdname getByRank
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getByRank", function(x, rank, value=NULL, ...) standardGeneric("getByRank"))
-setMethod("getByRank", "Lineage", function(x, rank, value=NULL, drop=FALSE) {
+setMethod("getByRank", "Lineage", function(x, rank, value=NULL, drop=FALSE, ...) {
   rank <- match.arg(rank, ncbi:::.ranks)
   i <- which(getRank(x) == rank)
   
@@ -245,22 +243,23 @@ setMethod("getByRank", "Lineage", function(x, rank, value=NULL, drop=FALSE) {
 # Class-definition - Taxon_full ------------------------------------------
 
 
-#' @slot TaxId The Taxonomy Identifier, a stable unique identifier for
-#' each taxon in the NCBI Taxonomy database.
-#' @slot ScientificName The unique scientific name of the taxon.
-#' @slot Rank The taxonomic rank of the taxon.
-#'  
-#' @slot ParentTaxId The Taxonomy Identifier of the parental taxon.
-#' @slot OtherName A named character vector holding synonyms
-#' or GenBankSynonyms.
-#' @slot Authority
-#' @slot TypeMaterial
-#' @slot Lineage
+#' @section Slots:
+#' \describe{
+#'    \item{\code{TaxId}:}{The Taxonomy Identifier, a stable unique identifier for
+#'    each taxon in the NCBI Taxonomy database.}
+#'    \item{\code{ScientificName}:}{The unique scientific name of the taxon.}
+#'    \item{\code{Rank}:}{The taxonomic rank of the taxon.}
+#'    \item{\code{ParentTaxId}:}{The Taxonomy Identifier of the parental taxon.}
+#'    \item{\code{OtherName}:}{A named character vector holding synonyms
+#'    or GenBankSynonyms.}
+#'    \item{\code{Authority}:}{Authority}
+#'    \item{\code{TypeMaterial}:}{Type material}
+#'    \item{\code{Lineage}:}{Lineage}
+#' }
 #' 
 #' @rdname Taxon-class
-#' @export
-#' @classHierarchy
-#' @classMethods
+#' @name Taxon_full-class
+#' @exportClass Taxon_full
 new_Taxon_full <- 
   setClass("Taxon_full", contains="Taxon_minimal",
            slots=c(ParentTaxId="character",
@@ -296,34 +295,34 @@ setMethod("show", "Taxon",
 
 #' @rdname Taxon-accessors
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getParentTaxID", function(x, ...) standardGeneric("getParentTaxID"))
 setMethod("getParentTaxID", "Taxon_full", function(x) x@ParentTaxId)
 
 
 #' @rdname Taxon-accessors
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getOtherName", function(x, ...) standardGeneric("getOtherName"))
 setMethod("getOtherName", "Taxon_full", function(x) x@OtherName)
 
 
 #' @rdname Taxon-accessors
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getAuthority", function(x, ...) standardGeneric("getAuthority"))
 setMethod("getAuthority", "Taxon_full", function(x) x@Authority)
 
 
 #' @rdname Taxon-accessors
 #' @export
-#' @genericMethods
+#' @docType methods
 setGeneric("getLineage", function(x, ...) standardGeneric("getLineage"))
-setMethod("getLineage", "Taxon_full", function(x) x@Lineage)
+setMethod("getLineage", "Taxon_full", function(x, ...) x@Lineage)
 
 
-setMethod("getByRank", "Taxon_full", function(x, rank, value=NULL) {
-  getByRank(getLineage(x), rank=rank, value=value)
+setMethod("getByRank", "Taxon_full", function(x, rank, value=NULL, ...) {
+  getByRank(getLineage(x, ...), rank=rank, value=value, ...)
 })
 
 
@@ -340,7 +339,7 @@ setMethod("getByRank", "Taxon_full", function(x, rank, value=NULL) {
 #' query.
 #'
 #' @return An \linkS4class{XMLInternalDocument} or if parsed a
-#'  \linkS4class{taxon} or \linkS4class{TaxonList} instance.
+#'  \linkS4class{Taxon} or \linkS4class{TaxonList} instance.
 #' @rdname taxon-constructors
 #' @export
 taxon <- function(taxid, rettype=NULL, retmax=25, parse=TRUE, ...) {
@@ -363,21 +362,24 @@ taxon <- function(taxid, rettype=NULL, retmax=25, parse=TRUE, ...) {
 }
 
 
+#' Extract taxon from taxon.db
+#' 
 #' @param taxid TaxId
 #' @param shared Shared environment containing a connection to \bold{taxon.db}
 #' and (optionally) \bold{geneid.db}.
-#' @param full Taxon_minimal or Taxon_full
+#' @param full Taxon_minimal or Taxon_full.
+#' @param ... Further arguments.
+#' @rdname new_taxon
 #' @keywords internal
-new_taxon <- function(taxid, shared, full=TRUE) {
+new_taxon <- function(taxid, shared, full=TRUE, ...) {
   assert_that(!is.null(shared$taxonDBConnection))
   if (!is.character(taxid)) {
     taxid <- as.character(taxid)
   }
-  
   if (full) {
-    tx <- lapply(taxid, dbGetTaxon, db=shared)
+    tx <- lapply(taxid, db_get_taxon, db=shared, ...)
   } else {
-    tx <- lapply(taxid, dbGetTaxonMinimal, db=shared)
+    tx <- lapply(taxid, db_get_taxon_minimal, db=shared, ...)
   }
   if (length(tx) == 1) {
     tx[[1]]
@@ -390,38 +392,39 @@ new_taxon <- function(taxid, shared, full=TRUE) {
 #' @param taxid A vector of valid NCBI Taxonomy Identifiers.
 #' @param full if \code{FALSE} a minimal taxonomic description is extracted
 #' (TaxId, ScientificName, Rank).
+#' @param ...
 #' @rdname taxon-constructors
 #' @export
-taxonDB <- function(taxid, full=TRUE) {
+taxonDB <- function(taxid, full=TRUE, ...) {
   if (missing(taxid)) {
     return( new_Taxon_full() )
   }
   shared <- new.env(parent=emptyenv())
   shared$taxonDBConnection <- taxonDBConnect()
-  new_taxon(taxid, shared, full=full)
+  new_taxon(taxid, shared, full=full, ...)
 }
 
 
 #' @param geneid GeneId (GI-number)
 #' @param shared Shared environment containing a connection to taxon.db
-#' and (optionally) geneid.db
-#' @param full Taxon_minimal or Taxon_full
+#' and (optionally) geneid.db.
+#' @param full Taxon_minimal or Taxon_full.
+#' @param ... Further arguments.
+#' @rdname new_taxon
 #' @keywords internal
-new_taxon_by_geneid <- function(geneid, shared, full=TRUE) {
+new_taxon_by_geneid <- function(geneid, shared, full=TRUE, ...) {
   assert_that(!is.null(shared$taxonDBConnection))
   assert_that(!is.null(shared$geneidDBConnection))
-  
   if (!is.character(geneid)) {
     geneid <- as.character(geneid)
   }
-  
-  if (length(getTaxidByGeneID(shared, 2)) == 0)
+  if (length(db_get_taxid_by_geneid(shared, 2)) == 0) {
     stop("'genes' table is empty. Run the command 'createGeneidDB()'")
-  
+  }
   if (full) {
-    tx <- lapply(geneid, dbGetTaxonByGeneID, db=shared)
+    tx <- lapply(geneid, db_get_taxon_by_geneid, db=shared, ...)
   } else {
-    tx <- lapply(geneid, dbGetTaxonMinimalByGeneID, db=shared)
+    tx <- lapply(geneid, db_get_taxon_minimal_by_geneid, db=shared, ...)
   }
   if (length(tx) == 1) {
     tx[[1]]
@@ -458,14 +461,14 @@ new_taxon_by_geneid <- function(geneid, shared, full=TRUE) {
 #'
 #' @rdname taxon-constructors
 #' @export
-taxonByGeneID <- function(geneid, full=TRUE) {
+taxonByGeneID <- function(geneid, full=TRUE, ...) {
   if (missing(geneid)) {
-    return( new_Taxon_full() )
+    return(new_Taxon_full())
   }
   shared <- new.env(parent=emptyenv())
   shared$taxonDBConnection <- taxonDBConnect()
   shared$geneidDBConnection <- geneidDBConnect()
-  new_taxon_by_geneid(geneid, shared, full=full)
+  new_taxon_by_geneid(geneid, shared, full=full, ...)
 }
 
 
@@ -516,7 +519,6 @@ parseTaxon <- function(taxaSet=response) {
   if (length(taxaSet) == 0) {
     stop("No 'TaxaSet' provided")
   }
-  
   tx <- lapply(taxaSet, function(taxon) {
     # taxon <- xmlDoc(taxaSet[[1]])
     taxon <- xmlDoc(taxon)
