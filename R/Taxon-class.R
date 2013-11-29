@@ -373,13 +373,12 @@ taxon <- function(taxid, rettype=NULL, retmax=25, parse=TRUE, ...) {
 #' @keywords internal
 new_taxon <- function(taxid, shared, full=TRUE, ...) {
   assert_that(!is.null(shared$taxonDBConnection))
-  if (!is.character(taxid)) {
-    taxid <- as.character(taxid)
-  }
+  taxid <- as.character(taxid %|na|% 0)
+  log <- list(...)$log
   if (full) {
-    tx <- lapply(taxid, db_get_taxon, db=shared, ...)
+    tx <- lapply(taxid, db_get_taxon, db=shared, log=log)
   } else {
-    tx <- lapply(taxid, db_get_taxon_minimal, db=shared, ...)
+    tx <- lapply(taxid, db_get_taxon_minimal, db=shared, log=log)
   }
   if (length(tx) == 1) {
     tx[[1]]
@@ -415,16 +414,18 @@ taxonDB <- function(taxid, full=TRUE, ...) {
 new_taxon_by_geneid <- function(geneid, shared, full=TRUE, ...) {
   assert_that(!is.null(shared$taxonDBConnection))
   assert_that(!is.null(shared$geneidDBConnection))
-  if (!is.character(geneid)) {
-    geneid <- as.character(geneid)
-  }
-  if (length(db_get_taxid_by_geneid(shared, 2)) == 0) {
+  geneid <- as.character(geneid %|na|% 0)
+  con <- conn(shared$geneidDBConnection)
+  if (length(.db_query(con, "select tax_id from genes where rowid = 2", 1L)) == 0) {
     stop("'genes' table is empty. Run the command 'createGeneidDB()'")
   }
+  log <- list(...)$log
+  stmt <- paste0("select tax_id from genes where rowid in (", paste0(geneid, collapse=","), ")")
+  taxid <- as.character(.db_query(con, stmt, 1L, log = log) %|na|% 0)
   if (full) {
-    tx <- lapply(geneid, db_get_taxon_by_geneid, db=shared, ...)
+    tx <- lapply(taxid, db_get_taxon, db=shared, log=log)
   } else {
-    tx <- lapply(geneid, db_get_taxon_minimal_by_geneid, db=shared, ...)
+    tx <- lapply(taxid, db_get_taxon_minimal, db=shared, log=log)
   }
   if (length(tx) == 1) {
     tx[[1]]
@@ -468,7 +469,7 @@ taxonByGeneID <- function(geneid, full=TRUE, ...) {
   shared <- new.env(parent=emptyenv())
   shared$taxonDBConnection <- taxonDBConnect()
   shared$geneidDBConnection <- geneidDBConnect()
-  new_taxon_by_geneid(geneid, shared, full=full, ...)
+  new_taxon_by_geneid(geneid, shared, full=full)
 }
 
 

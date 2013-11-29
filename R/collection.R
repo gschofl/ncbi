@@ -103,14 +103,14 @@ setReplaceMethod("shared", c(x="Collection", i="ANY", value="NULL"),
                  })
 
 
-#' @keywords internal
+#' @export
 setMethod("[", "Collection", function(x, i, j, ..., drop) {
   new(class(x), callNextMethod(), elementType = elementType(x),
       shared = shared(x))
 })
 
 
-#' @keywords internal
+#' @export
 setMethod("[[", "Collection", function(x, i, j, ...) {
   callNextMethod()
 })
@@ -135,7 +135,7 @@ collectionConstructor <- function(Class) {
       if (!all(vapply(listData, is, elementType, FUN.VALUE=logical(1L)))) 
         stop("All elements in '...' must be '", elementType,"' objects")
       
-      new(Class, listData, elementType=elementType, shared=shared)
+      new(Class, .Data=listData, elementType=elementType, shared=shared)
     }
   }
 }

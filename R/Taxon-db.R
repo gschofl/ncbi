@@ -342,7 +342,7 @@ db_load <- function(con, db_path, type="taxon") {
     fn <- normalizePath(file.path(db_path, "gi_index"))
     message("Loading 'gi_index'. This will take a while ...")
     db <- list(geneidDBConnection=con)
-    if (length(getTaxidByGeneID(db, 1)) != 0) {
+    if (length(.db_query(con, "select tax_id from genes where rowid = 1", 1L)) == 0) {
       dbSendQuery(con, "DELETE FROM genes")
     }
     rc <- try({
@@ -361,18 +361,11 @@ db_load <- function(con, db_path, type="taxon") {
 }
 
 ##
-db_get_taxon <- memoise(function(db, taxid, ...) {
-  dots <- list(...)
-  log <- dots$log
-  reduced <- dots$reduced
+db_get_taxon <- memoise(function(db, taxid, log = NULL) {
   node <- db_get_node(db, taxid, log = log)
-  if (isTRUE(reduced)) {
-    on <- au <- tm <- NA_character_
-  } else {
-    on   <- db_get_other_name(db, taxid, log = log)
-    au   <- db_get_authority(db, taxid, log = log)
-    tm   <- db_get_type_material(db, taxid, log = log)
-  }
+  on   <- db_get_other_name(db, taxid, log = log)
+  au   <- db_get_authority(db, taxid, log = log)
+  tm   <- db_get_type_material(db, taxid, log = log)
   lin  <- db_get_lineage(db, taxid, log = log)
   new_Taxon_full(
     shared=db,
@@ -386,21 +379,9 @@ db_get_taxon <- memoise(function(db, taxid, ...) {
 })
 
 ##
-db_get_taxon_by_geneid <- memoise(function(db, geneid, ...) {
-  taxid <- as.character(db_get_taxid_by_geneid(db, geneid, ...))
-  if (length(taxid) == 0 || taxid == 0) {
-    new_Taxon_full(shared=db)
-  } else {
-    db_get_taxon(db = db, taxid = taxid, ...)
-  }
-})
-
-##
-db_get_taxon_minimal <- memoise(function(db, taxid, ...) {
-  taxid <- taxid %|na|% 0
-  log <- list(...)$log
+db_get_taxon_minimal <- memoise(function(db, taxid, log = NULL) {
   stmt <- paste0("select tax_id, tax_name, rank from nodes join names using (tax_id) ",
-                "where tax_id=", taxid, " and class='scientific name'") 
+                 "where tax_id=", taxid, " and class='scientific name'") 
   data <- .db_query(conn(db$taxonDBConnection), stmt, NA, log = log)
   new_Taxon_minimal(
     shared=db,
@@ -410,52 +391,33 @@ db_get_taxon_minimal <- memoise(function(db, taxid, ...) {
 })
 
 ##
-db_get_taxon_minimal_by_geneid <- memoise(function(db, geneid, ...) {
-  taxid <- db_get_taxid_by_geneid(db, geneid, ...)
-  if (length(taxid) == 0 || taxid == 0) {
-    new_Taxon_minimal(shared=db)
-  } else {
-    db_get_taxon_minimal(db = db, taxid = taxid, ...)
-  }
-})
-
-##
-db_get_taxid_by_geneid <- function(db, geneid, ...) {
-  geneid <- geneid %|na|% 0
-  log <- list(...)$log
-  stmt <- paste0("select tax_id from genes where rowid=", geneid)
-  .db_query(conn(db$geneidDBConnection), stmt, 1, log = log)
+db_get_node <- function(db, taxid, log = NULL) {
+  stmt <- paste0("select tax_id, parent_id, tax_name, rank from nodes join names ",
+                 "using (tax_id) where tax_id in (", taxid, ") and class='scientific name'")
+  .db_query(conn(db$taxonDBConnection), stmt, NA, log = log)
 }
 
 ##
-db_get_parent_taxid <- function(db, taxid, ...) { 
-  taxid <- taxid %|na|% 0
-  log <- list(...)$log
+db_get_parent_taxid <- function(db, taxid, log = NULL) { 
   stmt <- paste0("select parent_id from nodes where tax_id=", taxid)
   .db_query(conn(db$taxonDBConnection), stmt, 1, log = log) %||% NA_character_
 }
 
 ##
-db_get_scientific_name <- function(db, taxid, ...) {
-  taxid <- taxid %|na|% 0
-  log <- list(...)$log
+db_get_scientific_name <- function(db, taxid, log = NULL) {
   stmt <- paste0("select tax_name, class from names where tax_id=", taxid,
                 " and class='scientific name'")
   .db_query(conn(db$taxonDBConnection), stmt, 1, log = log) %||% NA_character_
 }
 
 ##
-db_get_rank <- function(db, taxid, ...) {
-  taxid <- taxid %|na|% 0
-  log <- list(...)$log
+db_get_rank <- function(db, taxid, log = NULL) {
   stmt <- paste0("select rank from nodes where tax_id=", taxid)
   .db_query(conn(db$taxonDBConnection), sql, 1, log = log) %||% NA_character_
 }
 
 ##
-db_get_other_name <- function(db, taxid, ...) {
-  taxid <- taxid %|na|% 0
-  log <- list(...)$log
+db_get_other_name <- function(db, taxid, log = NULL) {
   stmt <- paste0("select tax_name, class from names where tax_id=", taxid,
                  " and class != 'scientific name' and class != 'type material'",
                  " and class != 'authority'")
@@ -464,35 +426,21 @@ db_get_other_name <- function(db, taxid, ...) {
 }
 
 ## 
-db_get_type_material <- function(db, taxid, ...) {
-  taxid <- taxid %|na|% 0
-  log <- list(...)$log
+db_get_type_material <- function(db, taxid, log = NULL) {
   stmt <- paste0("select tax_name from names where tax_id=", taxid, " and class='type material'")
   .db_query(conn(db$taxonDBConnection), stmt, 1, log = log) %||% NA_character_
 }
 
 ##
-db_get_authority <- function(db, taxid, ...) {
-  taxid <- taxid %|na|% 0
-  log <- list(...)$log
+db_get_authority <- function(db, taxid, log = NULL) {
   stmt <- paste0("select tax_name from names where tax_id=", taxid, " and class='authority'")
   .db_query(conn(db$taxonDBConnection), stmt, 1, log = log) %||% NA_character_
 }
 
 ##
-db_get_node <- function(db, taxid, ...) {
-  taxid <- taxid %|na|% 0
-  log <- list(...)$log
-  stmt <- paste0("select tax_id, parent_id, tax_name, rank from nodes join names ",
-                 "using (tax_id) where tax_id=", taxid, " and class='scientific name'")
-  .db_query(conn(db$taxonDBConnection), stmt, NA, log = log)
-}
-
-##
-db_get_lineage <- memoise(function(db, taxid, ...) {
-  log <- list(...)$log
+db_get_lineage <- memoise(function(db, taxid, log = NULL) {
   if (!.taxcache$exists(taxid)) {
-    lin <- .lineage_to_cache(db, taxid, log)
+    lin <- .lineage_to_cache(db, taxid, log = log)
   } else {
     node <- db_get_node(db, taxid, log = log)
     lin <- rbind(.lineage_from_cache(taxid), node[, c('tax_id', 'tax_name', 'rank')])
