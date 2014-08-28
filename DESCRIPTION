@@ -1,17 +1,15 @@
 Package: ncbi
 Type: Package
 Title: Retrieve data from NCBI.
-Version: 0.1.4
+Version: 0.1.4.99
 Date: 2012-11-13
-Authors@R: person("Gerhard", "Schöfl", role=c("aut","cre"),
-    email="gschofl@yahoo.de")
+Author: Gerhard Schöfl [aut, cre]
+Maintainer: Gerhard Schöfl <gerhard.schofl@gmail.com>
 Description: Search and retrieve data from the NCBI databases.
-License: MIT
-Encoding: latin1
 Depends:
     R (>= 2.15),
-    Rcpp (>= 0.10.1),
-LinkingTo: Rcpp
+    Rcpp (>= 0.11.0),
+LinkingTo: Rcpp (>= 0.11.0)
 Imports:
     assertthat,
     BiocGenerics,
@@ -29,6 +27,12 @@ Imports:
 Suggests:
     biofiles,
     testthats
+License: MIT
+Encoding: UTF-8
+URL: https://github.com/gschofl/biofiles
+BugReports: https://github.com/gschofl/biofiles/issues
+Roxygen: list(wrap = FALSE)
+SystemRequirements: C++11
 Collate:
     '00datacache.R'
     'utils.R'

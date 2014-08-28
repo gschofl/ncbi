@@ -1,1 +1,2 @@
 PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"`
+CXX_STD = CXX11
