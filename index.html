@@ -1,0 +1,357 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>ncbi by gschofl</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>ncbi</h1>
+        <p>Search and retrieve data from the NCBI databases.</p>
+
+        <p class="view"><a href="https://github.com/gschofl/ncbi">View the Project on GitHub <small>gschofl/ncbi</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/gschofl/ncbi/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/gschofl/ncbi/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/gschofl/ncbi">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="ncbi" class="anchor" href="#ncbi" aria-hidden="true"><span class="octicon octicon-link"></span></a>ncbi</h1>
+
+<p><code>ncbi</code> allows to search, download and parse data records from various NCBI
+databases. </p>
+
+<p>This package builds on the interface to the NCBI Entrez facilities provided
+by the package <a href="https://github.com/gschofl/rentrez">rentrez</a> but attempts to
+parse the retrieved XML or text records into native R objects.</p>
+
+<p>Sequences in fasta format are returned as <code>AAStringSet</code> or <code>DNAStringSet</code>
+objects. GenBank flat files are returned as <code>gbRecord</code>
+objects (Package <a href="https://github.com/gschofl/biofiles">biofiles</a>). Taxon
+records are returned as <code>taxon</code> or <code>taxonList</code> objects, PubMed records are returned as <code>pubmed</code> objects.</p>
+
+<p>Currently implemented are functions for the sequence databases <em>protein</em>,
+<em>nuccore</em>, <em>nucgss</em>, and <em>nucest</em>, as well as for <em>pubmed</em> and <em>taxonomy</em>.</p>
+
+<h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>This package is currently only available via github. It depends on a number
+of utility functions provided in my <a href="https://github.com/gschofl/rmisc">rmisc</a> package. Use Hadley Wickham's <a href="https://github.com/hadley/devtools">devtools</a>
+to install:</p>
+
+<p><code>ncbi</code> depends on functionality provided by packages
+currently not available from CRAN:
+<a href="https://github.com/gschofl/rentrez">rentrez</a>,
+<a href="https://github.com/gschofl/biofiles">biofiles</a>, and
+<a href="https://github.com/gschofl/rmisc">rmisc</a>.</p>
+
+<p>Use Hadley Wickham's <a href="https://github.com/hadley/devtools">devtools</a> to 
+install:</p>
+
+<div class="highlight highlight-r"><pre>require(<span class="pl-vo">devtools</span>)
+install_github(<span class="pl-s1"><span class="pl-pds">"</span>rmisc<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>gschofl<span class="pl-pds">"</span></span>)
+install_github(<span class="pl-s1"><span class="pl-pds">"</span>rentrez<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>gschofl<span class="pl-pds">"</span></span>)
+install_github(<span class="pl-s1"><span class="pl-pds">"</span>biofiles<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>gschofl<span class="pl-pds">"</span></span>)
+install_github(<span class="pl-s1"><span class="pl-pds">"</span>ncbi<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>gschofl<span class="pl-pds">"</span></span>)</pre></div>
+
+<h3>
+<a id="important-functions" class="anchor" href="#important-functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Important functions</h3>
+
+<h4>
+<a id="protein-nucleotide-est-and-gss" class="anchor" href="#protein-nucleotide-est-and-gss" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+<code>protein</code>, <code>nucleotide</code>, <code>EST</code>, and <code>GSS</code>
+</h4>
+
+<h4>
+<a id="parsetseqset-and-parsegenbank" class="anchor" href="#parsetseqset-and-parsegenbank" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+<code>parseTSeqSet</code>, and <code>parseGenBank</code>
+</h4>
+
+<h4>
+<a id="pubmed-parsepubmed-and-browsepubmed" class="anchor" href="#pubmed-parsepubmed-and-browsepubmed" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+<code>pubmed</code>, <code>parsePubmed</code>, and <code>browsePubmed</code>
+</h4>
+
+<h4>
+<a id="taxon-and-parsetaxon" class="anchor" href="#taxon-and-parsetaxon" aria-hidden="true"><span class="octicon octicon-link"></span></a>
+<code>taxon</code> and <code>parseTaxon</code>
+</h4>
+
+<h3>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h3>
+
+<h4>
+<a id="retrieving-protein-sequences-for-chlamydia-psittaci-6bc" class="anchor" href="#retrieving-protein-sequences-for-chlamydia-psittaci-6bc" aria-hidden="true"><span class="octicon octicon-link"></span></a>Retrieving protein sequences for <em>Chlamydia psittaci</em> 6BC:</h4>
+
+<p>Let's first retrieve the accession numbers for all proteins for <em>C. psittaci</em>
+6BC. As a default <code>retmax</code> is set to 100. To get all accession numbers we set
+<code>retmax = NULL</code> and <code>rettype='acc'</code>.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">psit_acc</span> <span class="pl-k">&lt;-</span> protein(<span class="pl-s1"><span class="pl-pds">"</span>Chlamydia psittaci 6BC[ORGN]<span class="pl-pds">"</span></span>, <span class="pl-v">rettype</span> <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">"</span>acc<span class="pl-pds">"</span></span>, <span class="pl-v">retmax</span> <span class="pl-k">=</span> <span class="pl-c1">NULL</span>)
+<span class="pl-vo">psit_acc</span>
+
+ <span class="pl-c">##    [1] "Q46203.1"       "F0T4D1.1"       "Q46225.1"       "F0T376.1"      </span>
+ <span class="pl-c">##    [5] "YP_005663703.1" "YP_005663701.1" "YP_005663699.1" "YP_005663704.1"</span>
+ <span class="pl-c">##    [9] "YP_005663702.1" "YP_005663700.1" "YP_005663698.1" "YP_005663696.1"</span>
+ <span class="pl-c">##   [13] "YP_005663694.1" "YP_005663692.1" "YP_005663690.1" "YP_005663688.1"</span>
+<span class="pl-k">...</span>.</pre></div>
+
+<p>Download the first 10 proteins. The default retrieval type is <code>fasta</code> and gets
+parsed into an <code>AAStringSet</code> or <code>DNAStringSet</code>. Parsing can be turned of
+by setting the attribute <code>parse = FALSE</code>. </p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">psit_seq</span> <span class="pl-k">&lt;-</span> protein(<span class="pl-vo">psit_acc</span>[<span class="pl-c1">1</span><span class="pl-k">:</span><span class="pl-c1">10</span>])
+<span class="pl-vo">psit_seq</span>
+
+ <span class="pl-c">##    A AAStringSet instance of length 10</span>
+ <span class="pl-c">##       width seq                                         names               </span>
+ <span class="pl-c">##   [1]   402 MKKLLKSALLFAATGSALSL...TGEARLINERAAHMNAQFRF Q46203.1 RecName:...</span>
+ <span class="pl-c">##   [2]   433 MIKGRRTKLHTFLYDCFLIF...KVAFDRTWESFKRYIPCVKI F0T4D1.1 RecName:...</span>
+<span class="pl-k">...</span>.</pre></div>
+
+<div class="highlight highlight-r"><pre>protein(<span class="pl-vo">psit_acc</span>[<span class="pl-c1">1</span><span class="pl-k">:</span><span class="pl-c1">10</span>], <span class="pl-v">parse</span> <span class="pl-k">=</span> <span class="pl-c1">FALSE</span>)
+
+ <span class="pl-c">##  &lt;?xml version="1.0"?&gt;</span>
+ <span class="pl-c">##  &lt;!DOCTYPE TSeqSet PUBLIC "-//NCBI//NCBI TSeq/EN" "http://www.ncbi.nlm.nih.gov/dtd/NCBI_TSeq.dtd"&gt;</span>
+ <span class="pl-c">##  &lt;TSeqSet&gt;</span>
+ <span class="pl-c">##    &lt;TSeq&gt;</span>
+ <span class="pl-c">##      &lt;TSeq_seqtype value="protein"/&gt;</span>
+ <span class="pl-c">##      &lt;TSeq_gi&gt;75428263&lt;/TSeq_gi&gt;</span>
+ <span class="pl-c">##      &lt;TSeq_accver&gt;Q46203.1&lt;/TSeq_accver&gt;</span>
+ <span class="pl-c">##      &lt;TSeq_taxid&gt;331636&lt;/TSeq_taxid&gt;</span>
+<span class="pl-k">...</span>.</pre></div>
+
+<p>Look at the metadata that comes with the sequences</p>
+
+<div class="highlight highlight-r"><pre>require(<span class="pl-vo">Biostrings</span>)
+names(elementMetadata(<span class="pl-vo">psit_seq</span>))
+
+ <span class="pl-c">##  [1] "gi"      "accver"  "sid"     "local"   "taxid"   "orgname" "defline"</span>
+ <span class="pl-c">##  [8] "length"</span></pre></div>
+
+<div class="highlight highlight-r"><pre>elementMetadata(<span class="pl-vo">psit_seq</span>)[[<span class="pl-s1"><span class="pl-pds">"</span>defline<span class="pl-pds">"</span></span>]]
+
+ <span class="pl-c">##   [1] "RecName: Full=Major outer membrane porin; Short=MOMP; Flags: Precursor"                                                                                                                                                                                  </span>
+ <span class="pl-c">##   [2] "RecName: Full=3-deoxy-D-manno-octulosonic acid transferase; Short=Kdo transferase; AltName: Full=Kdo(2)-lipid IV(A) 3-deoxy-D-manno-octulosonic acid transferase; AltName: Full=Kdo(3)-lipid IV(A) 3-deoxy-D-manno-octulosonic acid transferase; AltNam&gt;"</span>
+ <span class="pl-c">##   [3] "RecName: Full=2-dehydro-3-deoxyphosphooctonate aldolase; AltName: Full=3-deoxy-D-manno-octulosonic acid 8-phosphate synthase; AltName: Full=KDO-8-phosphate synthase; Short=KDO 8-P synthase; Short=KDOPS; AltName: Full=Phospho-2-dehydro-3-deoxyocton&gt;"</span>
+ <span class="pl-c">##   [4] "RecName: Full=Small cysteine-rich outer membrane protein omcA; Short=Small-CRP; AltName: Full=9 kDa cysteine-rich lipoprotein; Short=9KD-CRP; Flags: Precursor"                                                                                          </span>
+ <span class="pl-c">##   [5] "replicative DNA helicase [Chlamydophila psittaci 6BC]"                                                                                                                                                                                                   </span>
+ <span class="pl-c">##   [6] "hypothetical protein G5O_p0004 [Chlamydophila psittaci 6BC]"                                                                                                                                                                                             </span>
+ <span class="pl-c">##   [7] "hypothetical protein G5O_p0002 [Chlamydophila psittaci 6BC]"                                                                                                                                                                                             </span>
+ <span class="pl-c">##   [8] "site-specific recombinase, phage integrase family [Chlamydophila psittaci 6BC]"                                                                                                                                                                          </span>
+ <span class="pl-c">##   [9] "hypothetical protein G5O_p0005 [Chlamydophila psittaci 6BC]"                                                                                                                                                                                             </span>
+ <span class="pl-c">##  [10] "sporulation initiation inhibitor protein soj [Chlamydophila psittaci 6BC]"</span>
+<span class="pl-k">...</span>.</pre></div>
+
+<p>Fetch the full Genbank entry for a protein</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">gi5</span> <span class="pl-k">&lt;-</span> elementMetadata(<span class="pl-vo">psit_seq</span>)[[<span class="pl-s1"><span class="pl-pds">"</span>gi<span class="pl-pds">"</span></span>]][<span class="pl-c1">5</span>]
+<span class="pl-vo">p</span> <span class="pl-k">&lt;-</span> protein(<span class="pl-vo">gi5</span>, <span class="pl-s1"><span class="pl-pds">"</span>gp<span class="pl-pds">"</span></span>)
+
+ <span class="pl-c">##  Parsing features into "file7a619c5daf2.db"</span>
+<span class="pl-vo">r</span>
+<span class="pl-vo">p</span>
+
+ <span class="pl-c">##  'gbRecord' database 'file7a619c5daf2.db' with 10 features</span>
+ <span class="pl-c">##  LOCUS       YP_005663703 458 aa AA linear BCT 27-SEP-2012</span>
+ <span class="pl-c">##  DEFINITION  replicative DNA helicase [Chlamydophila psittaci 6BC].</span>
+ <span class="pl-c">##  ACCESSION   YP_005663703</span>
+ <span class="pl-c">##  VERSION     YP_005663703.1 GI:384451104</span>
+ <span class="pl-c">##  DBLINK      Project: 159845</span>
+ <span class="pl-c">##  DBSOURCE    REFSEQ: accession NC_017288.1</span>
+ <span class="pl-c">##  KEYWORDS    .</span>
+ <span class="pl-c">##  SOURCE      Chlamydophila psittaci 6BC (Chlamydia psittaci 6BC)</span>
+ <span class="pl-c">##    ORGANISM  Chlamydophila psittaci 6BC</span>
+ <span class="pl-c">##              Bacteria; Chlamydiae; Chlamydiales; Chlamydiaceae;</span>
+ <span class="pl-c">##               Chlamydia/Chlamydophila group; Chlamydia.</span>
+ <span class="pl-c">##  REFERENCE   Not implemented yet</span>
+ <span class="pl-c">##  COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject</span>
+ <span class="pl-c">##               to final NCBI review. The reference sequence is identical</span>
+ <span class="pl-c">##               to AEB56030. Method: conceptual translation.</span>
+ <span class="pl-c">##  ORIGIN      mikqseeekdlldveffvlgqavnylehahvvvrrlsehhfksenhknifllirdilrdrd</span>
+ <span class="pl-c">##               ...</span>
+ <span class="pl-c">##               gqieqdadvilflhrkdyysqeatkglseiivgknrhgsvfsttlrfnsctgkftiqkeaw</span></pre></div>
+
+<div class="highlight highlight-r"><pre>require(<span class="pl-vo">biofiles</span>)
+features(<span class="pl-vo">p</span>)
+
+ <span class="pl-c">##  'gbFeatureList' with 10 features:</span>
+ <span class="pl-c">##  </span>
+ <span class="pl-c">##  Feature:         Location/Qualifiers:</span>
+ <span class="pl-c">##   source          1..458</span>
+ <span class="pl-c">##                   /organism="Chlamydophila psittaci 6BC"</span>
+ <span class="pl-c">##                   /strain="6BC"</span>
+ <span class="pl-c">##                   /culture_collection="ATCC:VR-125"</span>
+ <span class="pl-c">##                   /db_xref="taxon:331636"</span>
+ <span class="pl-c">##                   /plasmid="pCps6BC"</span>
+ <span class="pl-c">##  </span>
+<span class="pl-k">...</span>.</pre></div>
+
+<h4>
+<a id="retrieving-taxon-information-for-chlamydiaceae" class="anchor" href="#retrieving-taxon-information-for-chlamydiaceae" aria-hidden="true"><span class="octicon octicon-link"></span></a>Retrieving taxon information for Chlamydiaceae:</h4>
+
+<p>Which taxa within the family <em>Chlamydiaceae</em> are on NCBI</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">tx</span> <span class="pl-k">&lt;-</span> taxon(<span class="pl-s1"><span class="pl-pds">"</span>Chlamydiaceae[subtree]<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>uilist<span class="pl-pds">"</span></span>, <span class="pl-v">retmax</span> <span class="pl-k">=</span> <span class="pl-c1">NULL</span>)
+length(<span class="pl-vo">tx</span>)
+
+ <span class="pl-c">##  [1] 254</span>
+<span class="pl-vo">r</span>
+head(<span class="pl-vo">tx</span>, <span class="pl-c1">10</span>)
+
+ <span class="pl-c">##   [1] 1283074 1282969 1282882 1282662 1282442 1260223 1260222 1238237</span>
+ <span class="pl-c">##   [9] 1238236 1238235</span></pre></div>
+
+<p>Download all taxon records</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">txlist</span> <span class="pl-k">&lt;-</span> taxon(<span class="pl-s1"><span class="pl-pds">"</span>Chlamydiaceae[subtree]<span class="pl-pds">"</span></span>, <span class="pl-v">retmax</span> <span class="pl-k">=</span> <span class="pl-c1">NULL</span>)
+<span class="pl-vo">txlist</span>
+
+ <span class="pl-c">##  A 'taxonList' instance of length 254</span>
+ <span class="pl-c">##  Chlamydia psittaci FalTex (1283074; no rank) </span>
+ <span class="pl-c">##  Chlamydia psittaci 6BC/83 (1282969; no rank) </span>
+ <span class="pl-c">##  Chlamydia psittaci CT1 (1282882; no rank) </span>
+ <span class="pl-c">##  Chlamydia psittaci str. Borg (1282662; no rank) </span>
+ <span class="pl-c">##  Chlamydia psittaci RTH (1282442; no rank) </span>
+ <span class="pl-c">##  Chlamydia trachomatis IU888 (1260223; no rank) </span>
+ <span class="pl-c">##  Chlamydia trachomatis IU824 (1260222; no rank) </span>
+ <span class="pl-c">##  Chlamydia psittaci 10_1398_11 (1238237; no rank) </span>
+ <span class="pl-c">##  Chlamydia psittaci 10_743_SC13 (1238236; no rank) </span>
+<span class="pl-k">...</span>.</pre></div>
+
+<p>The scientific names of all those recognized as species</p>
+
+<div class="highlight highlight-r"><pre>sciName(<span class="pl-vo">txlist</span>)[taxRank(<span class="pl-vo">txlist</span>) <span class="pl-k">==</span> <span class="pl-s1"><span class="pl-pds">"</span>species<span class="pl-pds">"</span></span>]
+
+ <span class="pl-c">##   [1] "Chlamydia sp. 10DC88"                 </span>
+ <span class="pl-c">##   [2] "Chlamydia sp. 12DC97"                 </span>
+ <span class="pl-c">##   [3] "Chlamydia sp. 12DC96"                 </span>
+ <span class="pl-c">##   [4] "Chlamydia sp. PV_7344/2"              </span>
+ <span class="pl-c">##   [5] "Chlamydia sp. PV_7341/13"             </span>
+ <span class="pl-c">##   [6] "Chlamydia sp. PV_58394/2012"          </span>
+ <span class="pl-c">##   [7] "Chlamydia sp. PV_48558/2010"          </span>
+ <span class="pl-c">##   [8] "Chlamydia sp. PV_3954/22"             </span>
+ <span class="pl-c">##   [9] "Chlamydia sp. PV_3515/3"              </span>
+ <span class="pl-c">##  [10] "Chlamydia sp. PV_2863/2"              </span>
+<span class="pl-k">...</span>.</pre></div>
+
+<h4>
+<a id="retrieving-data-from-pubmed" class="anchor" href="#retrieving-data-from-pubmed" aria-hidden="true"><span class="octicon octicon-link"></span></a>Retrieving data from Pubmed:</h4>
+
+<p>First we search PubMed for all publications with <em>Chlamydia psittaci</em> in the
+title from 2010 to 2012. We use the <code>esearch</code> function from <a href="https://github.com/gschofl/rentrez">rentrez</a> for greater control over the search.</p>
+
+<div class="highlight highlight-r"><pre>require(<span class="pl-vo">rentrez</span>)
+<span class="pl-vo">pmid</span> <span class="pl-k">&lt;-</span> esearch(<span class="pl-s1"><span class="pl-pds">"</span>Chlamydia psittaci[TITL] and <span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>pubmed<span class="pl-pds">"</span></span>, <span class="pl-v">mindate</span> <span class="pl-k">=</span> <span class="pl-c1">2010</span>, <span class="pl-v">maxdate</span> <span class="pl-k">=</span> <span class="pl-c1">2012</span>)
+<span class="pl-vo">pmid</span>
+
+ <span class="pl-c">##  ESearch query using the 'pubmed' database.</span>
+ <span class="pl-c">##  Query term: 'Chlamydia psittaci[TITL] AND 2010[EDAT] : 2012[EDAT]'</span>
+ <span class="pl-c">##  Total number of hits: 24</span>
+ <span class="pl-c">##  Number of hits retrieved: 24</span>
+ <span class="pl-c">##   [1] "23265868" "23227890" "23209198" "23189195" "23098816" "22957128"</span>
+ <span class="pl-c">##   [7] "22689815" "22506068" "22472082" "22382892" "22302240" "22299031"</span>
+ <span class="pl-c">##  [13] "22296995" "21921110" "21885218" "21846923" "21791668" "21761223"</span>
+ <span class="pl-c">##  [19] "21622741" "21393457" "21173126" "21152037" "20807089" "22802266"</span></pre></div>
+
+<p>Now we fetch the first 5 of these records from PubMed. We can extract the 
+PMIDs from the <code>esearch</code> object using the function <code>idList</code> and pass them to
+<code>pubmed</code> or, more conveniently, simply pass on the subsetted `esearch object.</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-vo">ids</span> <span class="pl-k">&lt;-</span> idList(<span class="pl-vo">pmid</span>)
+<span class="pl-vo">ids</span>[<span class="pl-c1">1</span><span class="pl-k">:</span><span class="pl-c1">5</span>]
+
+ <span class="pl-c">##  [1] "23265868" "23227890" "23209198" "23189195" "23098816"</span>
+<span class="pl-vo">r</span>
+<span class="pl-vo">p</span> <span class="pl-k">&lt;-</span> pubmed(<span class="pl-vo">pmid</span>[<span class="pl-c1">1</span><span class="pl-k">:</span><span class="pl-c1">5</span>])
+<span class="pl-vo">p</span>
+
+ <span class="pl-c">##  A 'pubmed' instance of length 5</span>
+ <span class="pl-c">##  [1] Pmid: 23265868 References: 1</span>
+ <span class="pl-c">##  -------------------------------------------------------------------</span>
+ <span class="pl-c">##  Ostermann C, Schroedl W, Schubert E, Sachse K and Reinhold P</span>
+ <span class="pl-c">##  (2012). "Dose-dependent effects of Chlamydia psittaci infection on</span>
+ <span class="pl-c">##  pulmonary gas exchange, innate immunity and acute-phase reaction</span>
+ <span class="pl-c">##  in a bovine respiratory model." _Veterinary journal (London,</span>
+ <span class="pl-c">##  England : 1997)_. ISSN 1532-2971, &lt;URL:</span>
+ <span class="pl-c">##  http://dx.doi.org/10.1016/j.tvjl.2012.10.035&gt;.</span>
+ <span class="pl-c">##  </span>
+ <span class="pl-c">##  [2] Pmid: 23227890 References: 1</span>
+ <span class="pl-c">##  -------------------------------------------------------------------</span>
+ <span class="pl-c">##  Gartrell B, French N, Howe L, Nelson N, Houston M, Burrows E,</span>
+ <span class="pl-c">##  Russell J and Anderson S (2012). "First detection of Chlamydia</span>
+ <span class="pl-c">##  psittaci from a wild native passerine bird in New Zealand." _New</span>
+ <span class="pl-c">##  Zealand veterinary journal_. ISSN 0048-0169, &lt;URL:</span>
+ <span class="pl-c">##  http://dx.doi.org/10.1080/00480169.2012.740656&gt;.</span>
+ <span class="pl-c">##  </span>
+<span class="pl-k">...</span>.</pre></div>
+
+<p>Which journals where they published in?</p>
+
+<div class="highlight highlight-r"><pre>journal(<span class="pl-vo">p</span>)
+
+ <span class="pl-c">##  [[1]]</span>
+ <span class="pl-c">##  [1] "Veterinary journal (London, England : 1997)"</span>
+ <span class="pl-c">##  attr(,"abbrev")</span>
+ <span class="pl-c">##  [1] "Vet. J."</span>
+ <span class="pl-c">##  attr(,"issn")</span>
+ <span class="pl-c">##  [1] "1532-2971"</span>
+ <span class="pl-c">##  </span>
+ <span class="pl-c">##  [[2]]</span>
+ <span class="pl-c">##  [1] "New Zealand veterinary journal"</span>
+ <span class="pl-c">##  attr(,"abbrev")</span>
+ <span class="pl-c">##  [1] "N Z Vet J"</span>
+ <span class="pl-c">##  attr(,"issn")</span>
+<span class="pl-k">...</span>.</pre></div>
+
+<p>Which are the authors?</p>
+
+<div class="highlight highlight-r"><pre>author(<span class="pl-vo">p</span>)
+
+ <span class="pl-c">##  [[1]]</span>
+ <span class="pl-c">##  [1] "Carola Ostermann" "Wieland Schroedl" "Evelyn Schubert" </span>
+ <span class="pl-c">##  [4] "Konrad Sachse"    "Petra Reinhold"  </span>
+ <span class="pl-c">##  </span>
+ <span class="pl-c">##  [[2]]</span>
+ <span class="pl-c">##  [1] "Bd Gartrell" "Np French"   "L Howe"      "Nj Nelson"   "M Houston"  </span>
+ <span class="pl-c">##  [6] "Ea Burrows"  "Jc Russell"  "Sh Anderson"</span>
+ <span class="pl-c">##  </span>
+ <span class="pl-c">##  [[3]]</span>
+ <span class="pl-c">##  [1] "Sarah Van Lent"         "Jurgen R Piet"         </span>
+ <span class="pl-c">##  [3] "Delphine Beeckman"      "Arie van der Ende"     </span>
+ <span class="pl-c">##  [5] "Filip Van Nieuwerburgh" "Patrik Bavoil"         </span>
+<span class="pl-k">...</span>.</pre></div>
+
+<p>And finally which are the DOIs?</p>
+
+<div class="highlight highlight-r"><pre>doi(<span class="pl-vo">p</span>)
+
+ <span class="pl-c">##   [1] doi:10.1016/j.tvjl.2012.10.035</span>
+ <span class="pl-c">##   [2] doi:10.1080/00480169.2012.740656</span>
+ <span class="pl-c">##   [3] doi:10.1128/JB.01828-12</span>
+ <span class="pl-c">##   [4] doi:10.1371/journal.pone.0050327</span>
+ <span class="pl-c">##   [5] doi:10.1016/j.vetmic.2012.09.026</span></pre></div>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/gschofl">gschofl</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
