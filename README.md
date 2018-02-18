@@ -324,7 +324,7 @@ p
  ##  pulmonary gas exchange, innate immunity and acute-phase reaction
  ##  in a bovine respiratory model." _Veterinary journal (London,
  ##  England : 1997)_. ISSN 1532-2971, <URL:
- ##  http://dx.doi.org/10.1016/j.tvjl.2012.10.035>.
+ ##  https://doi.org/10.1016/j.tvjl.2012.10.035>.
  ##  
  ##  [2] Pmid: 23227890	References: 1
  ##  -------------------------------------------------------------------
@@ -332,7 +332,7 @@ p
  ##  Russell J and Anderson S (2012). "First detection of Chlamydia
  ##  psittaci from a wild native passerine bird in New Zealand." _New
  ##  Zealand veterinary journal_. ISSN 0048-0169, <URL:
- ##  http://dx.doi.org/10.1080/00480169.2012.740656>.
+ ##  https://doi.org/10.1080/00480169.2012.740656>.
  ##  
 ....
 ```
