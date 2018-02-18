@@ -48,7 +48,7 @@ setMethod("browsePubmed", "doi", function(x, browser=getOption("browser")) {
   }
   x <- initialize(x, doi=Filter(!is.na, x@doi))
   l <- Map(function(d) {
-    browseURL(paste0('http://dx.doi.org/', d), browser=browser)
+    browseURL(paste0('https://doi.org/', d), browser=browser)
   }, d=x@doi)
   
   invisible(NULL)
